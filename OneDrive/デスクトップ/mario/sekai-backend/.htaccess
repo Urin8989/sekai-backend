@@ -1,0 +1,25 @@
+SetEnvIf Request_URI ".*" Ngx_Cache_NoCacheMode=off
+SetEnvIf Request_URI ".*" Ngx_Cache_AllCacheMode
+# .htaccess
+
+# RewriteEngineを有効にする
+RewriteEngine On
+
+# --- APIリクエストのプロキシ ---
+# /api/ で始まるリクエストをNode.jsアプリケーション (ポート5000) に転送
+# Pフラグはプロキシとして処理することを意味します
+# [L]フラグはこのルールが適用されたら以降のRewriteRuleを評価しないことを意味します
+RewriteRule ^api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L]
+
+# --- WebSocket接続のプロキシ (mod_proxy_wstunnel が必要) ---
+# / (ルートパス) へのWebSocket接続リクエストをNode.jsアプリケーションに転送
+# 条件: Upgradeヘッダーがwebsocketであること
+RewriteCond %{HTTP:Upgrade} =websocket [NC]
+RewriteRule ^/?(.*) ws://127.0.0.1:5000/$1 [P,L]
+
+# --- フロントエンドのルーティング (SPA対応など) ---
+# 上記のプロキシにマッチしなかったリクエストで、
+# 実際のファイルやディレクトリが存在しない場合は index.html を表示
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
