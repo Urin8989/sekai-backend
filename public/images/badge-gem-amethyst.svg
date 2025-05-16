@@ -1,0 +1,77 @@
+<!-- badge-gem-amethyst-mystic.svg -->
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- アメシスト風グラデーション (神秘的な紫) -->
+    <radialGradient id="amethystGradMystic" cx="50%" cy="50%" r="70%" fx="40%" fy="40%">
+      <stop offset="0%" style="stop-color:#E6E6FA; stop-opacity:1" />   <!-- Lavender Highlight -->
+      <stop offset="30%" style="stop-color:#DDA0DD; stop-opacity:0.9" /> <!-- Plum -->
+      <stop offset="60%" style="stop-color:#BA55D3; stop-opacity:0.85" /> <!-- MediumOrchid -->
+      <stop offset="85%" style="stop-color:#8A2BE2; stop-opacity:0.9" /> <!-- BlueViolet -->
+      <stop offset="100%" style="stop-color:#4B0082; stop-opacity:1" />   <!-- Indigo (Deep Edge) -->
+    </radialGradient>
+
+    <!-- 背景: 星雲/オーラ風グラデーション -->
+    <radialGradient id="nebulaGrad" cx="50%" cy="50%" r="60%" fx="60%" fy="60%">
+      <stop offset="0%" style="stop-color:#FFF0F5; stop-opacity:0.9" />   <!-- LavenderBlush center -->
+      <stop offset="40%" style="stop-color:#D8BFD8; stop-opacity:0.8" /> <!-- Thistle -->
+      <stop offset="75%" style="stop-color:#483D8B; stop-opacity:0.8" /> <!-- DarkSlateBlue -->
+      <stop offset="100%" style="stop-color:#2E0854; stop-opacity:0.9" /> <!-- Dark Purple edge -->
+    </radialGradient>
+
+    <!-- ピューター/ダークシルバー枠グラデーション -->
+    <linearGradient id="pewterFrameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E5E4E2; stop-opacity:1" /> <!-- Platinum -->
+      <stop offset="50%" style="stop-color:#BFC1C2; stop-opacity:1" /> <!-- Silver Gray -->
+      <stop offset="100%" style="stop-color:#848482; stop-opacity:1" /> <!-- Gray -->
+    </linearGradient>
+
+    <!-- 星屑パターン -->
+    <pattern id="starDustPattern" patternUnits="userSpaceOnUse" width="30" height="30" x="0" y="0">
+       <circle cx="5" cy="5" r="0.8" fill="white" opacity="0.5"/>
+       <circle cx="15" cy="20" r="1" fill="#E6E6FA" opacity="0.7"/>
+       <polygon points="25,10 26,8 27,10 29,11 27,12 26,14 25,12 23,11" fill="#DDA0DD" opacity="0.6"/>
+    </pattern>
+
+    <!-- アメシストの輝きフィルター -->
+    <filter id="amethystGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 外枠 (ピューター枠) -->
+  <circle cx="50" cy="50" r="49" fill="none" stroke="url(#pewterFrameGrad)" stroke-width="5"/>
+  <!-- 内側の装飾線 (蔦のような) -->
+  <path d="M 50,5 A 45 45 0 0 1 85.3,21.7 Q 80,25 85.3,28.3 A 45 45 0 0 1 78.3,78.3 Q 75,80 71.7,78.3 A 45 45 0 0 1 21.7,21.7 Q 25,20 28.3,21.7 A 45 45 0 0 1 50,5 Z"
+        fill="none" stroke="#C0C0C0" stroke-width="1.2" opacity="0.8"/> <!-- Silver -->
+
+  <!-- ベースメダル (星雲/オーラ背景) -->
+  <circle cx="50" cy="50" r="42" fill="url(#nebulaGrad)" />
+  <!-- 星屑パターンのオーバーレイ -->
+  <circle cx="50" cy="50" r="42" fill="url(#starDustPattern)" />
+
+  <!-- 背景のオーラエフェクト -->
+  <path d="M 35 25 Q 50 15 65 25 T 65 75 Q 50 85 35 75 T 35 25 Z"
+        fill="none" stroke="#DA70D6" stroke-width="1.5" opacity="0.3" filter="url(#amethystGlowFilter)"/> <!-- Orchid -->
+
+  <!-- 中央のアメシスト (マーキスカット風) -->
+  <path d="M 50 20 Q 75 30 80 50 Q 75 70 50 80 Q 25 70 20 50 Q 25 30 50 20 Z"
+        fill="url(#amethystGradMystic)" stroke="#300040" stroke-width="1.8" filter="url(#amethystGlowFilter)"/> <!-- Dark Purple stroke -->
+
+  <!-- ファセットの線 (マーキス風) -->
+  <path d="M50,20 L50,80 M20,50 L80,50 M35,35 L65,65 M35,65 L65,35"
+        stroke="#FFC0CB" stroke-width="0.7" opacity="0.5"/> <!-- Pink -->
+  <path d="M50,20 Q 60 40 70 50 Q 60 60 50 80 Q 40 60 30 50 Q 40 40 50 20 Z"
+        fill="none" stroke="#E6E6FA" stroke-width="0.5" opacity="0.4"/> <!-- Lavender -->
+
+  <!-- 輝き (紫がかった光、星屑) -->
+  <polygon points="82,25 84,22 86,25 89,26 86,27 84,30 82,27 79,26" fill="#E6E6FA" opacity="0.8"/> <!-- Lavender -->
+  <polygon points="18,75 16,78 14,75 11,74 14,73 16,70 18,73 21,74" fill="#FFF0F5" opacity="0.7"/> <!-- LavenderBlush -->
+  <circle cx="35" cy="65" r="1.2" fill="white" opacity="0.6"/>
+  <circle cx="65" cy="35" r="1.2" fill="white" opacity="0.6"/>
+
+  <title>宝石バッジ - アメシスト (神秘)</title>
+</svg>

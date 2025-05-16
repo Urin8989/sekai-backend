@@ -1,0 +1,106 @@
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 深紅と黒のグラデーション -->
+    <linearGradient id="predatorRedBlackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4B0000; stop-opacity:1" /> <!-- Dark Red -->
+      <stop offset="50%" style="stop-color:#DC143C; stop-opacity:1" /> <!-- Crimson -->
+      <stop offset="100%" style="stop-color:#1C1C1C; stop-opacity:1" /> <!-- Near Black -->
+    </linearGradient>
+    <!-- 光沢のある黒のグラデーション -->
+    <linearGradient id="shinyBlackGradEnhanced" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#777777; stop-opacity:1" /> <!-- Lighter Gray -->
+      <stop offset="40%" style="stop-color:#222222; stop-opacity:1" /> <!-- Darker -->
+      <stop offset="100%" style="stop-color:#444444; stop-opacity:1" /> <!-- Mid Gray -->
+    </linearGradient>
+    <!-- 燃えるような赤のグラデーション -->
+    <radialGradient id="burningRedGradBrighter" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#FF6347; stop-opacity:1" /> <!-- Tomato (Brighter center) -->
+      <stop offset="50%" style="stop-color:#FF0000; stop-opacity:1" /> <!-- Red -->
+      <stop offset="100%" style="stop-color:#8B0000; stop-opacity:1" /> <!-- DarkRed -->
+    </radialGradient>
+    <!-- テキスト用グラデーション (メタリック感) -->
+    <linearGradient id="textFill10kMetallic" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF8C69; stop-opacity:1" /> <!-- Lighter Tomato -->
+      <stop offset="30%" style="stop-color:#FF6347; stop-opacity:1" /> <!-- Tomato -->
+      <stop offset="60%" style="stop-color:#DC143C; stop-opacity:1" /> <!-- Crimson -->
+      <stop offset="90%" style="stop-color:#400000; stop-opacity:1" /> <!-- Darker Red -->
+      <stop offset="100%" style="stop-color:#200000; stop-opacity:1" /> <!-- Very Dark Red -->
+    </linearGradient>
+    <!-- テキストシャドウ -->
+    <filter id="textShadow10kPredatorEnhanced" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#FF6347" flood-opacity="0.8"/> <!-- Tomato Shadow -->
+    </filter>
+    <!-- 鋭角的なベース形状のパス -->
+    <path id="predatorShapePath" d="M50 2 L65 15 L90 15 L98 35 L85 60 L98 85 L90 95 L65 95 L50 98 L35 95 L10 95 L2 85 L15 60 L2 35 L10 15 L35 15 Z" />
+    <!-- 爪痕のシンボル (静的) -->
+    <!-- ▼▼▼ シンボルID変更、アニメーション削除 ▼▼▼ -->
+    <symbol id="clawMarkSymbolStatic" viewBox="0 0 20 40">
+      <g>
+        <path d="M 5 0 Q 3 10, 5 20 T 5 40" stroke="url(#burningRedGradBrighter)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 10 0 Q 9 10, 10 20 T 10 40" stroke="url(#burningRedGradBrighter)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <path d="M 15 0 Q 17 10, 15 20 T 15 40" stroke="url(#burningRedGradBrighter)" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- <animateTransform ... /> を削除 -->
+      </g>
+    </symbol>
+  </defs>
+
+  <!-- 背景: 放射状の黒い線 (静的) -->
+  <g opacity="0.3">
+      <g>
+        <line x1="50" y1="50" x2="50" y2="0" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="100" y2="50" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="50" y2="100" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="0" y2="50" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="85" y2="15" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="85" y2="85" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="15" y2="85" stroke="#111" stroke-width="2"/>
+        <line x1="50" y1="50" x2="15" y2="15" stroke="#111" stroke-width="2"/>
+      </g>
+  </g>
+
+  <!-- 外側の鋭角なエッジ (明滅アニメーション付き) -->
+  <g fill="#FF0000" opacity="1.0">
+      <polygon points="50,0 54,6 46,6" /> <!-- Top -->
+      <polygon points="100,50 94,54 94,46" /> <!-- Right -->
+      <polygon points="50,100 54,94 46,94" /> <!-- Bottom -->
+      <polygon points="0,50 6,54 6,46" /> <!-- Left -->
+      <polygon points="93,18 99,25 97,15" transform="rotate(12 96 20)"/> <!-- Top-Right -->
+      <polygon points="7,18 1,25 3,15" transform="rotate(-12 4 20)"/> <!-- Top-Left -->
+      <polygon points="93,82 99,85 97,75" transform="rotate(-12 96 80)"/> <!-- Bottom-Right -->
+      <polygon points="7,82 1,85 3,75" transform="rotate(12 4 80)"/> <!-- Bottom-Left -->
+      <polygon points="75,5 80,10 70,10" transform="rotate(5 75 7.5)"/> <!-- Top-Right Shoulder -->
+      <polygon points="25,5 20,10 30,10" transform="rotate(-5 25 7.5)"/> <!-- Top-Left Shoulder -->
+      <polygon points="75,95 80,90 70,90" transform="rotate(-5 75 92.5)"/> <!-- Bottom-Right Shoulder -->
+      <polygon points="25,95 20,90 30,90" transform="rotate(5 25 92.5)"/> <!-- Bottom-Left Shoulder -->
+      <polygon points="98,40 95,45 95,35" /> <!-- Mid-Right -->
+      <polygon points="2,40 5,45 5,35" /> <!-- Mid-Left -->
+      <!-- ▼▼▼ グループ全体に明滅アニメーション ▼▼▼ -->
+      <animate attributeName="opacity"
+               values="1; 0.6; 1" 
+               dur="3s"           
+               repeatCount="indefinite" />
+  </g>
+
+  <!-- ベース形状 (光沢強化した黒) -->
+  <use href="#predatorShapePath" fill="url(#shinyBlackGradEnhanced)" stroke="#300" stroke-width="3"/>
+
+  <!-- 内側の形状 (赤黒グラデーション、縁取り明滅アニメーション付き) -->
+  <use href="#predatorShapePath" fill="url(#predatorRedBlackGrad)" stroke="#FF6347" stroke-width="2" transform="scale(0.85)" transform-origin="50 50">
+      <!-- ▼▼▼ 縁取りの透明度アニメーション ▼▼▼ -->
+      <animate attributeName="stroke-opacity"
+               values="1; 0.4; 1" 
+               dur="2.5s"        
+               repeatCount="indefinite" />
+  </use>
+
+  <!-- 爪痕の配置 (静的シンボル使用) -->
+  <!-- ▼▼▼ href を静的シンボルに変更 ▼▼▼ -->
+  <use href="#clawMarkSymbolStatic" x="65" y="10" width="17" height="34" transform="rotate(20 73.5 27)"/>
+  <use href="#clawMarkSymbolStatic" x="15" y="55" width="14" height="28" transform="rotate(-30 22 69) scale(0.85)"/>
+
+
+  <!-- テキスト "10K" (メタリック感、影強化) -->
+  <text x="50" y="70" font-family="'Impact', 'Arial Black', sans-serif" font-size="62" fill="url(#textFill10kMetallic)" text-anchor="middle" stroke="#000" stroke-width="1.5" filter="url(#textShadow10kPredatorEnhanced)">10K</text>
+
+  <title>10000戦記念 (プレデター風・明滅アニメーション)</title>
+</svg>

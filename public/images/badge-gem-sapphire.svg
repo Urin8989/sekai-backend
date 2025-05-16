@@ -1,0 +1,87 @@
+<!-- badge-gem-sapphire-max-flash.svg -->
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- サファイア風グラデーション (ブリリアント) -->
+    <radialGradient id="sapphireGradOval" cx="50%" cy="50%" r="70%" fx="60%" fy="40%">
+      <stop offset="0%" style="stop-color:#ADD8E6; stop-opacity:1" />   <!-- Light Blue Highlight -->
+      <stop offset="30%" style="stop-color:#87CEFA; stop-opacity:0.9" /> <!-- Light Sky Blue -->
+      <stop offset="60%" style="stop-color:#4169E1; stop-opacity:0.85" /> <!-- Royal Blue -->
+      <stop offset="85%" style="stop-color:#0000CD; stop-opacity:0.9" /> <!-- Medium Blue -->
+      <stop offset="100%" style="stop-color:#000080; stop-opacity:1" />   <!-- Navy (Deep Edge) -->
+    </radialGradient>
+
+    <!-- 背景: スターバーストグラデーション (青系) -->
+    <radialGradient id="deepSwirlGrad" cx="50%" cy="50%" r="60%" fx="70%" fy="70%">
+      <stop offset="0%" style="stop-color:#B0E0E6; stop-opacity:1" />   <!-- PowderBlue center -->
+      <stop offset="50%" style="stop-color:#B0C4DE; stop-opacity:0.9" /> <!-- Light Steel Blue -->
+      <stop offset="80%" style="stop-color:#6495ED; stop-opacity:0.8" /> <!-- Cornflower Blue -->
+      <stop offset="100%" style="stop-color:#0000CD; stop-opacity:0.9" /> <!-- Medium Blue edge -->
+    </radialGradient>
+
+    <!-- 豪華なプラチナ/銀枠グラデーション (ダイヤモンドと同じ) -->
+    <linearGradient id="platinumFrameGradSapphire" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5F5; stop-opacity:1" /> <!-- WhiteSmoke -->
+      <stop offset="50%" style="stop-color:#DCDCDC; stop-opacity:1" /> <!-- Gainsboro -->
+      <stop offset="100%" style="stop-color:#A9A9A9; stop-opacity:1" /> <!-- DarkGray -->
+    </linearGradient>
+
+    <!-- 虹色グラデーション (プリズム効果用 - ダイヤモンドと同じ) -->
+    <linearGradient id="prismGradSapphire" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF00FF; stop-opacity:0.7" />   <!-- Magenta -->
+      <stop offset="20%" style="stop-color:#00FFFF; stop-opacity:0.7" />  <!-- Cyan -->
+      <stop offset="40%" style="stop-color:#FFFF00; stop-opacity:0.7" />  <!-- Yellow -->
+      <stop offset="60%" style="stop-color:#00FF00; stop-opacity:0.7" />  <!-- Lime -->
+      <stop offset="80%" style="stop-color:#FF4500; stop-opacity:0.7" />  <!-- OrangeRed -->
+      <stop offset="100%" style="stop-color:#FF00FF; stop-opacity:0.7" /> <!-- Magenta -->
+    </linearGradient>
+
+    <!-- 輝きフィルター (ダイヤモンドと同じ) -->
+    <filter id="sapphireGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 外枠 (豪華なプラチナ枠) -->
+  <circle cx="50" cy="50" r="49" fill="none" stroke="url(#platinumFrameGradSapphire)" stroke-width="5"/>
+  <!-- 内側の装飾線 -->
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.8"/>
+  <!-- 波線に変更 -->
+  <path d="M 50,7 A 43 43 0 0 1 93,50 A 43 43 0 0 1 50,93 A 43 43 0 0 1 7,50 A 43 43 0 0 1 50,7 Z"
+        fill="none" stroke="#ADD8E6" stroke-width="1.2" opacity="0.7"
+        stroke-dasharray="10 5"/> <!-- LightBlue, dashed line for wave effect -->
+
+  <!-- ベースメダル (スターバースト背景 - 青系) -->
+  <circle cx="50" cy="50" r="42" fill="url(#deepSwirlGrad)" />
+
+  <!-- 背景の渦巻きエフェクト -->
+  <path d="M 30 30 Q 50 10 70 30 T 70 70 Q 50 90 30 70 T 30 30 Z"
+        fill="none" stroke="#87CEEB" stroke-width="1.5" opacity="0.4"/> <!-- SkyBlue -->
+  <path d="M 40 40 Q 50 30 60 40 T 60 60 Q 50 70 40 60 T 40 40 Z"
+        fill="none" stroke="white" stroke-width="1" opacity="0.3"/>
+
+  <!-- 中央のサファイア (オーバルカット風 - 楕円) -->
+  <ellipse cx="50" cy="50" rx="30" ry="22"
+           fill="url(#sapphireGradOval)" stroke="#000080" stroke-width="1.8" filter="url(#sapphireGlowFilter)"/> <!-- Navy stroke -->
+
+  <!-- ファセットの線 (オーバル風 - 放射状 + 楕円) -->
+  <path d="M50,28 L50,72 M20,50 L80,50 M30,35 L70,65 M30,65 L70,35"
+        stroke="url(#prismGradSapphire)" stroke-width="0.8" opacity="0.7"/>
+  <ellipse cx="50" cy="50" rx="15" ry="11" fill="none" stroke="white" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- 多数の輝き (スパークル - 4点星 & 8点星 - 白と水色系) -->
+  <polygon points="80,20 82,15 84,20 89,22 84,24 82,29 80,24 75,22" fill="white" opacity="0.95"/>
+  <polygon points="20,80 22,75 24,80 29,82 24,84 22,89 20,84 15,82" fill="#AFEEEE" opacity="0.8"/> <!-- PaleTurquoise -->
+  <polygon points="30,30 31,28 32,30 34,31 32,32 31,34 30,32 28,31" fill="white" opacity="0.7"/>
+  <polygon points="70,70 71,68 72,70 74,71 72,72 71,74 70,72 68,71" fill="#E0FFFF" opacity="0.7"/> <!-- LightCyan -->
+  <!-- 8点星 -->
+  <path d="M50 8 L 52 16 L 60 18 L 52 20 L 50 28 L 48 20 L 40 18 L 48 16 Z" fill="#F0F8FF" opacity="0.8"/> <!-- AliceBlue -->
+  <!-- レンズフレア風 -->
+  <line x1="15" y1="15" x2="35" y2="35" stroke="white" stroke-width="1.5" opacity="0.6"/>
+  <line x1="65" y1="65" x2="85" y2="85" stroke="#AFEEEE" stroke-width="1.5" opacity="0.6"/> <!-- PaleTurquoise -->
+
+  <title>宝石バッジ - サファイア (深淵)</title>
+</svg>

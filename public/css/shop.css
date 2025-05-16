@@ -1,0 +1,552 @@
+/* ==========================
+   Shop Page Styles (shop.html)
+   ========================== */
+
+/* --- Page Container & Basic Elements --- */
+.shop-page-container {
+    max-width: 1200px; /* コンテンツの最大幅 */
+    margin: 0 auto;    /* 中央揃え */
+    padding: 30px 20px; /* 上下の余白と左右の余白 */
+}
+
+.shop-page-container > h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-family: var(--font-family-title);
+    color: var(--color-primary-light);
+    font-size: 2rem; /* common.css に依存するが見出しサイズ調整 */
+    letter-spacing: 1px;
+}
+
+/* --- User Points Display --- */
+.user-points-info-shop {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 15px;
+    background-color: rgba(0, 0, 0, 0.2); /* 背景を少しつける */
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--color-border);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+#user-points-display {
+    color: var(--color-primary);
+    font-family: var(--font-family-mono);
+    font-weight: 700;
+    font-size: 1.5rem; /* ポイント数を少し大きく */
+    margin-left: 10px;
+    vertical-align: middle; /* テキストと高さを合わせる */
+}
+
+/* --- General Shop Section Styling --- */
+.shop-section {
+    background-color: var(--color-background-secondary);
+    padding: 30px;
+    margin-bottom: 40px;
+    border-radius: var(--border-radius-large);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-light);
+}
+
+.shop-section h2 {
+    font-family: var(--font-family-title);
+    color: var(--color-primary-light);
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-primary-dark);
+    font-size: 1.8rem;
+    display: flex; /* アイコンとテキストを横並び */
+    align-items: center;
+    gap: 12px; /* アイコンとテキストの間隔 */
+}
+
+.shop-section h2 .section-icon {
+    font-size: 1.2em; /* アイコンサイズ調整 */
+    line-height: 1; /* アイコンの縦位置調整 */
+}
+
+.shop-section p {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+/* --- Gacha Section --- */
+.gacha-section {
+    border-color: var(--color-primary); /* ガチャセクションを少し目立たせる */
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.7), rgba(20, 20, 20, 0.8)); /* 背景グラデーション例 */
+    /* ▼▼▼ セクション内のコンテンツを中央揃えにするため追加 ▼▼▼ */
+    display: flex;          /* 子要素(gacha-area)を中央揃えするためにflexを設定 */
+    flex-direction: column; /* 子要素を縦に並べる */
+    align-items: center;    /* 子要素を水平方向中央に */
+    /* ▲▲▲ 追加ここまで ▲▲▲ */
+}
+
+.gacha-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px; /* 説明文との間隔 */
+    /* ▼▼▼ gacha-area自体の幅を制限して中央揃え (任意) ▼▼▼ */
+    width: 100%;          /* 基本は親要素に合わせる */
+    max-width: 600px;     /* ガチャエリアの最大幅 (ボタンや説明文に合わせて調整) */
+    /* margin-left: auto; */  /* gacha-sectionにflexを設定したので不要 */
+    /* margin-right: auto; */ /* gacha-sectionにflexを設定したので不要 */
+    /* ▲▲▲ 幅制限ここまで ▲▲▲ */
+}
+
+#play-gacha-button {
+    /* ▼▼▼ スタイリッシュな金色ボタンに変更 ▼▼▼ */
+    min-width: 280px;
+    padding: 15px 30px; /* パディングは維持 */
+    font-size: 1.2rem; /* フォントサイズは維持 */
+    border-radius: 30px; /* 角を丸く */
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    background: linear-gradient(145deg, #fff0b3, var(--color-primary-light, #e4c66a)); /* 金色グラデーション */
+    color: #111; /* 暗い文字色 */
+    border: none;
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.35),
+                inset 0 -2px 2px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3),
+                0 0 18px 4px rgba(255, 215, 0, 0.6); /* 金色のグロー */
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    /* ▲▲▲ スタイリッシュな金色ボタンに変更 ▲▲▲ */
+}
+#play-gacha-button:hover:not(:disabled) {
+    background: linear-gradient(145deg, #ffffff, #fff0b3); /* ホバー時少し明るく */
+    box-shadow: 0 9px 25px rgba(0, 0, 0, 0.4),
+                inset 0 -2px 2px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3),
+                0 0 22px 5px rgba(255, 215, 0, 0.7); /* グローを強く */
+    transform: translateY(-4px); /* 浮き上がり */
+}
+#play-gacha-button:active:not(:disabled) {
+    transform: translateY(0px); /* 押し込み */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(0, 0, 0, 0.3),
+                0 0 8px 1px rgba(255, 215, 0, 0.4); /* グローを抑える */
+}
+/* :disabled スタイルは common.css を参照 */
+
+
+/* --- Purchasable Badges Section --- */
+.purchasable-section {
+    /* 購入セクション固有のスタイルがあれば追加 */
+}
+
+#shop-limited-items,
+#shop-regular-items {
+    margin-bottom: 40px; /* カテゴリ間のマージン */
+}
+#shop-limited-items:last-child,
+#shop-regular-items:last-child {
+    margin-bottom: 0;
+}
+
+.purchasable-section h3 {
+    font-family: var(--font-family-title);
+    color: var(--color-primary);
+    margin-top: 0;
+    margin-bottom: 25px; /* グリッドとの間隔 */
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px dashed var(--color-border-light);
+    padding-bottom: 10px;
+}
+.purchasable-section h3 .category-icon {
+    font-size: 1.1em;
+    line-height: 1;
+}
+
+/* --- Shop Items Grid (★5列表示とレスポンシブ) --- */
+.shop-items-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* ★ デフォルト5列 */
+    gap: 20px; /* アイテム間の隙間 */
+}
+
+/* ▼▼▼ 期間限定バッジグリッドの特別スタイル ▼▼▼ */
+#shop-limited-items-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3列 */
+    max-width: 750px; /* gapを広げた分、max-widthも少し調整 */
+    margin-left: auto;
+    margin-right: auto;
+    /* gap: 20px; */ /* ← 継承または以前の値 */
+    gap: 80px; /* ★ 隙間を広げる (例: 30px) */
+}
+/* ▲▲▲ 期間限定バッジグリッドの特別スタイル ▲▲▲ */
+
+
+/* --- Shop Item Card (JSで生成される要素を想定) --- */
+/* JavaScript側で .shop-items-grid の子要素に .shop-item-card クラスが付与されることを想定 */
+.shop-item-card {
+    /* Layout & Box Model */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 15px; /* 5列表示に合わせて調整 */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden;
+    text-align: center;
+    /* Background & Shadow */
+    background-color: rgba(0, 0, 0, 0.75); /* ★ 透明度を下げて濃くする */
+    box-shadow: var(--shadow-light);
+    /* Transitions */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.shop-item-card:hover {
+    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-medium), 0 0 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    /* background-color: rgba(20, 20, 20, 0.85); */ /* ★ ホバー時の背景も必要なら調整 */
+}
+
+/* Badge Display Area within Card */
+.shop-item-badge-display { /* カード内にこのクラスがあると仮定 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px; /* サイズ調整 (少し大きく) */
+    height: 90px;
+    margin-bottom: 15px;
+    border: 2px solid var(--color-border-light);
+    border-radius: var(--border-radius-medium); /* ★ 円形から角丸四角形へ変更 */
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shop-item-card:hover .shop-item-badge-display {
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7), 0 0 10px var(--color-primary-dark);
+}
+
+.shop-item-badge-display img {
+    display: block;
+    width: 70%; /* 画像サイズ調整 */
+    height: 70%;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+}
+
+/* Item Details within Card */
+.shop-item-details { /* カード内にこのクラスがあると仮定 */
+    flex-grow: 1; /* 価格とボタンを下部に押しやる */
+    width: 100%;
+    margin-bottom: 15px; /* ボタンとの間隔 */
+    display: flex;
+    flex-direction: column; /* 縦並び */
+    justify-content: space-between; /* 名前/説明と価格を離す */
+    min-height: 80px; /* カードの高さをある程度揃えるため */
+}
+
+.shop-item-name { /* カード内にこのクラスがあると仮定 */
+    color: var(--color-text-primary);
+    font-family: var(--font-family-title);
+    font-size: 1rem; /* サイズ調整 */
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    line-height: 1.3; /* 2行になった場合の間隔 */
+    min-height: 2.6em; /* 名前が2行になっても高さが揃うように */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.shop-item-description { /* カード内にこのクラスがあると仮定 */
+    color: var(--color-text-secondary);
+    font-size: 0.85rem; /* サイズ調整 */
+    line-height: 1.4;
+    margin-bottom: 8px;
+    min-height: 2.8em; /* 説明が2行になっても高さが揃うように */
+    /* 必要であれば flex-grow: 1; を追加してスペースを埋める */
+}
+
+.shop-item-requirement { /* カード内にこのクラスがあると仮定 */
+    color: var(--color-text-secondary);
+    font-size: 0.75rem; /* サイズ調整 */
+    font-weight: 600;
+    margin: 4px 0; /* 上下の間隔 */
+}
+
+.shop-item-price { /* カード内にこのクラスがあると仮定 */
+    color: var(--color-primary);
+    font-family: var(--font-family-mono);
+    font-size: 1rem; /* サイズ調整 */
+    font-weight: 700;
+    margin-top: 10px; /* 説明や条件との間隔 */
+}
+
+/* Buy Button within Card */
+.shop-buy-button { /* カード内にこのクラスがあると仮定 */
+    /* ▼▼▼ スタイリッシュな金色ボタンに変更 ▼▼▼ */
+    width: 100%;
+    padding: 10px 12px; /* パディング調整 (5列表示用) */
+    font-size: 0.9rem; /* フォントサイズ調整 (5列表示用) */
+    margin-top: auto;
+    border-radius: 30px; /* 角を丸く */
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    background: linear-gradient(145deg, #fff0b3, var(--color-primary-light, #e4c66a)); /* 金色グラデーション */
+    color: #111; /* 暗い文字色 */
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), /* 影を少し調整 */
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3),
+                0 0 12px 2px rgba(255, 215, 0, 0.5); /* グローを少し調整 */
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    /* ▲▲▲ スタイリッシュな金色ボタンに変更 ▲▲▲ */
+}
+.shop-buy-button:hover:not(:disabled) {
+    background: linear-gradient(145deg, #ffffff, #fff0b3); /* ホバー時少し明るく */
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.35), /* 影を少し調整 */
+                inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3),
+                0 0 16px 3px rgba(255, 215, 0, 0.6); /* グローを少し調整 */
+    transform: translateY(-3px); /* 浮き上がりを少し調整 */
+}
+.shop-buy-button:active:not(:disabled) {
+    transform: translateY(0px); /* 押し込み */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), /* 影を少し調整 */
+                inset 0 1px 2px rgba(0, 0, 0, 0.25),
+                0 0 6px 1px rgba(255, 215, 0, 0.3); /* グローを抑える */
+}
+/* :disabled スタイルは common.css を参照 */
+
+
+/* Item Card States (Owned, Insufficient) */
+.shop-item-card.owned,
+.shop-item-card.rate-insufficient,
+.shop-item-card.matches-insufficient {
+    opacity: 0.7; /* 透明度は少し上げる */
+    cursor: default; /* クリックできないことを示す */
+    background-color: rgba(10, 10, 10, 0.8); /* ★ 購入済みの場合も濃くする */
+}
+
+.shop-item-card.owned:hover,
+.shop-item-card.rate-insufficient:hover,
+.shop-item-card.matches-insufficient:hover {
+    border-color: var(--color-border); /* ホバー効果を無効化 */
+    box-shadow: var(--shadow-light);
+    transform: none;
+}
+
+.shop-item-card.owned .shop-item-badge-display,
+.shop-item-card.rate-insufficient .shop-item-badge-display,
+.shop-item-card.matches-insufficient .shop-item-badge-display {
+     border-color: var(--color-border-light); /* ホバー効果を無効化 */
+     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+}
+
+/* --- Loading & Notice --- */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px; /* 十分な余白 */
+    color: var(--color-text-secondary);
+    gap: 15px;
+    min-height: 100px; /* 最低限の高さを確保 */
+    width: 100%; /* 親要素いっぱいに広がるように */
+}
+/* .shop-items-grid 内のローディング表示 */
+.shop-items-grid .loading-indicator {
+    grid-column: 1 / -1; /* グリッド内で全幅を使う */
+}
+
+.spinner { /* common.css に定義があれば不要 */
+    width: 30px;
+    height: 30px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-left-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.notice-text {
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: 30px 20px;
+    font-style: italic;
+    width: 100%; /* 親要素いっぱいに広がるように */
+}
+/* .shop-items-grid 内の通知テキスト */
+.shop-items-grid .notice-text {
+    grid-column: 1 / -1; /* グリッド内で全幅を使う */
+}
+
+.error-text { /* common.css に定義があれば不要 */
+    color: var(--color-danger);
+    font-weight: 600;
+    font-style: normal;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* --- Gacha Result Modal --- */
+/* .modal, .modal-content スタイルは common.css にある想定 */
+.gacha-result-content {
+    text-align: center;
+    padding: 30px;
+}
+#gacha-result-title {
+    color: var(--color-primary);
+    font-family: var(--font-family-title);
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+.gacha-result-badge { /* バッジ表示エリア */
+    margin: 20px auto 30px auto; /* 上下のマージン調整 */
+    width: 170px; /* モーダル内でのサイズ (少し大きく) */
+    height: 170px;
+    border: 3px solid var(--color-primary-dark); /* 枠線 */
+    border-radius: var(--border-radius-medium); /* ★ 円形から角丸四角形へ変更 */
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 20px var(--color-primary-dark); /* 影 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.gacha-result-badge img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+}
+.gacha-result-name {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 10px;
+}
+.gacha-result-desc {
+    color: var(--color-text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+.gacha-result-rarity {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--color-primary); /* レアリティに応じて色を変えても良い */
+    margin-top: 20px;
+    text-transform: uppercase; /* 大文字表示など */
+}
+#close-gacha-result { /* 閉じるボタンの位置調整 */
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+/* ==========================
+   Shop Page Responsive Adjustments
+   ========================== */
+
+/* --- Medium Screens (e.g., Tablets, ~992px) --- */
+@media (max-width: 992px) {
+    .shop-items-grid {
+        grid-template-columns: repeat(4, 1fr); /* 通常グリッドは4列 */
+        gap: 18px;
+    }
+    /* ▼▼▼ 期間限定グリッドのレスポンシブ (992px以下) ▼▼▼ */
+    #shop-limited-items-grid {
+        grid-template-columns: repeat(3, 1fr);
+        /* max-width は必要に応じて調整 */
+        /* gap: 18px; */ /* ← 以前の値 */
+        gap: 25px; /* ★ 隙間を広げる (例: 25px) */
+    }
+    /* ▲▲▲ 期間限定グリッドのレスポンシブ ▲▲▲ */
+
+    /* カード内要素の微調整 (必要に応じて) */
+    .shop-item-card { padding: 12px; }
+    .shop-item-badge-display { width: 85px; height: 85px; } /* 少し大きく */
+    .shop-item-name { font-size: 0.95rem; }
+    .shop-item-price { font-size: 0.95rem; }
+    .shop-buy-button { padding: 7px 9px; font-size: 0.85rem; }
+}
+
+/* --- Small Screens (e.g., Large Phones, Small Tablets, ~768px) --- */
+@media (max-width: 768px) {
+    .shop-page-container { padding: 20px 15px; }
+    .shop-section { padding: 25px 20px; }
+    .shop-section h2 { font-size: 1.6rem; }
+    .purchasable-section h3 { font-size: 1.4rem; }
+    #play-gacha-button { min-width: 240px; padding: 12px 25px; font-size: 1.1rem; }
+
+    .shop-items-grid {
+        grid-template-columns: repeat(3, 1fr); /* 通常グリッドは3列 */
+        gap: 15px;
+    }
+    /* ▼▼▼ 期間限定グリッドのレスポンシブ (768px以下) ▼▼▼ */
+    #shop-limited-items-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2列 */
+        max-width: 500px; /* gapを広げた分、max-widthも少し調整 */
+        /* gap: 15px; */ /* ← 以前の値 */
+        gap: 25px; /* ★ 隙間を広げる (例: 25px) */
+    }
+    /* ▲▲▲ 期間限定グリッドのレスポンシブ ▲▲▲ */
+
+    .shop-item-card { padding: 10px; }
+    .shop-item-badge-display { width: 75px; height: 75px; margin-bottom: 12px; } /* 少し大きく */
+    .shop-item-name { font-size: 0.9rem; min-height: 2.4em; }
+    .shop-item-description { font-size: 0.8rem; min-height: 2.6em; }
+    .shop-item-price { font-size: 0.9rem; }
+    .shop-buy-button { padding: 8px 10px; font-size: 0.85rem; }
+}
+
+/* --- Extra Small Screens (e.g., Phones, ~480px) --- */
+@media (max-width: 480px) {
+    .shop-page-container { padding: 15px 10px; }
+    .user-points-info-shop { font-size: 1.1rem; padding: 10px; }
+    #user-points-display { font-size: 1.3rem; }
+    .shop-section { padding: 20px 15px; }
+    .shop-section h2 { font-size: 1.4rem; gap: 8px; }
+    .purchasable-section h3 { font-size: 1.2rem; gap: 8px; }
+    #play-gacha-button { min-width: 90%; padding: 10px 20px; font-size: 1rem; } /* 幅を広げる */
+
+    .shop-items-grid {
+        grid-template-columns: repeat(2, 1fr); /* 通常グリッドは2列 */
+        gap: 12px;
+    }
+    /* ▼▼▼ 期間限定グリッドのレスポンシブ (480px以下) ▼▼▼ */
+    #shop-limited-items-grid {
+        grid-template-columns: 1fr; /* 1列 */
+        max-width: 280px; /* gapは影響しないが、カード幅に合わせて調整 */
+        /* gap: 12px; */ /* ← 以前の値 */
+        gap: 20px; /* ★ 隙間を広げる (例: 20px、1列なので実質上下の隙間) */
+    }
+    /* ▲▲▲ 期間限定グリッドのレスポンシブ ▲▲▲ */
+
+    .shop-item-card { padding: 8px; }
+    .shop-item-badge-display { width: 70px; height: 70px; margin-bottom: 10px; } /* 少し大きく */
+    .shop-item-badge-display img { width: 65%; height: 65%; }
+    .shop-item-name { font-size: 0.85rem; min-height: 2.2em; }
+    .shop-item-description { font-size: 0.75rem; min-height: 2.4em; }
+    .shop-item-price { font-size: 0.85rem; }
+    .shop-buy-button { padding: 6px 8px; font-size: 0.8rem; }
+
+    /* モーダルも少し調整 */
+    .gacha-result-content { padding: 20px; }
+    #gacha-result-title { font-size: 1.6rem; margin-bottom: 20px; }
+    .gacha-result-badge { width: 130px; height: 130px; } /* 少し大きく */
+    .gacha-result-name { font-size: 1.3rem; }
+}

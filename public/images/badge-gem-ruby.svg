@@ -1,0 +1,62 @@
+<!-- badge-gem-ruby-flame-enhanced.svg -->
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- ルビー風グラデーション -->
+    <radialGradient id="rubyGradEnhanced" cx="50%" cy="50%" r="60%" fx="65%" fy="35%">
+      <stop offset="0%" style="stop-color:#FFD1DC; stop-opacity:1" />   <!-- Lighter Pink Highlight -->
+      <stop offset="40%" style="stop-color:#E60026; stop-opacity:1" />   <!-- Brighter Crimson -->
+      <stop offset="100%" style="stop-color:#A00000; stop-opacity:0.95" /> <!-- Slightly Brighter DarkRed -->
+    </radialGradient>
+
+    <!-- 炎風グラデーション -->
+    <radialGradient id="flameGradEnhanced" cx="50%" cy="50%" r="55%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#FFFF99; stop-opacity:1" /> <!-- Brighter Yellow center -->
+      <stop offset="35%" style="stop-color:#FFAC33; stop-opacity:1" /> <!-- Brighter Orange -->
+      <stop offset="75%" style="stop-color:#FF6347; stop-opacity:1" /> <!-- Tomato (Brighter OrangeRed) -->
+      <stop offset="100%" style="stop-color:#C04000; stop-opacity:0.85" /> <!-- Brighter Dark Red/Orange edge -->
+    </radialGradient>
+
+    <!-- 豪華な金枠グラデーション -->
+    <linearGradient id="goldFrameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF7AE; stop-opacity:1" /> <!-- Light Yellow Gold -->
+      <stop offset="50%" style="stop-color:#FFD700; stop-opacity:1" /> <!-- Gold -->
+      <stop offset="100%" style="stop-color:#B8860B; stop-opacity:1" /> <!-- DarkGoldenrod -->
+    </linearGradient>
+
+    <!-- ぼかしフィルター (炎の揺らめき用) -->
+    <filter id="flameBlurFilter" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" />
+    </filter>
+  </defs>
+
+  <!-- 外枠 (豪華な金枠) -->
+  <circle cx="50" cy="50" r="49" fill="none" stroke="url(#goldFrameGrad)" stroke-width="4"/>
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#DAA520" stroke-width="1" opacity="0.7"/> <!-- Inner gold line -->
+
+
+  <!-- ベースメダル (炎背景) -->
+  <circle cx="50" cy="50" r="45" fill="url(#flameGradEnhanced)" />
+
+  <!-- 炎の揺らめき (外側) - 少し透明度とぼかしを持たせる -->
+  <path d="M 50,6 A 44 44 0 0 1 94,50 Q 88 62 94 72 A 44 44 0 0 1 50,94 Q 38 88 28 94 A 44 44 0 0 1 6,50 Q 12 38 6 28 A 44 44 0 0 1 50,6 Z"
+        fill="#FFA500" opacity="0.5" filter="url(#flameBlurFilter)"/>
+
+  <!-- 中央のルビー (ファセットカット風 - 八角形) - 炎の上に配置 -->
+  <polygon points="75,50 68,68 50,75 32,68 25,50 32,32 50,25 68,32"
+           fill="url(#rubyGradEnhanced)" stroke="#500000" stroke-width="1.8"/>
+
+  <!-- ファセットの線 (追加) -->
+  <path d="M50,50 L75,50 M50,50 L68,68 M50,50 L50,75 M50,50 L32,68 M50,50 L25,50 M50,50 L32,32 M50,50 L50,25 M50,50 L68,32"
+        stroke="#FF8080" stroke-width="0.9" opacity="0.6"/>
+  <!-- 追加のファセット線 -->
+   <path d="M50,50 L71.5,59 M50,50 L59,71.5 M50,50 L41,71.5 M50,50 L28.5,59 M50,50 L28.5,41 M50,50 L41,28.5 M50,50 L59,28.5 M50,50 L71.5,41"
+        stroke="#FFB6C1" stroke-width="0.6" opacity="0.5"/>
+
+  <!-- 輝き (スパークル - 4点星 - より大きく) -->
+  <polygon points="66,34 69,28 72,34 78,36 72,38 69,44 66,38 60,36" fill="white" opacity="0.9"/>
+  <!-- 小さな輝き -->
+  <polygon points="35,65 36,63 37,65 39,66 37,67 36,69 35,67 33,66" fill="white" opacity="0.6"/>
+
+
+  <title>宝石バッジ - ルビー (灼熱)</title>
+</svg>
