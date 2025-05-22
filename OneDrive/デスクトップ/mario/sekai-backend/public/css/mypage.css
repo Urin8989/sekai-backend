@@ -1,0 +1,1634 @@
+/* ==========================
+   mypage.html 固有スタイル
+   ========================== */
+
+/* --- 全体レイアウト --- */
+.mypage-wrapper {
+    /* 必要に応じてパディングやマージンを設定 */
+}
+
+.mypage-content-layout {
+    display: flex; /* 横並びにする */
+    flex-wrap: wrap; /* 画面幅が足りなければ折り返す */
+    gap: var(--spacing-unit-large, 30px); /* セクション間の隙間 */
+    margin-bottom: var(--spacing-unit-large, 30px); /* 図鑑セクションとの間のマージン */
+}
+
+/* --- 各セクションの幅調整 --- */
+.mypage-user-info {
+    flex: 1 1 350px; /* 基本幅350px、伸び縮み可能 */
+    min-width: 300px; /* 最小幅 */
+}
+
+.mypage-charts {
+    flex: 2 1 500px; /* 基本幅500px、ユーザー情報より広めに */
+    min-width: 300px;
+    display: flex; /* チャートコンテナを横並びにする場合 */
+    flex-direction: column; /* デフォルトは縦積み */
+    gap: var(--spacing-unit-large, 30px); /* チャート間の隙間 */
+}
+
+/* --- プロフィールカード --- */
+.mypage-user-info .profile-card {
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.7), rgba(20, 20, 20, 0.8));
+    box-shadow: var(--shadow-heavy), 0 0 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* レイアウトによっては高さを揃える */
+}
+.mypage-user-info .profile-main-info-mypage {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    box-sizing: border-box;
+}
+.mypage-user-info .profile-main-info-mypage img#profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin: 0;
+    border: 4px solid var(--color-primary-dark);
+    padding: 4px;
+    background-color: var(--color-surface);
+    object-fit: cover;
+    box-shadow: var(--shadow-primary-glow), 0 4px 8px rgba(0,0,0,0.4);
+}
+.mypage-user-info .profile-name-details-mypage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex-grow: 1;
+    overflow: hidden; /* 名前の折り返しのため */
+}
+.mypage-user-info .profile-name-details-mypage h2#profile-name {
+    margin: 0;
+    font-size: 2.2rem;
+    font-family: var(--font-family-title);
+    color: var(--color-text-primary);
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    word-break: break-all;
+    line-height: 1.3;
+}
+
+/* プロフィール統計 (mypage.html用調整) */
+.mypage-user-info .profile-stats {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-evenly;
+    gap: calc(var(--spacing-unit) * 2);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-medium);
+    padding: calc(var(--spacing-unit) * 2);
+    margin-top: calc(var(--spacing-unit) * 1);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+.mypage-user-info .profile-stats .stat-item {
+    text-align: center;
+    flex: 1;
+    min-width: 100px; /* 最小幅 */
+}
+.mypage-user-info .profile-stats .stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.75);
+}
+.mypage-user-info .profile-stats .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-mono);
+    line-height: 1.1;
+}
+.mypage-user-info .profile-stats #profile-rate {
+    color: var(--color-primary);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* プロフィールバッジ表示エリア */
+.profile-badges-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* バッジと編集ボタンの間隔 */
+    margin-top: var(--spacing-unit-medium, 20px);
+    margin-bottom: var(--spacing-unit-medium, 20px);
+    flex-wrap: wrap; /* ボタンが下に回り込むように */
+}
+
+.profile-badges {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2.5);
+    flex-wrap: nowrap; /* バッジ自体は横並び */
+}
+
+.profile-badges .badge-slot {
+    width: 65px;
+    height: 65px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--color-primary-dark);
+    border-radius: var(--border-radius-medium); /* 円形から角丸四角形へ変更 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9), 0 4px 8px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.5; /* 初期は半透明 */
+}
+.profile-badges .badge-slot.filled {
+    opacity: 1; /* バッジが入ったら不透明に */
+}
+
+.profile-badges .badge-slot img {
+    width: 75%;
+    height: 75%;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.7));
+    display: block;
+}
+.profile-badges .badge-slot:hover {
+    transform: scale(1.1) translateY(-3px);
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.9), 0 6px 12px rgba(0,0,0,0.5), 0 0 25px var(--color-primary);
+}
+
+/* バッジ編集ボタン */
+#edit-display-badges-button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    /* .button-secondary スタイルを適用 */
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-text-secondary);
+}
+#edit-display-badges-button:hover:not(:disabled) {
+    background-color: var(--color-text-secondary);
+    color: var(--color-background);
+    border-color: var(--color-text-secondary);
+}
+
+
+/* 追加情報・編集エリア */
+.mypage-user-info .profile-extra-info {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    border-top: 1px solid var(--color-border);
+    padding-top: calc(var(--spacing-unit) * 3);
+    margin-top: auto; /* カード下部に配置 */
+}
+.profile-extra-info .info-item {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+.profile-extra-info label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    font-weight: 600;
+}
+/* 表示モード・編集モードのスタイルはJSでクラスを切り替える想定 */
+.profile-extra-info .display-mode { /* 表示用テキストなど */ }
+.profile-extra-info input.edit-mode,
+.profile-extra-info textarea.edit-mode { /* 編集用入力欄 */ }
+
+/* 編集アクションボタン */
+.profile-edit-actions {
+    margin-top: calc(var(--spacing-unit) * 3);
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2);
+}
+
+/* --- プロフィール編集ボタンのスタイル --- */
+.button-profile-edit,
+.button-profile-save,
+.button-profile-cancel {
+    padding: 8px 20px;
+    font-weight: 600;
+    border-radius: var(--border-radius-medium);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    /* .button の基本スタイルを継承しない場合はここで定義 */
+}
+
+/* 編集ボタン (通常時) - 金色枠線 */
+.button-profile-edit {
+    background-color: transparent;
+    border: 2px solid var(--color-primary-dark);
+    color: var(--color-primary);
+}
+.button-profile-edit:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+/* 保存ボタン - 金色 */
+.button-profile-save {
+    background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+    color: var(--color-text-on-primary);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), inset 0 -2px 0 rgba(0,0,0,0.1);
+}
+.button-profile-save:hover {
+    background: linear-gradient(145deg, #ffdf70, var(--color-primary-dark));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+.button-profile-save:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+
+/* キャンセルボタン - 落ち着いた色 */
+.button-profile-cancel {
+    background-color: var(--color-background-medium, #333); /* フォールバック追加 */
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+.button-profile-cancel:hover {
+    background-color: var(--color-background-dark, #222); /* フォールバック追加 */
+    color: var(--color-text-primary);
+    border-color: var(--color-border-light);
+}
+
+
+/* --- グラフエリア --- */
+/* グラフコンテナ共通 */
+.mypage-charts .chart-container {
+    background-color: var(--color-surface-alpha);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    padding: 25px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 0; /* layoutのgapで制御 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+.mypage-charts .chart-container h3 { /* メインタイトル */
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--color-primary-light);
+    font-family: var(--font-family-title);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    letter-spacing: 1.5px;
+    padding-bottom: calc(var(--spacing-unit) * 1);
+    border-bottom: 1px solid var(--color-primary-dark);
+    width: fit-content;
+}
+
+/* 折れ線グラフ用ラッパー */
+.mypage-charts .chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px; /* 折れ線グラフの高さ */
+    flex-grow: 1;
+}
+
+/* 勝率グラフコンテナ (統合版) */
+.chart-container-double h3 { /* 勝率のメインタイトル */
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+.charts-row-within { /* 円グラフ横並び用ラッパー */
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+.chart-wrapper-half { /* 各円グラフのラッパー */
+    flex: 1 1 250px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    height: 300px; /* ★ 高さを指定 */
+}
+.chart-wrapper-half h4 { /* 直近/全体のタイトル */
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 calc(var(--spacing-unit) * 1.5) 0;
+    font-weight: 600;
+    text-align: center;
+    font-family: var(--font-family-title);
+    letter-spacing: 1px;
+}
+.chart-wrapper-half canvas {
+    max-width: 100%;
+    max-height: 100%; /* ラッパーの高さに合わせる */
+    width: auto;
+    height: auto;
+    display: block;
+}
+.chart-wrapper-half .chart-placeholder { /* プレースホルダー */
+    min-height: 150px;
+    font-size: 0.9em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: 20px 0;
+    width: 100%;
+    position: absolute; /* canvasと重ねる */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* canvas要素自体のスタイル */
+.mypage-charts canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+/* プレースホルダー共通 */
+.mypage-charts .chart-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+}
+
+
+/* --- バッジ図鑑 --- */
+.mypage-badge-dex {
+    margin-top: calc(var(--spacing-unit) * 4);
+    padding: calc(var(--spacing-unit) * 2);
+    background: linear-gradient(170deg, rgba(35, 35, 40, 0.8), rgba(20, 20, 25, 0.9));
+    border-radius: var(--border-radius-large);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    box-shadow: var(--shadow-medium);
+    clear: both; /* 上のflexレイアウトの影響をクリア */
+}
+
+.mypage-badge-dex h2 {
+    text-align: center;
+    color: var(--color-primary-light);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    font-family: var(--font-family-title);
+}
+
+.badge-dex-grid-container {
+    position: relative; /* 詳細表示の位置基準 */
+}
+
+.badge-dex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); /* バッジサイズ調整 */
+    gap: var(--spacing-unit-medium, 20px);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.badge-dex-item {
+    position: relative;
+    aspect-ratio: 1 / 1; /* 正方形にする */
+    background: linear-gradient(145deg, rgba(40, 40, 45, 0.7), rgba(25, 25, 30, 0.8));
+    border-radius: 12px; /* 少し丸みをつける */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden; /* 画像のはみ出し防止 */
+}
+
+.badge-dex-item img {
+    max-width: 75%;
+    max-height: 75%;
+    object-fit: contain;
+    transition: filter 0.3s ease;
+}
+
+.badge-dex-item.not-owned img {
+    filter: grayscale(100%) brightness(0.5); /* 未取得をより暗く */
+    opacity: 0.5;
+}
+.badge-dex-item.not-owned::after { /* 未取得マーク (任意) */
+    content: '?';
+    position: absolute;
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: bold;
+}
+
+
+.badge-dex-item:hover {
+    transform: scale(1.08) translateY(-3px); /* ホバーエフェクトを少し強調 */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 0 20px var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+/* バッジ詳細表示 */
+.badge-dex-detail {
+    position: sticky; /* スクロールしても追従 */
+    bottom: 20px; /* 下からの位置 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(10, 10, 15, 0.95);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-large); /* 修正: medium -> large */
+    padding: calc(var(--spacing-unit) * 2);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(5px); /* 背景をぼかす (対応ブラウザのみ) */
+}
+
+.badge-dex-detail-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.badge-dex-detail img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: var(--spacing-unit);
+}
+
+.badge-dex-detail h3 {
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    color: var(--color-primary-light);
+}
+
+.badge-dex-detail p {
+    margin: calc(var(--spacing-unit) * 0.5) 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+.badge-dex-detail #badge-dex-detail-desc {
+    color: var(--color-text-primary); /* 説明は通常色 */
+}
+.badge-dex-detail #badge-dex-detail-condition,
+.badge-dex-detail #badge-dex-detail-rate,
+.badge-dex-detail #badge-dex-detail-price {
+    font-weight: bold;
+}
+.badge-dex-detail #badge-dex-detail-rate {
+    color: var(--color-warning, #ffcc00); /* フォールバック色 */
+}
+.badge-dex-detail #badge-dex-detail-price {
+    color: var(--color-accent, var(--color-primary)); /* フォールバック色 */
+}
+
+.badge-dex-detail .owned-status {
+    margin-top: var(--spacing-unit);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.badge-dex-detail .owned-status.owned {
+    color: var(--color-success, #4CAF50); /* フォールバック色 */
+}
+.badge-dex-detail .owned-status.not-owned {
+    color: var(--color-danger, #F44336); /* フォールバック色 */
+}
+
+
+/* --- 表示バッジ編集モーダル --- */
+.edit-badges-modal-content {
+    max-width: 700px; /* モーダルの幅を広げる */
+    background: linear-gradient(160deg, var(--color-surface-dark, #111), var(--color-background)); /* 背景グラデーション */
+    border: 1px solid var(--color-primary-dark);
+}
+
+.edit-badges-container {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.display-slots-container,
+.owned-badges-container {
+    flex: 1;
+}
+
+.display-slots-container h3,
+.owned-badges-container h3 {
+    text-align: center;
+    margin-bottom: var(--spacing-unit);
+    color: var(--color-primary-light);
+}
+
+.display-slots {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-unit);
+    padding: var(--spacing-unit);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-medium);
+    min-height: 80px; /* スロットの高さを確保 */
+}
+
+.display-slots .badge-slot {
+    width: 70px; /* スロットサイズ調整 */
+    height: 70px;
+    border: 2px dashed var(--color-border-light); /* 点線で枠を示す */
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer; /* クリックで削除できるように */
+    position: relative; /* バツ印用 */
+    opacity: 1 !important; /* 常に不透明 */
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* スムーズな変化 */
+}
+.display-slots .badge-slot.filled {
+    border-style: solid; /* バッジが入ったら実線 */
+    border-color: var(--color-primary);
+}
+.display-slots .badge-slot:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.display-slots .badge-slot img {
+    width: 80%;
+    height: 80%;
+}
+
+/* スロットからバッジを削除するボタン (任意) */
+.display-slots .remove-badge-from-slot {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--color-danger, #F44336);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    display: none; /* JSで表示制御 */
+    transition: background-color 0.2s ease;
+}
+.display-slots .badge-slot.filled:hover .remove-badge-from-slot {
+    display: block;
+}
+.display-slots .remove-badge-from-slot:hover {
+    background: #d32f2f; /* ホバー時少し暗く */
+}
+
+
+.owned-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* 小さめのグリッド */
+    gap: var(--spacing-unit);
+    max-height: 300px; /* 高さを制限してスクロール */
+    overflow-y: auto;
+    padding: var(--spacing-unit);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-medium);
+}
+
+.owned-badges-grid .badge-item {
+    aspect-ratio: 1 / 1;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: var(--border-radius-small);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.owned-badges-grid .badge-item.selected {
+    opacity: 0.4; /* 選択済みは半透明に */
+    cursor: not-allowed;
+}
+
+.owned-badges-grid .badge-item img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.owned-badges-grid .badge-item:not(.selected):hover {
+    transform: scale(1.1);
+    border-color: var(--color-primary);
+    background-color: rgba(var(--color-primary-rgb, 255, 215, 0), 0.1);
+}
+
+
+/* ==========================
+   mypage.html レスポンシブ
+   ========================== */
+
+/* --- 中間サイズ --- */
+@media (max-width: 992px) {
+    .mypage-content-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+    .mypage-user-info,
+    .mypage-charts {
+        flex: none;
+        width: 100%;
+        max-width: 700px;
+    }
+    .mypage-charts {
+        margin-top: 40px;
+    }
+}
+
+/* --- 小さめサイズ --- */
+@media (max-width: 768px) {
+    .mypage-user-info .profile-main-info-mypage { flex-direction: column; gap: calc(var(--spacing-unit) * 2); }
+    .mypage-user-info .profile-name-details-mypage { align-items: center; text-align: center; }
+    .mypage-user-info .profile-stats { justify-content: space-evenly; }
+    .mypage-user-info .profile-stats .stat-item { text-align: center; }
+    .mypage-user-info .profile-badges { justify-content: center; gap: calc(var(--spacing-unit) * 2.5); }
+    /* バッジサイズは共通CSSで調整済み */
+    .mypage-user-info .profile-extra-info { text-align: center; }
+    .mypage-user-info .profile-extra-info label { text-align: left; }
+
+    /* グラフ */
+    .mypage-charts .chart-wrapper { height: 300px; }
+    .charts-row-within { /* 縦積み */ }
+    .chart-wrapper-half { flex-basis: 100%; max-width: 300px; height: 250px; }
+    .mypage-charts .chart-container h3 { font-size: 1.1rem; }
+    .chart-wrapper-half h4 { font-size: 1rem; }
+
+    /* バッジ図鑑 */
+    .mypage-badge-dex { margin-top: calc(var(--spacing-unit) * 3); }
+    .badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: var(--spacing-unit); }
+    .badge-dex-detail { max-width: 95%; padding: var(--spacing-unit); }
+    .badge-dex-detail img { width: 60px; height: 60px; }
+
+    /* 編集モーダル */
+    .edit-badges-container { flex-direction: column; }
+    .owned-badges-grid { max-height: 200px; }
+}
+
+/* --- さらに小さいサイズ --- */
+@media (max-width: 480px) {
+    .mypage-user-info .profile-card { padding: calc(var(--spacing-unit) * 2); }
+    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 100px; height: 100px; }
+    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.8rem; }
+    .mypage-user-info .profile-stats .stat-value { font-size: 1.5rem; }
+    /* バッジサイズは共通CSSで調整済み */
+
+    /* グラフ */
+    .mypage-charts .chart-wrapper { height: 250px; }
+    .chart-wrapper-half { height: 200px; } /* さらに小さく */
+    .chart-wrapper-half canvas { max-height: 180px; }
+}
+/* mypage.css */
+
+/* --- 全体レイアウト --- */
+/* (変更なし) */
+
+/* --- プロフィールカード --- */
+/* (変更なし) */
+
+/* プロフィールバッジ表示エリア */
+.profile-badges-container {
+    /* (既存のスタイル) */
+    margin-top: var(--spacing-unit-medium, 15px); /* 上マージンを少し詰める */
+    margin-bottom: var(--spacing-unit-medium, 15px); /* ★ 下マージンを詰める */
+    /* (他のスタイル) */
+}
+
+/* (他のプロフィールのスタイル) */
+
+/* 追加情報・編集エリア */
+.mypage-user-info .profile-extra-info {
+    /* (既存のスタイル) */
+    padding-top: var(--spacing-unit-medium, 15px); /* ★ 上パディングを詰める */
+    margin-top: auto; /* カード下部に配置 */
+}
+
+/* (他のプロフィールのスタイル) */
+
+
+/* --- バッジ図鑑 --- */
+.mypage-badge-dex {
+    /* (既存のスタイル) */
+    padding: var(--spacing-unit-medium, 15px); /* ★ 全体のパディングを少し詰める */
+    margin-top: var(--spacing-unit-large, 30px); /* 上のマージンは維持 or 少し詰める */
+}
+
+.mypage-badge-dex h2 {
+    /* (既存のスタイル) */
+    margin-bottom: var(--spacing-unit-medium, 15px); /* ★ 下マージンを詰める */
+}
+
+.badge-dex-grid {
+    /* (既存のスタイル) */
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* ★ バッジサイズを少し小さく */
+    gap: var(--spacing-unit, 10px); /* ★ 間隔を詰める */
+}
+
+.badge-dex-item {
+    /* (既存のスタイル) */
+    border-radius: 10px; /* ★ 角丸を少し小さく */
+}
+.badge-dex-item img {
+    max-width: 70%; /* ★ 画像サイズを少し調整 */
+    max-height: 70%;
+}
+.badge-dex-item.not-owned::after {
+    font-size: 2rem; /* ★ '?' サイズ調整 */
+}
+
+/* (他のバッジ図鑑スタイル) */
+
+/* --- グラフエリア --- */
+/* (変更なし or 既存のスタイルを確認) */
+
+/* 勝率グラフコンテナ (統合版) */
+.chart-wrapper-half {
+    /* (既存のスタイル) */
+    /* height: 300px; */ /* ★ 固定高さを削除または調整 */
+    min-height: 250px; /* ★ 最小高さを設定 */
+    position: relative; /* プレースホルダーの位置基準 */
+}
+.chart-wrapper-half canvas {
+    /* (既存のスタイル) */
+    position: relative; /* z-indexのため */
+    z-index: 1;
+}
+.chart-wrapper-half .chart-placeholder {
+    /* (既存のスタイル) */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex; /* ★ flexに変更 */
+    justify-content: center;
+    align-items: center;
+    transform: none; /* ★ transformリセット */
+    z-index: 0; /* canvasの後ろ */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+
+/* --- レスポンシブ対応 --- */
+@media (max-width: 768px) {
+    /* (既存のレスポンシブスタイル) */
+    .badge-dex-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* スマホではさらに小さく */
+        gap: calc(var(--spacing-unit) * 0.8);
+    }
+    .chart-wrapper-half {
+        min-height: 200px; /* スマホでの最小高さを調整 */
+    }
+}
+
+/* (他のレスポンシブスタイル) */
+
+/* mypage.css */
+
+/* (他のスタイル...) */
+
+.profile-extra-info p#self-intro-display.display-mode {
+    min-height: 120px; /* textarea の高さに合わせる (rows=5) */
+    white-space: pre-wrap; 
+}
+
+/* (他のスタイル...) */
+/* ==========================
+   mypage.html 固有スタイル
+   ========================== */
+
+/* --- 全体レイアウト --- */
+.mypage-wrapper {
+    /* 必要に応じてパディングやマージンを設定 */
+}
+
+.mypage-content-layout {
+    display: flex; /* 横並びにする */
+    flex-wrap: wrap; /* 画面幅が足りなければ折り返す */
+    gap: var(--spacing-unit-large, 30px); /* セクション間の隙間 */
+    margin-bottom: var(--spacing-unit-large, 30px); /* 図鑑セクションとの間のマージン */
+}
+
+/* --- 各セクションの幅調整 --- */
+.mypage-user-info {
+    flex: 1 1 350px; /* 基本幅350px、伸び縮み可能 */
+    min-width: 300px; /* 最小幅 */
+}
+
+.mypage-charts {
+    flex: 2 1 500px; /* 基本幅500px、ユーザー情報より広めに */
+    min-width: 300px;
+    display: flex; /* チャートコンテナを横並びにする場合 */
+    flex-direction: column; /* デフォルトは縦積み */
+    gap: var(--spacing-unit-large, 30px); /* チャート間の隙間 */
+}
+
+/* --- プロフィールカード --- */
+.mypage-user-info .profile-card {
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.7), rgba(20, 20, 20, 0.8));
+    box-shadow: var(--shadow-heavy), 0 0 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* レイアウトによっては高さを揃える */
+}
+.mypage-user-info .profile-main-info-mypage {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    box-sizing: border-box;
+}
+.mypage-user-info .profile-main-info-mypage img#profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin: 0;
+    border: 4px solid var(--color-primary-dark);
+    padding: 4px;
+    background-color: var(--color-surface);
+    object-fit: cover;
+    box-shadow: var(--shadow-primary-glow), 0 4px 8px rgba(0,0,0,0.4);
+}
+.mypage-user-info .profile-name-details-mypage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex-grow: 1;
+    overflow: hidden; /* 名前の折り返しのため */
+}
+.mypage-user-info .profile-name-details-mypage h2#profile-name {
+    margin: 0;
+    font-size: 2.2rem;
+    font-family: var(--font-family-title);
+    color: var(--color-text-primary);
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    word-break: break-all;
+    line-height: 1.3;
+}
+
+/* プロフィール統計 (mypage.html用調整) */
+.mypage-user-info .profile-stats {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-evenly;
+    gap: calc(var(--spacing-unit) * 2);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius-medium);
+    padding: calc(var(--spacing-unit) * 2);
+    margin-top: calc(var(--spacing-unit) * 1);
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+.mypage-user-info .profile-stats .stat-item {
+    text-align: center;
+    flex: 1;
+    min-width: 100px; /* 最小幅 */
+}
+.mypage-user-info .profile-stats .stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.75);
+}
+.mypage-user-info .profile-stats .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-mono);
+    line-height: 1.1;
+}
+.mypage-user-info .profile-stats #profile-rate {
+    color: var(--color-primary);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* プロフィールバッジ表示エリア */
+.profile-badges-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* バッジと編集ボタンの間隔 */
+    margin-top: var(--spacing-unit-medium, 15px); /* 上マージンを少し詰める */
+    margin-bottom: var(--spacing-unit-medium, 15px); /* 下マージンを詰める */
+    flex-wrap: wrap; /* ボタンが下に回り込むように */
+}
+
+.profile-badges {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2.5);
+    flex-wrap: nowrap; /* バッジ自体は横並び */
+}
+
+.profile-badges .badge-slot {
+    width: 65px;
+    height: 65px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--color-primary-dark);
+    border-radius: var(--border-radius-medium); /* 円形から角丸四角形へ変更 */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9), 0 4px 8px rgba(0,0,0,0.4), 0 0 15px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    opacity: 0.5; /* 初期は半透明 */
+}
+.profile-badges .badge-slot.filled {
+    opacity: 1; /* バッジが入ったら不透明に */
+}
+
+.profile-badges .badge-slot img {
+    width: 85%; /* さらに大きく */
+    height: 85%;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.7));
+    display: block;
+}
+.profile-badges .badge-slot:hover {
+    transform: scale(1.1) translateY(-3px);
+    border-color: var(--color-primary);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.9), 0 6px 12px rgba(0,0,0,0.5), 0 0 25px var(--color-primary);
+}
+
+/* バッジ編集ボタン */
+#edit-display-badges-button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    /* .button-secondary スタイルを適用 */
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-text-secondary);
+}
+#edit-display-badges-button:hover:not(:disabled) {
+    background-color: var(--color-text-secondary);
+    color: var(--color-background);
+    border-color: var(--color-text-secondary);
+}
+
+
+/* 追加情報・編集エリア */
+.mypage-user-info .profile-extra-info {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--spacing-unit-medium, 15px); /* 上パディングを詰める */
+    margin-top: auto; /* カード下部に配置 */
+}
+.profile-extra-info .info-item {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+.profile-extra-info label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    font-weight: 600;
+}
+/* 表示モード・編集モードのスタイルはJSでクラスを切り替える想定 */
+.profile-extra-info .display-mode { /* 表示用テキストなど */ }
+.profile-extra-info input.edit-mode,
+.profile-extra-info textarea.edit-mode { /* 編集用入力欄 */ }
+
+/* 自己紹介表示モードの高さ調整 */
+.profile-extra-info p#self-intro-display.display-mode {
+    min-height: 120px; /* textarea の高さに合わせる (rows=5) */
+    white-space: pre-wrap;
+}
+
+/* 編集アクションボタン */
+.profile-edit-actions {
+    margin-top: calc(var(--spacing-unit) * 3);
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2);
+}
+
+/* --- プロフィール編集ボタンのスタイル --- */
+.button-profile-edit,
+.button-profile-save,
+.button-profile-cancel {
+    padding: 8px 20px;
+    font-weight: 600;
+    border-radius: var(--border-radius-medium);
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    /* .button の基本スタイルを継承しない場合はここで定義 */
+}
+
+/* 編集ボタン (通常時) - 金色枠線 */
+.button-profile-edit {
+    background-color: transparent;
+    border: 2px solid var(--color-primary-dark);
+    color: var(--color-primary);
+}
+.button-profile-edit:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+/* 保存ボタン - 金色 */
+.button-profile-save {
+    background: linear-gradient(145deg, var(--color-primary-light), var(--color-primary));
+    color: var(--color-text-on-primary);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2), inset 0 -2px 0 rgba(0,0,0,0.1);
+}
+.button-profile-save:hover {
+    background: linear-gradient(145deg, #ffdf70, var(--color-primary-dark));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+}
+.button-profile-save:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+
+/* キャンセルボタン - 落ち着いた色 */
+.button-profile-cancel {
+    background-color: var(--color-background-medium, #333); /* フォールバック追加 */
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+}
+.button-profile-cancel:hover {
+    background-color: var(--color-background-dark, #222); /* フォールバック追加 */
+    color: var(--color-text-primary);
+    border-color: var(--color-border-light);
+}
+
+
+/* --- グラフエリア --- */
+/* グラフコンテナ共通 */
+.mypage-charts .chart-container {
+    background-color: var(--color-surface-alpha);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    padding: 25px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 0; /* layoutのgapで制御 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+.mypage-charts .chart-container h3 { /* メインタイトル */
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--color-primary-light);
+    font-family: var(--font-family-title);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    letter-spacing: 1.5px;
+    padding-bottom: calc(var(--spacing-unit) * 1);
+    border-bottom: 1px solid var(--color-primary-dark);
+    width: fit-content;
+}
+
+/* 折れ線グラフ用ラッパー */
+.mypage-charts .chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px; /* 折れ線グラフの高さ */
+    flex-grow: 1;
+}
+
+/* 勝率グラフコンテナ (統合版) */
+.chart-container-double h3 { /* 勝率のメインタイトル */
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+}
+.charts-row-within { /* 円グラフ横並び用ラッパー */
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-grow: 1;
+}
+.chart-wrapper-half { /* 各円グラフのラッパー */
+    flex: 1 1 250px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    min-height: 250px; /* 最小高さを設定 */
+}
+.chart-wrapper-half h4 { /* 直近/全体のタイトル */
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 calc(var(--spacing-unit) * 1.5) 0;
+    font-weight: 600;
+    text-align: center;
+    font-family: var(--font-family-title);
+    letter-spacing: 1px;
+}
+.chart-wrapper-half canvas {
+    max-width: 100%;
+    max-height: 100%; /* ラッパーの高さに合わせる */
+    width: auto;
+    height: auto;
+    display: block;
+    position: relative; /* z-indexのため */
+    z-index: 1;
+}
+.chart-wrapper-half .chart-placeholder { /* プレースホルダー */
+    min-height: 150px;
+    font-size: 0.9em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    padding: 20px 0;
+    width: 100%;
+    position: absolute; /* canvasと重ねる */
+    top: 50%; /* 中央揃え */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0; /* canvasの後ろ */
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* canvas要素自体のスタイル */
+.mypage-charts canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+}
+
+/* プレースホルダー共通 */
+.mypage-charts .chart-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+}
+
+
+/* --- バッジ図鑑 --- */
+.mypage-badge-dex {
+    margin-top: calc(var(--spacing-unit) * 4);
+    padding: var(--spacing-unit-medium, 15px); /* 全体のパディングを少し詰める */
+    background: linear-gradient(170deg, rgba(35, 35, 40, 0.8), rgba(20, 20, 25, 0.9));
+    border-radius: var(--border-radius-large);
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    box-shadow: var(--shadow-medium);
+    clear: both; /* 上のflexレイアウトの影響をクリア */
+}
+
+.mypage-badge-dex h2 {
+    text-align: center;
+    color: var(--color-primary-light);
+    margin-bottom: var(--spacing-unit-medium, 15px); /* 下マージンを詰める */
+    font-family: var(--font-family-title);
+}
+
+.badge-dex-grid-container {
+    position: relative; /* 詳細表示の位置基準 */
+}
+
+/* ▼▼▼ バッジ図鑑グリッド (金色枠・円形) ▼▼▼ */
+#badge-dex-grid {
+  display: grid;
+  /* 画面幅に応じて列数を自動調整、各アイテムの最小幅60px */
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 15px; /* アイテム間の隙間 */
+  padding: 15px 0; /* 上下の余白 */
+  margin-bottom: calc(var(--spacing-unit) * 2); /* 下マージン */
+}
+
+/* 各バッジアイテムのスタイル */
+.badge-dex-item {
+  width: 60px; /* 丸い枠の幅 */
+  height: 60px; /* 丸い枠の高さ */
+  border: 3px solid gold; /* 金色の枠線 */
+  border-radius: 50%; /* 完全な円にする */
+  background-color: #f0f0f0; /* 取得済みバッジの背景色 (任意) */
+  display: flex; /* 中の画像を中央揃えにするため */
+  align-items: center;
+  justify-content: center;
+  cursor: pointer; /* クリック可能を示す */
+  overflow: hidden; /* 画像がはみ出ないように */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* ホバーエフェクト用 */
+  position: relative; /* 未取得時のスタイル調整用 */
+}
+
+/* バッジアイテム内の画像スタイル */
+.badge-dex-item img {
+  max-width: 85%; /* さらに大きく */
+  max-height: 85%;
+  object-fit: contain; /* アスペクト比を保って収める */
+  display: block; /* 画像下の余分なスペースを防ぐ */
+  transition: opacity 0.3s ease, filter 0.3s ease; /* 未取得時のエフェクト用 */
+}
+
+/* ホバー時のエフェクト (任意) */
+.badge-dex-item:hover {
+  transform: scale(1.05); /* 少し拡大 */
+  box-shadow: 0 0 10px gold; /* 金色の影 */
+}
+
+/* --- 未取得バッジ (.not-owned) のスタイル --- */
+.badge-dex-item.not-owned {
+  border-color: #cccccc; /* 枠の色をグレーに */
+  background-color: #f9f9f9; /* 背景色を少し変える */
+}
+
+.badge-dex-item.not-owned img {
+  opacity: 0.4; /* 画像を半透明に */
+  filter: grayscale(80%); /* 画像をグレースケールに */
+}
+
+/* 未取得バッジのホバーエフェクトを無効化 (任意) */
+.badge-dex-item.not-owned:hover {
+  transform: none;
+  box-shadow: none;
+}
+/* ▲▲▲ バッジ図鑑グリッドここまで ▲▲▲ */
+
+
+/* バッジ詳細表示 */
+.badge-dex-detail {
+    position: sticky; /* スクロールしても追従 */
+    bottom: 20px; /* 下からの位置 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: rgba(10, 10, 15, 0.95);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--border-radius-large);
+    padding: calc(var(--spacing-unit) * 2);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(5px); /* 背景をぼかす (対応ブラウザのみ) */
+}
+
+.badge-dex-detail-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.badge-dex-detail img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: var(--spacing-unit);
+}
+
+.badge-dex-detail h3 {
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    color: var(--color-primary-light);
+}
+
+.badge-dex-detail p {
+    margin: calc(var(--spacing-unit) * 0.5) 0;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+.badge-dex-detail #badge-dex-detail-desc {
+    color: var(--color-text-primary); /* 説明は通常色 */
+}
+.badge-dex-detail #badge-dex-detail-condition,
+.badge-dex-detail #badge-dex-detail-rate,
+.badge-dex-detail #badge-dex-detail-price {
+    font-weight: bold;
+}
+.badge-dex-detail #badge-dex-detail-rate {
+    color: var(--color-warning, #ffcc00); /* フォールバック色 */
+}
+.badge-dex-detail #badge-dex-detail-price {
+    color: var(--color-accent, var(--color-primary)); /* フォールバック色 */
+}
+
+.badge-dex-detail .owned-status {
+    margin-top: var(--spacing-unit);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+.badge-dex-detail .owned-status.owned {
+    color: var(--color-success, #4CAF50); /* フォールバック色 */
+}
+.badge-dex-detail .owned-status.not-owned {
+    color: var(--color-danger, #F44336); /* フォールバック色 */
+}
+
+
+/* --- 表示バッジ編集モーダル --- */
+.edit-badges-modal-content {
+    max-width: 700px; /* モーダルの幅を広げる */
+    background: linear-gradient(160deg, var(--color-surface-dark, #111), var(--color-background)); /* 背景グラデーション */
+    border: 1px solid var(--color-primary-dark);
+}
+
+.edit-badges-container {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.display-slots-container,
+.owned-badges-container {
+    flex: 1;
+}
+
+.display-slots-container h3,
+.owned-badges-container h3 {
+    text-align: center;
+    margin-bottom: var(--spacing-unit);
+    color: var(--color-primary-light);
+}
+
+.display-slots {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-unit);
+    padding: var(--spacing-unit);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-medium);
+    min-height: 80px; /* スロットの高さを確保 */
+}
+
+.display-slots .badge-slot {
+    width: 70px; /* スロットサイズ調整 */
+    height: 70px;
+    border: 2px dashed var(--color-border-light); /* 点線で枠を示す */
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer; /* クリックで削除できるように */
+    position: relative; /* バツ印用 */
+    opacity: 1 !important; /* 常に不透明 */
+    transition: background-color 0.2s ease, border-color 0.2s ease; /* スムーズな変化 */
+}
+.display-slots .badge-slot.filled {
+    border-style: solid; /* バッジが入ったら実線 */
+    border-color: var(--color-primary);
+}
+.display-slots .badge-slot:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.display-slots .badge-slot img {
+    width: 90%; /* さらに大きく */
+    height: 90%;
+}
+
+/* スロットからバッジを削除するボタン (任意) */
+.display-slots .remove-badge-from-slot {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--color-danger, #F44336);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    display: none; /* JSで表示制御 */
+    transition: background-color 0.2s ease;
+}
+.display-slots .badge-slot.filled:hover .remove-badge-from-slot {
+    display: block;
+}
+.display-slots .remove-badge-from-slot:hover {
+    background: #d32f2f; /* ホバー時少し暗く */
+}
+
+
+.owned-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); /* 小さめのグリッド */
+    gap: var(--spacing-unit);
+    max-height: 300px; /* 高さを制限してスクロール */
+    overflow-y: auto;
+    padding: var(--spacing-unit);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--border-radius-medium);
+}
+
+.owned-badges-grid .badge-item {
+    aspect-ratio: 1 / 1;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: var(--border-radius-small);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.owned-badges-grid .badge-item.selected {
+    opacity: 0.4; /* 選択済みは半透明に */
+    cursor: not-allowed;
+}
+
+.owned-badges-grid .badge-item img {
+    max-width: 90%; /* さらに大きく */
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.owned-badges-grid .badge-item:not(.selected):hover {
+    transform: scale(1.1);
+    border-color: var(--color-primary);
+    background-color: rgba(var(--color-primary-rgb, 255, 215, 0), 0.1);
+}
+
+
+/* ==========================
+   mypage.html レスポンシブ
+   ========================== */
+
+/* --- 中間サイズ --- */
+@media (max-width: 992px) {
+    .mypage-content-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+    .mypage-user-info,
+    .mypage-charts {
+        flex: none;
+        width: 100%;
+        max-width: 700px;
+    }
+    .mypage-charts {
+        margin-top: calc(var(--spacing-unit) * 4); /* 少し詰める */
+    }
+}
+
+/* --- 小さめサイズ --- */
+@media (max-width: 768px) {
+    .mypage-user-info .profile-main-info-mypage { flex-direction: column; gap: calc(var(--spacing-unit) * 2); }
+    .mypage-user-info .profile-name-details-mypage { align-items: center; text-align: center; margin-bottom: var(--spacing-unit); }
+    .mypage-user-info .profile-stats { justify-content: space-evenly; }
+    .mypage-user-info .profile-stats .stat-item { text-align: center; }
+    .mypage-user-info .profile-badges { justify-content: center; gap: calc(var(--spacing-unit) * 2.5); }
+    /* バッジサイズは共通CSSで調整済み */
+    .mypage-user-info .profile-extra-info { text-align: center; }
+    .mypage-user-info .profile-extra-info label { text-align: left; }
+
+    /* グラフ */
+    .mypage-charts .chart-wrapper { height: 280px; } /* 少し低く */
+    .charts-row-within { /* 縦積み */ }
+    .chart-wrapper-half { flex-basis: 100%; max-width: 280px; min-height: 180px; } /* 最小高さ調整 */
+    .mypage-charts .chart-container h3 { font-size: 1rem; margin-bottom: 15px; padding-bottom: calc(var(--spacing-unit)*0.8);}
+    .chart-wrapper-half h4 { font-size: 0.9rem; margin-bottom: var(--spacing-unit); }
+
+    /* バッジ図鑑 */
+    .mypage-badge-dex { margin-top: calc(var(--spacing-unit) * 2.5); padding: var(--spacing-unit); }
+    #badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 10px; } /* スマホではさらに小さく */
+    .badge-dex-item { width: 55px; height: 55px; border-width: 2px; } /* サイズと枠線調整 */
+    .badge-dex-detail { max-width: 95%; padding: var(--spacing-unit); }
+    .badge-dex-detail img { width: 60px; height: 60px; }
+
+    /* 編集モーダル */
+    .edit-badges-container { flex-direction: column; }
+    .owned-badges-grid { max-height: 180px; }
+}
+
+/* --- さらに小さいサイズ --- */
+@media (max-width: 480px) {
+    .mypage-user-info .profile-card { padding: var(--spacing-unit); }
+    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 80px; height: 80px; }
+    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.6rem; }
+    .mypage-user-info .profile-stats .stat-value { font-size: 1.3rem; }
+    .mypage-user-info .profile-stats .stat-label { font-size: 0.75rem;}
+    /* バッジサイズは共通CSSで調整済み */
+
+    /* グラフ */
+    .mypage-charts .chart-wrapper { height: 220px; }
+    .chart-wrapper-half { min-height: 160px; } /* さらに小さく */
+    .chart-wrapper-half canvas { max-height: 150px; }
+
+    /* バッジ図鑑 */
+    #badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: calc(var(--spacing-unit)*0.8); }
+    .badge-dex-item { width: 45px; height: 45px; }
+}
+/* mypage.css */
+
+/* --- バッジ図鑑 --- */
+/* (他のスタイルはそのまま) */
+
+/* ▼▼▼ バッジ図鑑グリッド (横7列固定) ▼▼▼ */
+#badge-dex-grid {
+    display: grid;
+    /* grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); */ /* ← この行をコメントアウトまたは削除 */
+    grid-template-columns: repeat(7, 1fr); /* ★ 7つの均等な列を作成 */
+    gap: 15px; /* アイテム間の隙間 */
+    padding: 15px 0; /* 上下の余白 */
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 下マージン */
+    /* overflow-x: auto; は不要 */
+    /* padding-bottom: 20px; は不要 */
+  }
+  
+  /* 各バッジアイテムのスタイル */
+  .badge-dex-item {
+    /* width/height は grid が自動調整するので削除しても良いが、 */
+    /* aspect-ratio を使う方が確実 */
+    /* width: 60px; */
+    /* height: 60px; */
+    aspect-ratio: 1 / 1; /* 正方形を維持 */
+    /* flex-shrink: 0; は不要 */
+    border: 3px solid gold;
+    border-radius: var(--border-radius-medium); /* 円形から角丸四角形へ変更 */
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+  
+  /* (他のスタイルはそのまま) */
+  /* .badge-dex-item img { ... } */
+  /* .badge-dex-item:hover { ... } */
+  /* .badge-dex-item.not-owned { ... } */
+  /* .badge-dex-item.not-owned img { ... } */
+  /* .badge-dex-item.not-owned:hover { ... } */
+  /* スクロールバーのスタイルは不要 */
+  
+  /* ▲▲▲ バッジ図鑑グリッドここまで ▲▲▲ */
+  
+  /* (他のスタイルはそのまま) */
+  

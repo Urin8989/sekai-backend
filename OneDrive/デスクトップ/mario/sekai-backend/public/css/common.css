@@ -1,0 +1,869 @@
+/* ==========================
+   変数定義 (Custom Properties)
+   ========================== */
+   :root {
+    /* Colors */
+    --color-background: #000000;
+    --color-surface: #1a1a1a; /* 基本的な要素の背景 */
+    --color-surface-lighter: rgba(36, 36, 36, 0.8); /* 少し明るい表面色 */
+    --color-surface-alpha: rgba(26, 26, 26, 0.7); /* 半透明の表面色 (カード背景など) */
+    --color-surface-darker-alpha: rgba(0, 0, 0, 0.2); /* 暗い半透明 (統計背景など) */
+    --color-primary: #FFD700; /* アクセントカラー (金) */
+    --color-primary-light: #ffee99;
+    --color-primary-dark: #cca300;
+    --color-text-primary: #e8e8e8; /* 主要テキスト */
+    --color-text-secondary: #b3b3b3; /* 補助テキスト */
+    --color-text-on-primary: #111111; /* プライマリ色上のテキスト */
+    --color-border: #282828; /* 標準の境界線 */
+    --color-border-light: #444; /* 明るい境界線 (破線など) */
+    --color-disabled: #555; /* 無効状態の背景 */
+    --color-cancel: #ff6b6b; /* キャンセルボタン */
+    --color-heading: var(--color-text-primary); /* 見出し色 (mypage, shop で使用) */
+    --color-background-light: var(--color-surface); /* shop, mypage で使用 */
+    --color-background-medium: #333; /* shop, mypage で使用 */
+    --color-background-dark: #222; /* shop, mypage で使用 */
+
+    /* Background Image */
+    --background-image-url: url('../images/first.jpg'); /* ★パス変更 */
+
+    /* Fonts */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-family-title: 'Cinzel', serif; /* タイトル用フォント */
+    --font-family-mono: monospace; /* 等幅フォント (レート表示など) */
+
+    /* Layout & Spacing */
+    --container-max-width: 1200px;
+    --spacing-unit: 8px;
+    --border-radius-large: 12px; /* カードなどの角丸 */
+    --border-radius-medium: 6px; /* ボタン、統計などの角丸 */
+    --border-radius-small: 4px; /* 入力欄などの角丸 */
+
+    /* Shadows */
+    --shadow-light: 0 4px 10px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.5);
+    --shadow-heavy: 0 8px 18px rgba(0, 0, 0, 0.5);
+    --shadow-large: 0 10px 25px rgba(0, 0, 0, 0.6); /* shop で使用 */
+    --shadow-primary-glow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+/* ==========================
+   基本スタイル (Reset & Base)
+   ========================== */
+body {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.75)), url('../images/first.jpg'); /* ★パス変更 */
+    background-color: var(--color-background);
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-base);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-heading); /* 共通の見出し色を使用 */
+    font-weight: 600;
+    margin-top: calc(var(--spacing-unit) * 3);
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+p {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+a:hover {
+    color: var(--color-primary-dark);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ==========================
+   レイアウト (Layout)
+   ========================== */
+.container {
+    max-width: var(--container-max-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: calc(var(--spacing-unit) * 3);
+    padding-right: calc(var(--spacing-unit) * 3);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+main {
+    flex-grow: 1;
+    padding-top: calc(var(--spacing-unit) * 2);
+    padding-bottom: calc(var(--spacing-unit) * 6);
+}
+
+/* ==========================
+   ヘッダー (Header)
+   ========================== */
+header {
+    background: linear-gradient(180deg, rgba(30, 30, 30, 0.95) 0%, rgba(15, 15, 15, 0.98) 100%);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+    padding: 0; /* header-container でパディングを管理 */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 要素間のスペースを均等に */
+    padding: 10px 20px; /* ヘッダー内のパディング */
+    position: relative; /* タイトル中央配置のため */
+    max-width: var(--container-max-width); /* containerに合わせる */
+    margin: 0 auto; /* 中央揃え */
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* ヘッダーホームボタン */
+.header-icon-link {
+    /* order: 1; は不要 (flexの順序で制御) */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--spacing-unit) * 1.25);
+    color: var(--color-primary);
+    background-color: transparent;
+    border: 2px solid var(--color-primary);
+    text-decoration: none;
+    border-radius: var(--border-radius-medium);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.1s ease;
+    z-index: 10;
+    line-height: 1;
+    flex-shrink: 0; /* 縮まないように */
+}
+
+.header-icon-link svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+    fill: currentColor;
+}
+
+.header-icon-link:hover {
+    color: var(--color-background);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.header-icon-link:active {
+    transform: scale(0.97);
+}
+
+/* サイトタイトル (中央配置) */
+.site-title-header {
+    /* order: 2; は不要 */
+    flex-grow: 1; /* 中央のスペースを埋める */
+    text-align: center;
+    margin: 0 15px; /* 左右の要素との間にマージン */
+    min-width: 0; /* flexアイテムが縮小できるように */
+}
+.site-title-header a {
+    text-decoration: none;
+    display: inline-block;
+}
+.site-title-header span {
+    font-family: var(--font-family-title);
+    font-size: 2.2rem; /* 共通サイズ */
+    font-weight: 700;
+    color: var(--color-primary);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+    letter-spacing: 2px;
+    padding: 0;
+    margin: 0;
+    transition: color 0.3s ease;
+    /* white-space: nowrap; */ /* タイトルが折り返さないように ← スマホで重なるのを防ぐため、折り返しを許可 */
+    /* 折り返しを許可する場合、text-overflow: ellipsis; は期待通りに機能しないことがあります。 */
+    /* 必要であれば、代わりに高さを制限して複数行の末尾を省略するなどのテクニックを検討できますが、まずは折り返しを許可します。 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* はみ出した場合に省略記号 */
+}
+.site-title-header a:hover span {
+    color: var(--color-primary-light);
+}
+
+/* 認証セクション (右配置) */
+.auth-section {
+    /* order: 3; は不要 */
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+    flex-shrink: 0; /* 縮まないように */
+}
+#user-info {
+    color: var(--color-text-primary);
+    display: flex; /* JSで制御する場合あり */
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+#header-user-name {
+    display: none; /* 必要ならJSで表示 */
+}
+/* Googleログインボタン装飾 */
+#g_id_signin {
+    border-radius: var(--border-radius-medium);
+    padding: 2px;
+    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary-dark));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 0.3s ease;
+    display: inline-block;
+}
+#g_id_signin:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+#g_id_signin > div {
+   margin: 0 !important;
+}
+
+/* ナビゲーションメニューコンテナ */
+.nav-menu-container {
+    position: relative;
+    z-index: 1050;
+    flex-shrink: 0; /* 縮まないように */
+    margin-left: var(--spacing-unit); /* 左の要素との間にスペース */
+}
+
+/* ナビゲーションメニュートグルボタン */
+.nav-menu-button {
+    background: linear-gradient(145deg, #2a2a2a, #111111);
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 215, 0, 0.2);
+    transition: all 0.2s ease;
+    color: var(--color-primary);
+}
+
+.nav-menu-button svg {
+    fill: currentColor;
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+
+.nav-menu-button:hover {
+    background: linear-gradient(145deg, #3a3a3a, #222222);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 215, 0, 0.3);
+    transform: translateY(-2px);
+    color: var(--color-primary-light);
+    border-color: var(--color-primary-light);
+}
+
+.nav-menu-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* メインナビゲーションメニュー (ドロップダウン) */
+.main-navigation {
+    position: absolute;
+    top: calc(100% + 10px);
+    /* right: 0; を削除し、left: 0; に変更 */
+    left: 0; /* ボタンの左端に合わせる */
+    background-color: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+    padding: 10px 0;
+    min-width: 230px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top left; /* 左上を基点に */
+    transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* メニューが表示されたときのスタイル */
+.main-navigation[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.main-navigation ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-navigation li a {
+    display: block;
+    padding: 12px 30px;
+    color: rgba(255, 255, 255, 0.95);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    position: relative;
+    overflow: visible;
+}
+
+/* 区切り線 */
+.main-navigation li:not(:last-child) a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 25px;
+    right: 25px;
+    height: 0.5px;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* ホバー/アクティブ時の背景 */
+.main-navigation li a:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+.main-navigation li a:active {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* ==========================
+   フッター (Footer)
+   ========================== */
+footer {
+    background-color: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: calc(var(--spacing-unit) * 3) 0;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    margin-top: auto;
+}
+
+/* ==========================
+   共通コンポーネント (Common Components)
+   ========================== */
+
+/* --- ボタン (Buttons) --- */
+.button {
+    display: inline-block;
+    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+    border: none;
+    border-radius: var(--border-radius-medium);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+}
+.button:active {
+    transform: scale(0.97);
+}
+.button:disabled {
+    background: var(--color-disabled) !important;
+    color: var(--color-text-secondary) !important;
+    border-color: var(--color-disabled) !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    opacity: 0.8; /* shop.css から移動 */
+}
+
+.button-primary {
+    background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+    color: var(--color-text-on-primary);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.button-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-background);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.button-secondary {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-text-secondary);
+}
+.button-secondary:hover:not(:disabled) {
+    background-color: var(--color-text-secondary);
+    color: var(--color-background);
+    border-color: var(--color-text-secondary);
+}
+
+.button-cancel {
+    background-color: transparent;
+    color: var(--color-cancel);
+    border: 2px solid var(--color-cancel);
+}
+.button-cancel:hover:not(:disabled) {
+    background-color: var(--color-cancel);
+    color: var(--color-background);
+    border-color: var(--color-cancel);
+}
+
+#logout-button {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 2.5);
+    /* .button の基本スタイルを継承 */
+}
+#logout-button:hover {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+}
+
+/* --- フォーム要素 (Forms) --- */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+    padding: calc(var(--spacing-unit) * 1.5);
+    border-radius: var(--border-radius-small);
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-unit);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+textarea {
+    resize: vertical;
+    min-height: calc(var(--spacing-unit) * 10);
+}
+
+/* --- プロフィール統計 (Profile Stats - 共通部分) --- */
+.profile-stats {
+    display: flex;
+    justify-content: space-around; /* 基本は均等配置 */
+    background-color: var(--color-surface-darker-alpha);
+    border-radius: var(--border-radius-medium);
+    padding: calc(var(--spacing-unit) * 1.5);
+    gap: var(--spacing-unit);
+    width: 100%;
+    box-sizing: border-box;
+}
+.profile-stats:empty {
+    display: none;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1; /* 基本は均等幅 */
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.4rem; /* 基本サイズ */
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-mono);
+    line-height: 1.2;
+}
+/* レートの基本色 */
+.profile-stats #profile-rate,
+.profile-stats #my-profile-rate,
+.profile-stats #opponent-profile-rate {
+    color: var(--color-primary);
+}
+
+/* --- バッジ (Badges - 共通部分) --- */
+.profile-badges {
+    display: flex;
+    justify-content: center;
+    gap: calc(var(--spacing-unit) * 2);
+    flex-wrap: wrap;
+}
+
+.badge-slot {
+    width: 70px; /* 基本サイズ */
+    height: 70px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-medium); /* 円形から角丸四角形へ変更 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; /* border-color追加 */
+    flex-shrink: 0;
+    position: relative;
+}
+.badge-slot:hover {
+    transform: scale(1.1);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7), 0 0 15px var(--color-primary-dark);
+    border-color: var(--color-primary); /* ホバー時に枠線変更 */
+}
+.badge-slot img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    display: block;
+}
+.badge-slot span { /* テキストは非表示 */
+   display: none;
+}
+/* バッジ固有の背景色など (必要なら追加) */
+.badge-icon-badge-gold { background-color: #b8860b; }
+.badge-icon-badge-streak-5 { background-color: #cd5c5c; }
+.badge-icon-badge-top10 { background-color: #4682b4; }
+
+/* --- プロフィール詳細 (Profile Detail - 共通部分) --- */
+.profile-detail {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    padding: 0 calc(var(--spacing-unit) * 1);
+    font-size: 0.95em;
+}
+
+.profile-detail .detail-label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.85em;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.profile-detail .detail-value,
+.profile-detail .detail-comment {
+    color: var(--color-text-primary);
+    word-break: break-word;
+}
+
+.profile-detail .detail-comment {
+    display: block;
+    margin-top: calc(var(--spacing-unit) * 0.5);
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5);
+    background-color: var(--color-surface-darker-alpha);
+    border-radius: var(--border-radius-small);
+    font-size: 0.9em;
+    line-height: 1.5;
+    min-height: calc(var(--spacing-unit) * 5);
+    border-left: 3px solid var(--color-primary);
+}
+
+/* --- ページタイトル (Page Title with Icon - 共通部分) --- */
+.page-title-icon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center; /* 基本は中央揃え */
+    margin-top: calc(var(--spacing-unit) * 1);
+    margin-bottom: calc(var(--spacing-unit) * 4);
+    gap: calc(var(--spacing-unit) * 2);
+}
+.page-title-icon img {
+    width: 60px; /* 基本サイズ */
+    height: 60px;
+    border-radius: 20%; /* 基本形状 */
+    background-color: var(--color-surface);
+    padding: var(--spacing-unit);
+    box-shadow: var(--shadow-light);
+    border: 2px solid var(--color-primary-dark);
+    object-fit: contain; /* 基本フィット */
+}
+.page-title-icon h1 {
+    font-size: 2.2rem; /* 基本サイズ */
+    color: var(--color-text-primary);
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    font-family: var(--font-family-title);
+    /* 既存のh1スタイルを上書き */
+    border-bottom: none;
+    padding-bottom: 0;
+    display: block;
+    margin-top: 0;
+}
+
+/* --- カードコンポーネント (Card Component - 基本) --- */
+.profile-card {
+    background-color: var(--color-surface-alpha);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    padding: calc(var(--spacing-unit) * 3);
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* ==========================
+   モーダル (Modal) スタイル
+   ========================== */
+.modal {
+    display: none; /* JSで flex に変更して表示 */
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--color-surface);
+    margin: auto;
+    padding: calc(var(--spacing-unit) * 4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow-heavy);
+    text-align: center;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 結果表示モーダル固有スタイル (match.css に移動しても良いかも) */
+.result-card h2 {
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    font-family: var(--font-family-title);
+    font-size: 2em;
+}
+.result-card #result-details {
+    margin-bottom: calc(var(--spacing-unit) * 4);
+    font-size: 1.1em;
+    line-height: 1.8;
+}
+.result-card #result-details p {
+    margin-bottom: var(--spacing-unit);
+}
+.result-card #result-details span {
+    font-weight: bold;
+    font-family: var(--font-family-mono);
+}
+.result-card #result-my-rate-after {
+    font-size: 1.2em;
+    color: var(--color-primary);
+}
+.result-card #result-rate-change {
+    font-size: 1.1em;
+    margin-left: var(--spacing-unit);
+}
+.result-card #close-result-modal {
+    margin-top: var(--spacing-unit);
+}
+
+/* --- ローディングインジケーター (共通) --- */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    color: var(--color-text-secondary);
+    /* grid-column は shop.css など個別で指定 */
+    min-height: 200px;
+}
+
+.spinner {
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-left-color: var(--color-primary);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ==========================
+   レスポンシブデザイン (共通部分)
+   ========================== */
+
+/* --- 中間サイズ (タブレットなど) --- */
+@media (max-width: 992px) {
+    .header-container {
+        padding-left: calc(var(--spacing-unit) * 2);
+        padding-right: calc(var(--spacing-unit) * 2);
+    }
+    .site-title-header span { font-size: 1.6rem; } /* 共通で調整 */
+}
+
+/* --- 小さめサイズ (スマホなど) --- */
+@media (max-width: 768px) {
+    :root {
+        --spacing-unit: 7px; /* スマートフォンでの基本スペーシングを少し詰める */
+    }
+    body { font-size: 15px; }
+    h1 { font-size: 1.8rem; } /* 見出しを少し小さく */
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
+
+    /* Header */
+    .header-container {
+        padding: 10px 15px; /* パディング縮小 */
+        flex-wrap: nowrap; /* 折り返さない */
+    }
+    /* ホームボタンとナビボタンはそのまま左 */
+    .site-title-header {
+        /* 中央配置を維持しつつ、左右のマージンを調整 */
+        margin: 0 10px;
+        /* 絶対配置ではなくflexレイアウト内で中央を維持 */
+        /* position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); を削除 */
+    }
+    .site-title-header span { font-size: 1.5rem; }
+    /* 認証セクションはそのまま右 */
+    .auth-section {
+        gap: calc(var(--spacing-unit) * 0.5); /* 少し詰める */
+    }
+    #g_id_signin { /* Googleボタンが大きすぎる場合 */
+        transform: scale(0.9);
+        transform-origin: right center;
+    }
+
+    /* ドロップダウンメニュー */
+    .main-navigation {
+        min-width: 180px;
+        border-radius: 12px;
+    }
+    .main-navigation li a {
+        padding: 10px 25px;
+        font-size: 0.95rem;
+    }
+    .container {
+        padding-left: calc(var(--spacing-unit) * 2); /* 992pxからこちらへ移動 */
+        padding-right: calc(var(--spacing-unit) * 2);
+    }
+
+    /* Page Title */
+    .page-title-icon h1 { font-size: 1.6rem; } /* さらに調整 */
+    .page-title-icon img { width: 50px; height: 50px; }
+
+    /* Badges */
+    .badge-slot { width: 60px; height: 60px; } /* 少し小さく */
+}
+
+/* --- さらに小さいサイズ --- */
+@media (max-width: 480px) {
+    :root {
+        --spacing-unit: 6px; /* さらに詰める */
+    }
+    body { font-size: 14px; }
+
+    /* Header */
+    .header-container { padding: 8px 10px; }
+    .header-icon-link { padding: 6px; }
+    .header-icon-link svg { width: 20px; height: 20px; }
+    .nav-menu-button { padding: 6px 8px; }
+    .nav-menu-button svg { width: 22px; height: 22px; }
+    .site-title-header { margin: 0 5px; }
+    .site-title-header span { font-size: 1.2rem; letter-spacing: 1px; } /* タイトルをさらに調整 */
+    .auth-section { gap: calc(var(--spacing-unit) * 0.25); }
+    #g_id_signin { transform: scale(0.8); }
+    #logout-button { padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5); font-size: 0.9rem; }
+
+    .container {
+        padding-left: var(--spacing-unit); /* 共通コンテナのパディングも詰める */
+        padding-right: var(--spacing-unit);
+    }
+
+    /* Page Title */
+    .page-title-icon { gap: calc(var(--spacing-unit) * 1.5); margin-top: calc(var(--spacing-unit) * 2); }
+    .page-title-icon img { width: 40px; height: 40px; }
+    .page-title-icon h1 { font-size: 1.4rem; }
+
+    /* Badges */
+    .badge-slot { width: 45px; height: 45px; gap: var(--spacing-unit); } /* バッジとスロットをさらに小さく */
+}
+/* ▼▼▼ 動物バッジ全般と関連モーダルに適用 ▼▼▼ */
+.badge-slot img[src*="animal-"],
+.badge-slot img[src*="wolf.jpg"],
+.badge-dex-item img[src*="animal-"],
+.badge-dex-item img[src*="wolf.jpg"],
+.shop-item-badge-display img[src*="animal-"], /* ショップリスト */
+.shop-item-badge-display img[src*="wolf.jpg"],
+/* --- モーダル内の動物バッジ画像 --- */
+#badge-dex-detail-img[src*="animal-"], /* マイページ図鑑詳細 */
+#badge-dex-detail-img[src*="wolf.jpg"],
+.shop-item-modal-badge-display img[src*="animal-"], /* ショップ購入確認 */
+.shop-item-modal-badge-display img[src*="wolf.jpg"],
+#gacha-result-badge-img[src*="animal-"], /* ガチャ結果 */
+#gacha-result-badge-img[src*="wolf.jpg"],
+.display-slot img[src*="animal-"], /* 表示バッジ編集スロット */
+.display-slot img[src*="wolf.jpg"],
+.badge-item img[src*="animal-"], /* 表示バッジ編集所有リスト */
+.badge-item img[src*="wolf.jpg"]
+{
+    /* 画像の角を少し丸める */
+    border-radius: 20% !important;
+
+    /* 画像に少し内側の影と枠線を追加して立体感を出す */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    /* 必要に応じて画像のサイズを少し小さくして、背景の枠を見せる */
+    /* width: 75%; */
+    /* height: 75%; */
+
+    /* 色調を少し調整してイラスト風に近づける (任意) */
+    /* filter: contrast(110%) saturate(120%); */
+}
+/* ▲▲▲ 動物バッジ全般ここまで ▲▲▲ */
+
+/* バッジ図鑑で未取得の場合のスタイル調整 (任意) */
+/* .badge-dex-item.not-owned img[src*="badge-animal-"],
+   .badge-dex-item.not-owned img[src*="wolf.jpg"] { */
+    /* filter: grayscale(90%) contrast(80%) brightness(0.9); */ /* より暗く、コントラスト低めに */
+    /* border-color: #999; */
+/* } */

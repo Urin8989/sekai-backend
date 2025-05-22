@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ▼▼▼ タイトルを修正 ▼▼▼ -->
+    <title>ホーム - Mario Kart Best Rivals</title>
+    <!-- ▲▲▲ タイトルを修正 ▲▲▲ -->
+    <!-- 共通スタイル -->
+    <link rel="stylesheet" href="css/common.css">
+    <!-- ▼▼▼ index.html 固有スタイル ▼▼▼ -->
+    <link rel="stylesheet" href="css/index.css">
+    <!-- ▲▲▲ index.html 固有スタイル ▲▲▲ -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+    <!-- Google Identity Services Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <!-- ▼▼▼ ナビゲーションメニュー ▼▼▼ -->
+            <div class="nav-menu-container">
+                <button id="nav-menu-toggle" class="nav-menu-button" aria-label="ナビゲーションメニューを開く" aria-expanded="false" aria-controls="main-navigation-menu" title="メニュー">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+                <nav id="main-navigation-menu" class="main-navigation" aria-hidden="true">
+                    <ul>
+                        <li><a href="index.html">ホーム</a></li>
+                        <li><a href="mypage.html">マイページ</a></li>
+                        <li><a href="match.html">対戦</a></li>
+                        <li><a href="ranking.html">ランキング</a></li>
+                        <li><a href="shop.html">ショップ</a></li>
+                        <li><a href="community.html">コミュニティ</a></li>
+                        <li><a href="rules.html">ルール</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <!-- ▲▲▲ ナビゲーションメニュー ▲▲▲ -->
+
+            <!-- サイトタイトル -->
+            <div class="site-title-header">
+                <a href="index.html"><span>Mario Kart Best Rivals</span></a>
+            </div>
+
+            <!-- 認証セクション -->
+            <div class="auth-section">
+                <div id="g_id_signin"></div>
+                <div id="user-info" style="display: none;">
+                    <span id="header-user-name"></span>
+                    <button id="logout-button" class="button">ログアウト</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- メインコンテンツレイアウト -->
+            <div class="main-content-layout">
+
+                <!-- 左側: アイコンナビゲーション -->
+                <section class="icon-navigation">
+                    <div class="welcome-intro">
+                        <h2 class="welcome-intro-title">MKBR</h2>
+                        <p class="welcome-intro-description">
+                            ここは、最高のライバルを見つけ、レート戦で競い合い、<br>
+                            共に成長するためのマリオカートプレイヤーコミュニティです。<br>
+                        </p>
+                    </div>
+                    <div class="logged-in-icon-header" style="display: none;">
+                        <p>好きなメニューを選んでください</p> <!-- 表示したいテキスト -->
+                    </div>
+                    <div class="icon-grid">
+                        <a href="mypage.html" class="icon-link">
+                            <img src="images/mypage.jpg" alt="マイページアイコン">
+                            <span>マイページ</span>
+                        </a>
+                        <a href="match.html" class="icon-link">
+                            <img src="images/battle.jpg" alt="対戦アイコン">
+                            <span>対戦</span>
+                        </a>
+                        <a href="ranking.html" class="icon-link">
+                            <img src="images/rank.jpg" alt="ランキングアイコン">
+                            <span>ランキング</span>
+                        </a>
+                        <a href="rules.html" class="icon-link"> <!-- rules.html は仮 -->
+                            <img src="images/rules.jpg" alt="ルールアイコン">
+                            <span>ルール</span>
+                        </a>
+                        <a href="shop.html" class="icon-link"> <!-- news.html は仮 -->
+                            <img src="images/shop.jpg" alt="ショップアイコン">
+                            <span>ショップ</span>
+                        </a>
+                        <a href="community.html" class="icon-link">
+                            <img src="images/community.jpg" alt="コミュニティアイコン">
+                            <span>コミュニティ</span>
+                        </a>
+                        <!-- 他のメニューアイコンを追加可能 -->
+                    </div>
+                </section>
+                <!-- 右側: ログインユーザープロフィール (ログイン時のみ表示) -->
+                <section id="user-profile-section" style="display: none;">
+                    <img id="profile-pic" src="images/placeholder-avatar.png" alt="プロフィール画像">
+                    <div class="profile-details">
+                        <h2 id="profile-name">プレイヤー名</h2>
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">レート</span>
+                                <span id="profile-rate" class="stat-value">----</span>
+                            </div>
+                            <!-- ▼▼▼ 連勝数からポイントに変更 ▼▼▼ -->
+                            <div class="stat-item">
+                                <span class="stat-label">ポイント</span> <!-- ラベル変更 -->
+                                <span id="profile-points" class="stat-value">---- P</span> <!-- IDと初期値変更 -->
+                            </div>
+                            <!-- ▲▲▲ 変更ここまで ▲▲▲ -->
+                        </div>
+                        <div class="profile-badges">
+                            <div class="badge-slot"><span></span></div>
+                            <div class="badge-slot"><span></span></div>
+                            <div class="badge-slot"><span></span></div>
+                        </div>
+                    </div>
+                </section>
+
+            </div> <!-- /.main-content-layout -->
+        </div> <!-- /.container -->
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2024 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <nav class="footer-nav">
+                <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <!-- ▼▼▼ index.html 固有のスクリプト読み込みを追加 ▼▼▼ -->
+    <script src="js/index.js"></script>
+</body>
+</html>

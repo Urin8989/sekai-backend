@@ -1,0 +1,82 @@
+<!-- badge-gem-diamond-max-flash.svg -->
+<svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- ダイヤモンド風グラデーション (ブリリアント) -->
+    <radialGradient id="diamondGradMax" cx="50%" cy="50%" r="60%" fx="55%" fy="40%">
+      <stop offset="0%" style="stop-color:#FFFFFF; stop-opacity:1" />   <!-- Pure White Highlight -->
+      <stop offset="30%" style="stop-color:#E0FFFF; stop-opacity:0.9" /> <!-- Light Cyan -->
+      <stop offset="60%" style="stop-color:#ADD8E6; stop-opacity:0.8" /> <!-- Light Blue -->
+      <stop offset="85%" style="stop-color:#B0C4DE; stop-opacity:0.9" /> <!-- Light Steel Blue -->
+      <stop offset="100%" style="stop-color:#778899; stop-opacity:1" />   <!-- Light Slate Gray (Edge) -->
+    </radialGradient>
+
+    <!-- 背景: スターバーストグラデーション -->
+    <radialGradient id="starburstGrad" cx="50%" cy="50%" r="55%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#F0F8FF; stop-opacity:1" />   <!-- AliceBlue center -->
+      <stop offset="50%" style="stop-color:#AFEEEE; stop-opacity:0.9" /> <!-- PaleTurquoise -->
+      <stop offset="80%" style="stop-color:#4682B4; stop-opacity:0.8" /> <!-- SteelBlue -->
+      <stop offset="100%" style="stop-color:#191970; stop-opacity:0.9" /> <!-- MidnightBlue edge -->
+    </radialGradient>
+
+    <!-- 豪華なプラチナ/銀枠グラデーション -->
+    <linearGradient id="platinumFrameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5F5; stop-opacity:1" /> <!-- WhiteSmoke -->
+      <stop offset="50%" style="stop-color:#DCDCDC; stop-opacity:1" /> <!-- Gainsboro -->
+      <stop offset="100%" style="stop-color:#A9A9A9; stop-opacity:1" /> <!-- DarkGray -->
+    </linearGradient>
+
+    <!-- 虹色グラデーション (プリズム効果用) -->
+    <linearGradient id="prismGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF00FF; stop-opacity:0.7" />   <!-- Magenta -->
+      <stop offset="20%" style="stop-color:#00FFFF; stop-opacity:0.7" />  <!-- Cyan -->
+      <stop offset="40%" style="stop-color:#FFFF00; stop-opacity:0.7" />  <!-- Yellow -->
+      <stop offset="60%" style="stop-color:#00FF00; stop-opacity:0.7" />  <!-- Lime -->
+      <stop offset="80%" style="stop-color:#FF4500; stop-opacity:0.7" />  <!-- OrangeRed -->
+      <stop offset="100%" style="stop-color:#FF00FF; stop-opacity:0.7" /> <!-- Magenta -->
+    </linearGradient>
+
+    <!-- 輝きフィルター -->
+    <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 外枠 (豪華なプラチナ枠) -->
+  <circle cx="50" cy="50" r="49" fill="none" stroke="url(#platinumFrameGrad)" stroke-width="5"/>
+  <!-- 内側の装飾線 -->
+  <circle cx="50" cy="50" r="45" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.8"/>
+  <circle cx="50" cy="50" r="43" fill="none" stroke="#B0E0E6" stroke-width="1" opacity="0.6"/> <!-- PowderBlue -->
+
+  <!-- ベースメダル (スターバースト背景) -->
+  <circle cx="50" cy="50" r="42" fill="url(#starburstGrad)" />
+
+  <!-- 背景の輝きエフェクト (多数の線) -->
+  <g stroke="white" stroke-width="0.5" opacity="0.5">
+    <line x1="50" y1="8" x2="50" y2="25" /> <line x1="50" y1="92" x2="50" y2="75" />
+    <line x1="8" y1="50" x2="25" y2="50" /> <line x1="92" y1="50" x2="75" y2="50" />
+    <line x1="20" y1="20" x2="35" y2="35" /> <line x1="80" y1="80" x2="65" y2="65" />
+    <line x1="20" y1="80" x2="35" y2="65" /> <line x1="80" y1="20" x2="65" y2="35" />
+  </g>
+
+  <!-- 中央のダイヤモンド (ブリリアントカット風 - 多角形) -->
+  <polygon points="50,20 75,35 80,50 75,65 50,80 25,65 20,50 25,35"
+           fill="url(#diamondGradMax)" stroke="#708090" stroke-width="1.5" filter="url(#glowFilter)"/> <!-- SlateGray stroke -->
+
+  <!-- ファセットの線 (ブリリアントカット風) -->
+  <path d="M50,20 L50,50 M75,35 L50,50 M80,50 L50,50 M75,65 L50,50 M50,80 L50,50 M25,65 L50,50 M20,50 L50,50 M25,35 L50,50"
+        stroke="url(#prismGrad)" stroke-width="1" opacity="0.8"/>
+
+  <!-- 多数の輝き (スパークル - 4点星 & 8点星) -->
+  <polygon points="80,20 82,15 84,20 89,22 84,24 82,29 80,24 75,22" fill="white" opacity="0.95"/>
+  <polygon points="20,80 22,75 24,80 29,82 24,84 22,89 20,84 15,82" fill="#E0FFFF" opacity="0.8"/>
+  <polygon points="30,30 31,28 32,30 34,31 32,32 31,34 30,32 28,31" fill="white" opacity="0.7"/>
+  <polygon points="70,70 71,68 72,70 74,71 72,72 71,74 70,72 68,71" fill="white" opacity="0.7"/>
+  <!-- 8点星 -->
+  <path d="M50 10 L 52 18 L 60 20 L 52 22 L 50 30 L 48 22 L 40 20 L 48 18 Z" fill="#F0FFFF" opacity="0.8"/>
+
+  <title>宝石バッジ - ダイヤモンド (最高級)</title>
+</svg>

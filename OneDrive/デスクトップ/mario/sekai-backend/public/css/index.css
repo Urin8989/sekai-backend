@@ -1,0 +1,413 @@
+/* ==========================
+   index.html 固有スタイル
+   ========================== */
+
+/* レイアウト */
+.main-content-layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: calc(var(--spacing-unit) * 5);
+    margin-bottom: calc(var(--spacing-unit) * 6);
+    margin-top: calc(var(--spacing-unit) * 4);
+}
+
+/* アイコンナビゲーション */
+.icon-navigation {
+    padding-top: 0;
+    padding-bottom: 0;
+    flex: 2;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.icon-grid-caption {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    font-style: italic;
+}
+.icon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: calc(var(--spacing-unit) * 5);
+}
+.icon-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+.icon-link img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+    border-radius: 20%;
+    background-color: var(--color-surface);
+    padding: calc(var(--spacing-unit) * 1.5);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    object-fit: contain;
+    border: 2px solid transparent;
+}
+.icon-link span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+.icon-link:hover {
+    transform: translateY(-6px);
+    color: var(--color-primary);
+}
+.icon-link:hover img {
+     transform: scale(1.05);
+     box-shadow: var(--shadow-heavy);
+     border: 2px solid var(--color-primary);
+}
+
+/* ユーザープロフィールセクション */
+#user-profile-section {
+    display: flex;
+    align-items: center;
+    background-color: var(--color-surface-alpha);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-large);
+    padding: calc(var(--spacing-unit) * 3);
+    box-shadow: var(--shadow-medium);
+    gap: calc(var(--spacing-unit) * 3);
+    flex: 1;
+    max-width: 400px;
+}
+#user-profile-section #profile-pic {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 3px solid var(--color-primary);
+    padding: 3px;
+    background-color: var(--color-surface);
+    object-fit: cover;
+    box-shadow: var(--shadow-primary-glow);
+    flex-shrink: 0;
+}
+#user-profile-section .profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1.5);
+    width: 100%;
+    overflow: hidden; /* 名前の折り返しのため */
+}
+#user-profile-section #profile-name {
+    font-size: 3.0rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    word-break: break-all; /* 長い名前の折り返し */
+}
+/* プロフィール統計 (index.html用調整) */
+#user-profile-section .profile-stats {
+    margin-top: var(--spacing-unit);
+    /* 共通スタイルを継承 */
+}
+/* プロフィールバッジ (index.html用調整) */
+#user-profile-section .profile-badges {
+    margin-top: calc(var(--spacing-unit) * 2);
+    /* 共通スタイルを継承 */
+}
+#user-profile-section .badge-slot {
+    /* サイズは共通スタイルで定義 */
+}
+
+/* ==========================
+   index.html レスポンシブ
+   ========================== */
+
+/* --- 中間サイズ --- */
+@media (max-width: 992px) {
+    .main-content-layout {
+        gap: calc(var(--spacing-unit) * 3);
+        margin-top: calc(var(--spacing-unit) * 2); /* 少し詰める */
+    }
+    #user-profile-section {
+        padding: calc(var(--spacing-unit) * 2.5);
+        gap: calc(var(--spacing-unit) * 1.5); /* 少し詰める */
+    }
+    /* バッジサイズは共通CSSで調整済み */
+}
+
+/* --- 小さめサイズ --- */
+@media (max-width: 768px) {
+    .main-content-layout {
+        flex-direction: column;
+        align-items: center;
+        margin-top: calc(var(--spacing-unit) * 2); /* 少し詰める */
+    }
+    .icon-navigation {
+        max-width: 95%;
+        flex: none;
+        order: 2; /* プロフィールセクションの下に */
+    }
+    .icon-grid-caption {
+        margin-bottom: calc(var(--spacing-unit) * 1.5); /* 少し詰める */
+    }
+    #user-profile-section {
+        max-width: 90%;
+        flex: none;
+        order: 1; /* 上に表示 */
+        flex-direction: column;
+        text-align: center;
+    }
+    #user-profile-section .profile-details { align-items: center; }
+    #user-profile-section .profile-stats { justify-content: space-evenly; }
+    #user-profile-section .profile-badges { justify-content: center; }
+}
+
+/* --- さらに小さいサイズ --- */
+@media (max-width: 480px) {
+    .icon-grid { gap: calc(var(--spacing-unit) * 3); } /* アイコン間のgapを少し調整 */
+    .icon-link { width: 90px; } /* アイコンリンクの幅を少し詰める */
+    .icon-link img { width: 50px; height: 50px; padding: calc(var(--spacing-unit)*0.8); margin-bottom: var(--spacing-unit); }
+    .icon-link span { font-size: 0.8rem; }
+    #user-profile-section #profile-pic { width: 70px; height: 70px;}
+    #user-profile-section #profile-name { font-size: 1.3rem; } /* 名前をさらに小さく */
+    .welcome-intro { padding: var(--spacing-unit) * 1.5; margin-bottom: var(--spacing-unit) * 3;}
+    /* バッジサイズは共通CSSで調整済み */
+}
+/* frontend/CSS/index.css */
+
+/* --- ログイン後プロフィールセクションのレイアウト調整 (画像と詳細を横並び) --- */
+#user-profile-section {
+    display: flex;       /* Flexbox を使用して画像と詳細を横並びに */
+    align-items: center; /* アイテムを垂直方向中央に揃える */
+    gap: 25px;           /* 画像と詳細の間隔 (適宜調整してください) */
+    /* 既存の背景色、パディング、影などは維持されます */
+}
+
+#user-profile-section #profile-pic {
+    flex-shrink: 0; /* 画像がコンテナ幅によって縮まないように */
+    /* 既存の画像サイズ、角丸などは維持されます */
+}
+
+#user-profile-section .profile-details {
+    flex-grow: 1; /* 残りのスペースを名前や統計情報が埋めるように */
+    /* .profile-details 内の要素 (名前、統計、バッジ) はデフォルト(または既存のCSS)で縦に並びます */
+}
+
+#user-profile-section #profile-name {
+    margin-top: 0; /* 上部の不要なマージンを削除 (必要に応じて) */
+    margin-bottom: 8px; /* 名前と統計の間のマージン (適宜調整してください) */
+    /* 既存のフォントサイズ、色などは維持されます */
+}
+
+/* --- レスポンシブ対応 (既存のスタイルを維持) --- */
+/* 小さめサイズ (スマホなど) で縦積みに戻す */
+@media (max-width: 768px) {
+    #user-profile-section {
+        flex-direction: column; /* 縦積みに戻す */
+        text-align: center;     /* 全体を中央揃え */
+    }
+    #user-profile-section .profile-details {
+        align-items: center; /* 詳細内のアイテムも中央揃え */
+    }
+}
+
+/* --- アイコンナビゲーションの文字強調は適用しません --- */
+/* .icon-link span { ... } のスタイルは変更しません */
+/* .icon-link:hover span { ... } のスタイルは変更しません */
+/* .icon-link img { ... } のスタイルは変更しません */
+/* .icon-link:hover img { ... } のスタイルは変更しません */
+/* frontend/CSS/index.css */
+
+/* ... (他のスタイル) ... */
+
+#user-profile-section .profile-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    /* ▼▼▼ 詳細エリア内のアイテムを中央揃えにする ▼▼▼ */
+    align-items: center;
+    /* ▲▲▲ ここまで追加 ▲▲▲ */
+    gap: calc(var(--spacing-unit) * 1.5);
+    width: 100%;
+    overflow: hidden;
+}
+
+#user-profile-section #profile-name {
+    /* ▼▼▼ テキスト自体も中央揃えにする ▼▼▼ */
+    text-align: center;
+    /* ▲▲▲ ここまで追加 ▲▲▲ */
+    margin-top: 0;
+    margin-bottom: 8px;
+    /* 既存のフォントサイズ、色などは維持 */
+    font-size: 1.8rem; /* 以前の3.0remから調整 */
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    word-break: break-all;
+}
+
+/* --- レスポンシブ対応 (既存のスタイルを維持) --- */
+@media (max-width: 768px) {
+    #user-profile-section {
+        flex-direction: column;
+        text-align: center;
+    }
+    #user-profile-section .profile-details {
+        align-items: center; /* 既に中央揃えになっているはず */
+    }
+    /* 名前に関するレスポンシブ変更は不要 */
+}
+
+/* ... (他のスタイル) ... */
+#user-profile-section .badge-slot img {
+    width: 75%; /* 枠に対して少し小さくする */
+    height: 75%;
+    object-fit: contain; /* 画像全体が表示されるように */
+}/* index.css */
+
+/* ... (既存のスタイル) ... */
+
+/* ==========================
+   index.html 固有スタイル調整 (詳細度を上げた版)
+   ========================== */
+
+/* ユーザープロフィールセクションのバッジ画像サイズ調整 */
+section#user-profile-section div.profile-badges div.badge-slot img {
+    width: 85%; /* さらに大きく */
+    height: 85%;
+    object-fit: contain; /* 画像全体が表示されるように */
+}
+
+/* ... (既存のレスポンシブスタイルなど) ... */
+/* index.css */
+
+/* ... (既存のスタイル) ... */
+
+/* ==========================
+   index.html 固有スタイル調整
+   ========================== */
+
+/* ユーザープロフィールセクションのバッジ画像サイズ調整 (前回提案) */
+section#user-profile-section div.profile-badges div.badge-slot img {
+    width: 75%;
+    /* border-radius は .badge-slot で指定 */
+    height: 75%;
+    object-fit: contain;
+}
+
+/* ▼▼▼ この部分を追加 ▼▼▼ */
+/* ユーザープロフィールセクションのバッジホバー時の拡大を無効化 */
+section#user-profile-section div.profile-badges div.badge-slot:hover {
+    transform: none; /* 拡大しない */
+    border-radius: var(--border-radius-medium); /* 形状を維持 */
+    /* 必要であれば、他のホバー効果（影など）もリセット */
+    /* box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7); */ /* 通常時の影に戻す例 */
+}
+/* ▲▲▲ 追加ここまで ▲▲▲ */
+
+/* ... (既存のレスポンシブスタイルなど) ... */
+/* index.css */
+
+/* ... (既存の .main-content-layout, .icon-navigation など) ... */
+
+/* ▼▼▼ Welcomeメッセージのスタイル ▼▼▼ */
+.welcome-intro {
+    background: linear-gradient(140deg, rgba(var(--color-background-rgb), 0.5), rgba(var(--color-surface-rgb), 0.2));
+    border-left: 5px solid var(--color-primary);
+    border-radius: var(--border-radius-medium);
+    padding: calc(var(--spacing-unit) * 3) calc(var(--spacing-unit) * 4);
+    margin-bottom: calc(var(--spacing-unit) * 5); /* アイコンとの間隔 */
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    animation: slideDownFadeIn 0.7s ease-out forwards;
+    backdrop-filter: blur(3px); /* 背景を少しぼかす (対応ブラウザ) */
+    -webkit-backdrop-filter: blur(3px); /* Safari用 */
+}
+
+.welcome-intro-title {
+    font-family: 'Cinzel', serif; /* 高級感のあるフォント */
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem); /* レスポンシブ対応 */
+    color: var(--color-primary);
+    margin: 0 0 calc(var(--spacing-unit) * 2) 0;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-intro-description {
+    font-size: clamp(0.95rem, 2.8vw, 1.1rem); /* レスポンシブ対応 */
+    color: var(--color-text-secondary);
+    line-height: 1.8;
+    margin: 0;
+    opacity: 0.95;
+}
+
+/* アニメーション */
+@keyframes slideDownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* ▲▲▲ Welcomeメッセージのスタイル ▲▲▲ */
+
+
+/* 元の .icon-grid-caption スタイルは削除またはコメントアウト */
+/*
+.icon-grid-caption {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: calc(var(--spacing-unit) * 4);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+*/
+
+/* ... (既存の .icon-grid, .icon-link など) ... */
+
+/* --- レスポンシブ調整 (必要に応じて) --- */
+@media (max-width: 768px) {
+    .welcome-intro {
+        padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 2.5);
+        margin-bottom: calc(var(--spacing-unit) * 4);
+    }
+}
+
+/* ... (他のレスポンシブスタイル) ... */
+/* index.css */
+
+/* ... 他のスタイル ... */
+
+.logged-in-icon-header {
+    text-align: center; /* テキストを中央揃え */
+    margin-bottom: 1.5rem; /* アイコンとの間に少し余白 */
+    padding: 0.5rem;
+    /* background-color: #f0f0f0; /* 背景色をつけたい場合 */
+    /* border-radius: 4px; */
+    font-size: 1.1rem; /* 文字サイズ */
+    color: var(--color-text-primary); /* 文字色 */
+}
+
+.logged-in-icon-header p {
+    margin: 0; /* 段落のデフォルトマージンを削除 */
+}
+
+/* ... 他のスタイル ... */
