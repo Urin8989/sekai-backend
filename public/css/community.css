@@ -522,11 +522,11 @@
 /* --- レスポンシブ --- */
 /* (変更なし) */
 @media (max-width: 768px) {
-    .community-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-    .detail-grid { grid-template-columns: 1fr; gap: 2rem; }
-    .community-detail-section { padding: 2rem; }
-    .detail-info-card, .detail-participants-card, .detail-chat-card { padding: 1.5rem; }
-    .modal-content { padding: 2rem; max-width: 95%; }
+    .community-grid { grid-template-columns: 1fr; gap: 1rem; } /* gap詰める */
+    .detail-grid { grid-template-columns: 1fr; gap: 1.5rem; } /* gap詰める */
+    .community-detail-section { padding: 1.5rem; } /* パディング詰める */
+    .detail-info-card, .detail-participants-card, .detail-chat-card { padding: 1.2rem; } /* パディング詰める */
+    .modal-content { padding: 1.5rem; max-width: 95%; } /* パディング詰める */
 }
 /* community.css */
 

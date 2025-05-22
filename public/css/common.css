@@ -733,10 +733,6 @@ textarea {
 
 /* --- 中間サイズ (タブレットなど) --- */
 @media (max-width: 992px) {
-    .container {
-        padding-left: calc(var(--spacing-unit) * 2);
-        padding-right: calc(var(--spacing-unit) * 2);
-    }
     .header-container {
         padding-left: calc(var(--spacing-unit) * 2);
         padding-right: calc(var(--spacing-unit) * 2);
@@ -746,9 +742,13 @@ textarea {
 
 /* --- 小さめサイズ (スマホなど) --- */
 @media (max-width: 768px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.6rem; }
-    h3 { font-size: 1.3rem; }
+    :root {
+        --spacing-unit: 7px; /* スマートフォンでの基本スペーシングを少し詰める */
+    }
+    body { font-size: 15px; }
+    h1 { font-size: 1.8rem; } /* 見出しを少し小さく */
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
 
     /* Header */
     .header-container {
@@ -781,9 +781,13 @@ textarea {
         padding: 10px 25px;
         font-size: 0.95rem;
     }
+    .container {
+        padding-left: calc(var(--spacing-unit) * 2); /* 992pxからこちらへ移動 */
+        padding-right: calc(var(--spacing-unit) * 2);
+    }
 
     /* Page Title */
-    .page-title-icon h1 { font-size: 1.8rem; }
+    .page-title-icon h1 { font-size: 1.6rem; } /* さらに調整 */
     .page-title-icon img { width: 50px; height: 50px; }
 
     /* Badges */
@@ -792,7 +796,10 @@ textarea {
 
 /* --- さらに小さいサイズ --- */
 @media (max-width: 480px) {
-    .container { padding-left: var(--spacing-unit); padding-right: var(--spacing-unit); }
+    :root {
+        --spacing-unit: 6px; /* さらに詰める */
+    }
+    body { font-size: 14px; }
 
     /* Header */
     .header-container { padding: 8px 10px; }
@@ -801,18 +808,23 @@ textarea {
     .nav-menu-button { padding: 6px 8px; }
     .nav-menu-button svg { width: 22px; height: 22px; }
     .site-title-header { margin: 0 5px; }
-    .site-title-header span { font-size: 1.3rem; }
+    .site-title-header span { font-size: 1.2rem; letter-spacing: 1px; } /* タイトルをさらに調整 */
     .auth-section { gap: calc(var(--spacing-unit) * 0.25); }
     #g_id_signin { transform: scale(0.8); }
     #logout-button { padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5); font-size: 0.9rem; }
 
+    .container {
+        padding-left: var(--spacing-unit); /* 共通コンテナのパディングも詰める */
+        padding-right: var(--spacing-unit);
+    }
+
     /* Page Title */
     .page-title-icon { gap: calc(var(--spacing-unit) * 1.5); margin-top: calc(var(--spacing-unit) * 2); }
     .page-title-icon img { width: 40px; height: 40px; }
-    .page-title-icon h1 { font-size: 1.6rem; }
+    .page-title-icon h1 { font-size: 1.4rem; }
 
     /* Badges */
-    .badge-slot { width: 50px; height: 50px; } /* さらに小さく */
+    .badge-slot { width: 45px; height: 45px; gap: var(--spacing-unit); } /* バッジとスロットをさらに小さく */
 }
 /* ▼▼▼ 動物バッジ全般と関連モーダルに適用 ▼▼▼ */
 .badge-slot img[src*="animal-"],

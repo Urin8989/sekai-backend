@@ -127,7 +127,7 @@
     background-color: transparent; /* ★ 背景を透明に */
     border-radius: var(--border-radius-large);
     padding: calc(var(--spacing-unit) * 3);
-    box-shadow: var(--shadow-medium);
+    box-shadow: none; /* 背景透明なので影もなしに */
     margin-top: calc(var(--spacing-unit) * 4);
     max-width: 1200px;
     width: 90%;
@@ -137,7 +137,7 @@
 .ranking-controls {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: stretch; /* 高さを揃える */
     margin-bottom: calc(var(--spacing-unit) * 3);
     flex-wrap: wrap; /* 折り返し */
     gap: calc(var(--spacing-unit) * 2);
@@ -302,11 +302,11 @@
 
 /* --- 小さめサイズ --- */
 @media (max-width: 768px) {
-    .podium { min-height: 220px; margin-bottom: calc(var(--spacing-unit) * 4); }
-    .podium-place img { width: 70px; height: 70px; }
-    .podium-place.place-1 img { width: 85px; height: 85px; }
-    .podium-name { font-size: 1em; }
-    .podium-base { font-size: 2em; }
+    .podium { min-height: 200px; margin-bottom: calc(var(--spacing-unit) * 3); gap: 3px; }
+    .podium-place img { width: 60px; height: 60px; }
+    .podium-place.place-1 img { width: 75px; height: 75px; }
+    .podium-name { font-size: 0.9em; }
+    .podium-base { font-size: 1.8em; padding: calc(var(--spacing-unit)*0.8) 0; }
     .podium-place.place-1 .podium-base { height: 120px; }
     .podium-place.place-2 .podium-base { height: 90px; }
     .podium-place.place-3 .podium-base { height: 70px; }
@@ -315,30 +315,32 @@
     .podium-place.place-2 .podium-rate,
     .podium-place.place-3 .podium-rate { font-size: 1.1em; }
     .podium-place.place-1 .podium-rate { font-size: 1.2em; }
+    .ranking-section { padding: calc(var(--spacing-unit)*2); margin-top: calc(var(--spacing-unit)*3); width: 95%;}
 
     .ranking-controls { flex-direction: column; align-items: stretch; }
     .ranking-search { width: 100%; }
     .ranking-type-selector { justify-content: center; }
+    .ranking-type-selector .button { flex-grow: 1; } /* ボタン幅を均等に */
 
     #ranking-table th,
-    #ranking-table td { padding: calc(var(--spacing-unit) * 1.2) calc(var(--spacing-unit) * 0.8); font-size: 0.9em; }
-    .rank-avatar { width: 30px; height: 30px; margin-right: var(--spacing-unit); }
+    #ranking-table td { padding: var(--spacing-unit) calc(var(--spacing-unit) * 0.8); font-size: 0.85em; }
+    .rank-avatar { width: 28px; height: 28px; margin-right: calc(var(--spacing-unit)*0.8); }
     #ranking-table td.rate-col,
-    #ranking-table td.matches-col { font-size: 0.95em; }
+    #ranking-table td.matches-col { font-size: 0.9em; }
 }
 
 /* --- さらに小さいサイズ --- */
 @media (max-width: 480px) {
-    .podium { min-height: 180px; }
-    .podium-place img { width: 50px; height: 50px; border-width: 2px; }
-    .podium-place.place-1 img { width: 65px; height: 65px; }
-    .podium-name { font-size: 0.9em; }
-    .podium-rate { font-size: 0.9em; }
+    .podium { min-height: 160px; margin-bottom: calc(var(--spacing-unit) * 2.5); }
+    .podium-place img { width: 45px; height: 45px; border-width: 2px; }
+    .podium-place.place-1 img { width: 55px; height: 55px; }
+    .podium-name { font-size: 0.8em; }
+    .podium-rate { font-size: 0.8em; }
     .podium-place.place-1 .podium-rate,
     .podium-place.place-2 .podium-rate,
     .podium-place.place-3 .podium-rate { font-size: 1em; }
     .podium-place.place-1 .podium-rate { font-size: 1.1em; }
-    .podium-base { font-size: 1.5em; }
+    .podium-base { font-size: 1.3em; }
     .podium-place.place-1 .podium-base { height: 90px; }
     .podium-place.place-2 .podium-base { height: 70px; }
     .podium-place.place-3 .podium-base { height: 55px; }
@@ -350,5 +352,5 @@
     .name-col { width: 50%; }
     .rate-col { width: 35%; } /* レート列広げる */
     .matches-col { display: none; } /* マッチ数列非表示 */
-    #ranking-table td.rate-col { font-size: 0.85em; }
+    #ranking-table td.rate-col { font-size: 0.8em; }
 }

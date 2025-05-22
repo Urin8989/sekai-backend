@@ -135,11 +135,11 @@
 @media (max-width: 992px) {
     .main-content-layout {
         gap: calc(var(--spacing-unit) * 3);
-        margin-top: calc(var(--spacing-unit) * 3);
+        margin-top: calc(var(--spacing-unit) * 2); /* 少し詰める */
     }
     #user-profile-section {
         padding: calc(var(--spacing-unit) * 2.5);
-        gap: calc(var(--spacing-unit) * 2);
+        gap: calc(var(--spacing-unit) * 1.5); /* 少し詰める */
     }
     /* バッジサイズは共通CSSで調整済み */
 }
@@ -149,7 +149,7 @@
     .main-content-layout {
         flex-direction: column;
         align-items: center;
-        margin-top: calc(var(--spacing-unit) * 3);
+        margin-top: calc(var(--spacing-unit) * 2); /* 少し詰める */
     }
     .icon-navigation {
         max-width: 95%;
@@ -157,7 +157,7 @@
         order: 2; /* プロフィールセクションの下に */
     }
     .icon-grid-caption {
-        margin-bottom: calc(var(--spacing-unit) * 2);
+        margin-bottom: calc(var(--spacing-unit) * 1.5); /* 少し詰める */
     }
     #user-profile-section {
         max-width: 90%;
@@ -173,11 +173,13 @@
 
 /* --- さらに小さいサイズ --- */
 @media (max-width: 480px) {
-    .icon-grid { gap: calc(var(--spacing-unit) * 2); }
-    .icon-link { width: 100px; }
-    .icon-link img { width: 60px; height: 60px; padding: var(--spacing-unit); }
-    .icon-link span { font-size: 0.85rem; }
-    #user-profile-section #profile-name { font-size: 1.5rem; }
+    .icon-grid { gap: calc(var(--spacing-unit) * 3); } /* アイコン間のgapを少し調整 */
+    .icon-link { width: 90px; } /* アイコンリンクの幅を少し詰める */
+    .icon-link img { width: 50px; height: 50px; padding: calc(var(--spacing-unit)*0.8); margin-bottom: var(--spacing-unit); }
+    .icon-link span { font-size: 0.8rem; }
+    #user-profile-section #profile-pic { width: 70px; height: 70px;}
+    #user-profile-section #profile-name { font-size: 1.3rem; } /* 名前をさらに小さく */
+    .welcome-intro { padding: var(--spacing-unit) * 1.5; margin-bottom: var(--spacing-unit) * 3;}
     /* バッジサイズは共通CSSで調整済み */
 }
 /* frontend/CSS/index.css */

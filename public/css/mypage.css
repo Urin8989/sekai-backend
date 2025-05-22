@@ -1531,14 +1531,14 @@
         max-width: 700px;
     }
     .mypage-charts {
-        margin-top: 40px;
+        margin-top: calc(var(--spacing-unit) * 4); /* 少し詰める */
     }
 }
 
 /* --- 小さめサイズ --- */
 @media (max-width: 768px) {
     .mypage-user-info .profile-main-info-mypage { flex-direction: column; gap: calc(var(--spacing-unit) * 2); }
-    .mypage-user-info .profile-name-details-mypage { align-items: center; text-align: center; }
+    .mypage-user-info .profile-name-details-mypage { align-items: center; text-align: center; margin-bottom: var(--spacing-unit); }
     .mypage-user-info .profile-stats { justify-content: space-evenly; }
     .mypage-user-info .profile-stats .stat-item { text-align: center; }
     .mypage-user-info .profile-badges { justify-content: center; gap: calc(var(--spacing-unit) * 2.5); }
@@ -1547,14 +1547,14 @@
     .mypage-user-info .profile-extra-info label { text-align: left; }
 
     /* グラフ */
-    .mypage-charts .chart-wrapper { height: 300px; }
+    .mypage-charts .chart-wrapper { height: 280px; } /* 少し低く */
     .charts-row-within { /* 縦積み */ }
-    .chart-wrapper-half { flex-basis: 100%; max-width: 300px; min-height: 200px; } /* 最小高さ調整 */
-    .mypage-charts .chart-container h3 { font-size: 1.1rem; }
-    .chart-wrapper-half h4 { font-size: 1rem; }
+    .chart-wrapper-half { flex-basis: 100%; max-width: 280px; min-height: 180px; } /* 最小高さ調整 */
+    .mypage-charts .chart-container h3 { font-size: 1rem; margin-bottom: 15px; padding-bottom: calc(var(--spacing-unit)*0.8);}
+    .chart-wrapper-half h4 { font-size: 0.9rem; margin-bottom: var(--spacing-unit); }
 
     /* バッジ図鑑 */
-    .mypage-badge-dex { margin-top: calc(var(--spacing-unit) * 3); }
+    .mypage-badge-dex { margin-top: calc(var(--spacing-unit) * 2.5); padding: var(--spacing-unit); }
     #badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); gap: 10px; } /* スマホではさらに小さく */
     .badge-dex-item { width: 55px; height: 55px; border-width: 2px; } /* サイズと枠線調整 */
     .badge-dex-detail { max-width: 95%; padding: var(--spacing-unit); }
@@ -1562,25 +1562,26 @@
 
     /* 編集モーダル */
     .edit-badges-container { flex-direction: column; }
-    .owned-badges-grid { max-height: 200px; }
+    .owned-badges-grid { max-height: 180px; }
 }
 
 /* --- さらに小さいサイズ --- */
 @media (max-width: 480px) {
-    .mypage-user-info .profile-card { padding: calc(var(--spacing-unit) * 2); }
-    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 100px; height: 100px; }
-    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.8rem; }
-    .mypage-user-info .profile-stats .stat-value { font-size: 1.5rem; }
+    .mypage-user-info .profile-card { padding: var(--spacing-unit); }
+    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 80px; height: 80px; }
+    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.6rem; }
+    .mypage-user-info .profile-stats .stat-value { font-size: 1.3rem; }
+    .mypage-user-info .profile-stats .stat-label { font-size: 0.75rem;}
     /* バッジサイズは共通CSSで調整済み */
 
     /* グラフ */
-    .mypage-charts .chart-wrapper { height: 250px; }
-    .chart-wrapper-half { min-height: 180px; } /* さらに小さく */
-    .chart-wrapper-half canvas { max-height: 180px; }
+    .mypage-charts .chart-wrapper { height: 220px; }
+    .chart-wrapper-half { min-height: 160px; } /* さらに小さく */
+    .chart-wrapper-half canvas { max-height: 150px; }
 
     /* バッジ図鑑 */
-    #badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
-    .badge-dex-item { width: 50px; height: 50px; }
+    #badge-dex-grid { grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: calc(var(--spacing-unit)*0.8); }
+    .badge-dex-item { width: 45px; height: 45px; }
 }
 /* mypage.css */
 

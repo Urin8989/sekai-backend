@@ -486,11 +486,11 @@
 
 /* --- Small Screens (e.g., Large Phones, Small Tablets, ~768px) --- */
 @media (max-width: 768px) {
-    .shop-page-container { padding: 20px 15px; }
-    .shop-section { padding: 25px 20px; }
-    .shop-section h2 { font-size: 1.6rem; }
-    .purchasable-section h3 { font-size: 1.4rem; }
-    #play-gacha-button { min-width: 240px; padding: 12px 25px; font-size: 1.1rem; }
+    .shop-page-container { padding: calc(var(--spacing-unit)*2) calc(var(--spacing-unit)*1.5); }
+    .shop-section { padding: calc(var(--spacing-unit)*2.5) calc(var(--spacing-unit)*2); }
+    .shop-section h2 { font-size: 1.5rem; } /* 少し小さく */
+    .purchasable-section h3 { font-size: 1.3rem; } /* 少し小さく */
+    #play-gacha-button { min-width: 220px; padding: 10px 20px; font-size: 1rem; } /* 少し小さく */
 
     .shop-items-grid {
         grid-template-columns: repeat(3, 1fr); /* 通常グリッドは3列 */
@@ -505,23 +505,23 @@
     }
     /* ▲▲▲ 期間限定グリッドのレスポンシブ ▲▲▲ */
 
-    .shop-item-card { padding: 10px; }
-    .shop-item-badge-display { width: 75px; height: 75px; margin-bottom: 12px; } /* 少し大きく */
-    .shop-item-name { font-size: 0.9rem; min-height: 2.4em; }
-    .shop-item-description { font-size: 0.8rem; min-height: 2.6em; }
-    .shop-item-price { font-size: 0.9rem; }
-    .shop-buy-button { padding: 8px 10px; font-size: 0.85rem; }
+    .shop-item-card { padding: calc(var(--spacing-unit)*1.2); }
+    .shop-item-badge-display { width: 70px; height: 70px; margin-bottom: var(--spacing-unit); }
+    .shop-item-name { font-size: 0.85rem; min-height: 2.2em; }
+    .shop-item-description { font-size: 0.75rem; min-height: 2.4em; }
+    .shop-item-price { font-size: 0.85rem; }
+    .shop-buy-button { padding: calc(var(--spacing-unit)*0.8) var(--spacing-unit); font-size: 0.8rem; }
 }
 
 /* --- Extra Small Screens (e.g., Phones, ~480px) --- */
 @media (max-width: 480px) {
-    .shop-page-container { padding: 15px 10px; }
-    .user-points-info-shop { font-size: 1.1rem; padding: 10px; }
-    #user-points-display { font-size: 1.3rem; }
-    .shop-section { padding: 20px 15px; }
-    .shop-section h2 { font-size: 1.4rem; gap: 8px; }
-    .purchasable-section h3 { font-size: 1.2rem; gap: 8px; }
-    #play-gacha-button { min-width: 90%; padding: 10px 20px; font-size: 1rem; } /* 幅を広げる */
+    .shop-page-container { padding: var(--spacing-unit) calc(var(--spacing-unit)*1.2); }
+    .user-points-info-shop { font-size: 1rem; padding: var(--spacing-unit); }
+    #user-points-display { font-size: 1.1rem; }
+    .shop-section { padding: calc(var(--spacing-unit)*2) var(--spacing-unit); }
+    .shop-section h2 { font-size: 1.2rem; gap: calc(var(--spacing-unit)*0.8); }
+    .purchasable-section h3 { font-size: 1.1rem; gap: calc(var(--spacing-unit)*0.8); }
+    #play-gacha-button { min-width: 85%; padding: 8px 15px; font-size: 0.9rem; } /* 幅を広げる */
 
     .shop-items-grid {
         grid-template-columns: repeat(2, 1fr); /* 通常グリッドは2列 */
@@ -536,17 +536,17 @@
     }
     /* ▲▲▲ 期間限定グリッドのレスポンシブ ▲▲▲ */
 
-    .shop-item-card { padding: 8px; }
-    .shop-item-badge-display { width: 70px; height: 70px; margin-bottom: 10px; } /* 少し大きく */
-    .shop-item-badge-display img { width: 65%; height: 65%; }
-    .shop-item-name { font-size: 0.85rem; min-height: 2.2em; }
-    .shop-item-description { font-size: 0.75rem; min-height: 2.4em; }
-    .shop-item-price { font-size: 0.85rem; }
-    .shop-buy-button { padding: 6px 8px; font-size: 0.8rem; }
+    .shop-item-card { padding: var(--spacing-unit); }
+    .shop-item-badge-display { width: 60px; height: 60px; margin-bottom: var(--spacing-unit); }
+    .shop-item-badge-display img { width: 70%; height: 70%; }
+    .shop-item-name { font-size: 0.8rem; min-height: 2em; }
+    .shop-item-description { font-size: 0.7rem; min-height: 2.2em; }
+    .shop-item-price { font-size: 0.8rem; }
+    .shop-buy-button { padding: calc(var(--spacing-unit)*0.7) var(--spacing-unit); font-size: 0.75rem; }
 
     /* モーダルも少し調整 */
-    .gacha-result-content { padding: 20px; }
-    #gacha-result-title { font-size: 1.6rem; margin-bottom: 20px; }
-    .gacha-result-badge { width: 130px; height: 130px; } /* 少し大きく */
-    .gacha-result-name { font-size: 1.3rem; }
+    .gacha-result-content { padding: calc(var(--spacing-unit)*2); }
+    #gacha-result-title { font-size: 1.4rem; margin-bottom: calc(var(--spacing-unit)*2); }
+    .gacha-result-badge { width: 110px; height: 110px; }
+    .gacha-result-name { font-size: 1.1rem; }
 }
