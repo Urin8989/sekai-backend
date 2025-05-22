@@ -1,0 +1,354 @@
+/* ==========================
+   ranking.html 固有スタイル
+   ========================== */
+
+/* 表彰台 */
+.podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* 下揃え */
+    gap: 5px; /* 台座間のわずかな隙間 */
+    margin-top: calc(var(--spacing-unit) * 4);
+    margin-bottom: calc(var(--spacing-unit) * 6);
+    padding: 0 calc(var(--spacing-unit) * 2);
+    min-height: 280px; /* 高さを確保 */
+    position: relative;
+}
+.podium-place {
+    flex: 1; /* 幅を均等に */
+    max-width: 200px; /* 最大幅 */
+    display: flex;
+    flex-direction: column; /* 上下に要素を配置 */
+    align-items: center;
+    text-align: center;
+}
+.podium-info { /* アバター、名前、レートのコンテナ */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: calc(var(--spacing-unit) * 1.5); /* 台座との間隔 */
+    position: relative; /* 必要なら */
+    width: 100%; /* 幅いっぱい */
+}
+.podium-place img { /* アバター */
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid var(--color-surface); /* 背景色で縁取り */
+    margin-bottom: var(--spacing-unit);
+    box-shadow: var(--shadow-medium);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+.podium-place:hover img {
+    transform: scale(1.1);
+}
+.podium-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 1.1em;
+    margin-bottom: calc(var(--spacing-unit) * 0.5);
+    word-break: break-all; /* 長い名前の折り返し */
+    width: 100%; /* 折り返しのため幅指定 */
+}
+.podium-rate {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-top: calc(var(--spacing-unit) * 0.5);
+    letter-spacing: 0.5px;
+    font-family: var(--font-family-mono);
+}
+/* 上位3位のレートスタイル */
+.podium-place.place-1 .podium-rate,
+.podium-place.place-2 .podium-rate,
+.podium-place.place-3 .podium-rate {
+    font-family: var(--font-family-title);
+    font-size: 1.2em;
+    color: var(--color-primary-light);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+.podium-place.place-1 .podium-rate {
+    font-size: 1.35em;
+    color: var(--color-primary);
+}
+/* 台座 */
+.podium-base {
+    width: 100%;
+    background: linear-gradient(to top, #333, #555); /* 基本の台座色 */
+    color: var(--color-text-primary);
+    font-size: 2.5em;
+    font-weight: bold;
+    font-family: var(--font-family-title);
+    padding: calc(var(--spacing-unit) * 1) 0;
+    border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0; /* 上角丸 */
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.4);
+    border: 1px solid #222;
+    border-bottom: none;
+    display: flex; /* 数字を中央揃え */
+    justify-content: center;
+    align-items: center;
+}
+/* 1位 */
+.podium-place.place-1 { order: 1; } /* 中央に配置 */
+.podium-place.place-1 .podium-base {
+    height: 150px;
+    background: linear-gradient(to top, var(--color-primary-dark), var(--color-primary-light));
+    color: var(--color-background);
+    border-color: var(--color-primary-dark);
+}
+.podium-place.place-1 img {
+    width: 110px;
+    height: 110px;
+    border-color: var(--color-primary);
+}
+.podium-place.place-1 .podium-name { font-size: 1.2em; }
+/* 2位 */
+.podium-place.place-2 { order: 0; } /* 左に配置 */
+.podium-place.place-2 .podium-base {
+    height: 110px;
+    background: linear-gradient(to top, #aaa, #ddd);
+    color: #333;
+    border-color: #999;
+}
+.podium-place.place-2 img { border-color: #ccc; }
+/* 3位 */
+.podium-place.place-3 { order: 2; } /* 右に配置 */
+.podium-place.place-3 .podium-base {
+    height: 80px;
+    background: linear-gradient(to top, #a0522d, #cd853f); /* 銅色 */
+    color: #fff;
+    border-color: #8b4513;
+}
+.podium-place.place-3 img { border-color: #cd853f; }
+
+/* ランキングリストセクション */
+.ranking-section {
+    background-color: transparent; /* ★ 背景を透明に */
+    border-radius: var(--border-radius-large);
+    padding: calc(var(--spacing-unit) * 3);
+    box-shadow: var(--shadow-medium);
+    margin-top: calc(var(--spacing-unit) * 4);
+    max-width: 1200px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ranking-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    flex-wrap: wrap; /* 折り返し */
+    gap: calc(var(--spacing-unit) * 2);
+}
+.ranking-search {
+    display: flex;
+    gap: var(--spacing-unit);
+    flex-grow: 1; /* スペースを埋める */
+    min-width: 250px; /* 最小幅 */
+}
+.ranking-search input[type="text"] {
+    flex-grow: 1;
+    margin-bottom: 0; /* 下マージン解除 */
+}
+.ranking-search .button {
+    flex-shrink: 0; /* 縮まない */
+}
+.ranking-type-selector {
+    display: flex;
+    gap: var(--spacing-unit);
+    flex-shrink: 0; /* 縮まない */
+}
+.ranking-type-selector .button.active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+    cursor: default;
+}
+
+/* ランキングテーブル */
+.ranking-list {
+    overflow-x: auto; /* 横スクロール可能に */
+    position: relative; /* ローディング表示の位置基準 */
+    min-height: 200px; /* ローディング中に高さ確保 */
+}
+#ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-unit);
+    min-width: 600px; /* テーブルが潰れない最小幅 */
+}
+#ranking-table th,
+#ranking-table td {
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle; /* 中央揃え */
+    white-space: nowrap; /* 基本的に折り返さない */
+}
+#ranking-table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky; /* ヘッダー固定 (オプション) */
+    top: 0; /* スクロール時にヘッダーが追従する場合 */
+    z-index: 1; /* 他の要素より手前に */
+}
+#ranking-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+#ranking-table tbody tr:hover {
+    background-color: rgba(255, 215, 0, 0.1); /* ホバー色 */
+    cursor: pointer; /* クリック可能を示す */
+}
+/* カラム幅 */
+.rank-col { width: 8%; text-align: center; font-weight: bold; }
+.name-col { width: 40%; white-space: normal; } /* 名前は折り返し許可 */
+.rate-col { width: 20%; text-align: right; font-family: var(--font-family-mono); }
+.matches-col { width: 20%; text-align: right; font-family: var(--font-family-mono); }
+/* データセルのスタイル */
+#ranking-table td.rate-col,
+#ranking-table td.matches-col {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+}
+.rank-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: calc(var(--spacing-unit) * 1.5);
+    vertical-align: middle;
+    object-fit: cover;
+    border: 1px solid var(--color-border-light);
+}
+/* 自分のランク強調 */
+#ranking-table tbody tr.current-user-rank {
+    background-color: rgba(255, 215, 0, 0.2) !important; /* !importantで上書き */
+    border-left: 3px solid var(--color-primary);
+    border-right: 3px solid var(--color-primary);
+}
+#ranking-table tr.current-user-rank td.rate-col,
+#ranking-table tr.current-user-rank td.matches-col {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* ページネーション */
+.pagination {
+    display: flex; /* JSで表示制御 */
+    justify-content: center;
+    margin-top: calc(var(--spacing-unit) * 3);
+    gap: var(--spacing-unit);
+}
+.pagination button {
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5);
+    min-width: 40px;
+    /* .button, .button-secondary スタイルを適用 */
+}
+.pagination button.active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+    cursor: default;
+}
+
+/* ローディング表示 (ranking.css) */
+.loading-indicator {
+    display: flex; /* JSで表示制御 */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    color: var(--color-text-secondary);
+    position: absolute; /* テーブルの上に重ねる */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    background-color: rgba(var(--color-surface-rgb, 26, 26, 26), 0.8); /* 半透明背景 */
+    z-index: 2; /* テーブルより手前 */
+}
+
+/* 結果なし表示 (ranking.css) */
+.notice-text {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--color-text-secondary);
+    font-style: italic;
+    font-size: 1.1rem;
+    /* display: none; はJSで制御 */
+}
+.notice-text a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+
+/* ==========================
+   ranking.html レスポンシブ
+   ========================== */
+
+/* --- 中間サイズ --- */
+@media (max-width: 992px) {
+    /* 特に変更なし */
+}
+
+/* --- 小さめサイズ --- */
+@media (max-width: 768px) {
+    .podium { min-height: 220px; margin-bottom: calc(var(--spacing-unit) * 4); }
+    .podium-place img { width: 70px; height: 70px; }
+    .podium-place.place-1 img { width: 85px; height: 85px; }
+    .podium-name { font-size: 1em; }
+    .podium-base { font-size: 2em; }
+    .podium-place.place-1 .podium-base { height: 120px; }
+    .podium-place.place-2 .podium-base { height: 90px; }
+    .podium-place.place-3 .podium-base { height: 70px; }
+    .podium-rate { font-size: 1em; }
+    .podium-place.place-1 .podium-rate,
+    .podium-place.place-2 .podium-rate,
+    .podium-place.place-3 .podium-rate { font-size: 1.1em; }
+    .podium-place.place-1 .podium-rate { font-size: 1.2em; }
+
+    .ranking-controls { flex-direction: column; align-items: stretch; }
+    .ranking-search { width: 100%; }
+    .ranking-type-selector { justify-content: center; }
+
+    #ranking-table th,
+    #ranking-table td { padding: calc(var(--spacing-unit) * 1.2) calc(var(--spacing-unit) * 0.8); font-size: 0.9em; }
+    .rank-avatar { width: 30px; height: 30px; margin-right: var(--spacing-unit); }
+    #ranking-table td.rate-col,
+    #ranking-table td.matches-col { font-size: 0.95em; }
+}
+
+/* --- さらに小さいサイズ --- */
+@media (max-width: 480px) {
+    .podium { min-height: 180px; }
+    .podium-place img { width: 50px; height: 50px; border-width: 2px; }
+    .podium-place.place-1 img { width: 65px; height: 65px; }
+    .podium-name { font-size: 0.9em; }
+    .podium-rate { font-size: 0.9em; }
+    .podium-place.place-1 .podium-rate,
+    .podium-place.place-2 .podium-rate,
+    .podium-place.place-3 .podium-rate { font-size: 1em; }
+    .podium-place.place-1 .podium-rate { font-size: 1.1em; }
+    .podium-base { font-size: 1.5em; }
+    .podium-place.place-1 .podium-base { height: 90px; }
+    .podium-place.place-2 .podium-base { height: 70px; }
+    .podium-place.place-3 .podium-base { height: 55px; }
+
+    #ranking-table th,
+    #ranking-table td { font-size: 0.8em; }
+    .rank-avatar { display: none; } /* アバター非表示 */
+    .rank-col { width: 15%; } /* ランク列少し広げる */
+    .name-col { width: 50%; }
+    .rate-col { width: 35%; } /* レート列広げる */
+    .matches-col { display: none; } /* マッチ数列非表示 */
+    #ranking-table td.rate-col { font-size: 0.85em; }
+}
