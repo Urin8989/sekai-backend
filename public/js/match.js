@@ -20,9 +20,9 @@ const getDefaultAvatarPath = () => {
     // script.jsで MyApp.DEFAULT_AVATAR_PATH のようなグローバル変数を設定してそれを使う。
     // ここでは、サーバーのルートからの絶対パスとして解決されることを期待。
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return '/public/images/placeholder-avatar.png';
+        return '/public/images/default_avatar.svg';
     } else {
-        return '/images/placeholder-avatar.png';
+        return '/images/default_avatar.svg';
     }
 };
 const getDefaultBadgePath = () => typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath('__DEFAULT__') : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '/public/images/default_badge.svg' : '/images/default_badge.svg');

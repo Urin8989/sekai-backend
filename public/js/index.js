@@ -16,9 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // script.js に MyApp.DEFAULT_AVATAR_PATH のようなものが定義されていればそれを使う
         // ここでは location.hostname で判定する例
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return '/public/images/placeholder-avatar.png';
+            return '/public/images/default-avatar.svg';
         } else {
-            return '/images/placeholder-avatar.png';
+            return '/images/default-avatar.svg';
         }
     };
 

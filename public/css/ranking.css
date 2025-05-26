@@ -27,8 +27,8 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: calc(var(--spacing-unit) * 1.5); /* 台座との間隔 */
-    position: relative; /* 必要なら */
-    width: 100%; /* 幅いっぱい */
+    position: relative;
+    width: 100%;
 }
 .podium-place img { /* アバター */
     width: 90px;
@@ -48,8 +48,8 @@
     color: var(--color-text-primary);
     font-size: 1.1em;
     margin-bottom: calc(var(--spacing-unit) * 0.5);
-    word-break: break-all; /* 長い名前の折り返し */
-    width: 100%; /* 折り返しのため幅指定 */
+    word-break: break-all;
+    width: 100%;
 }
 .podium-rate {
     font-size: 1.1em;
@@ -75,22 +75,22 @@
 /* 台座 */
 .podium-base {
     width: 100%;
-    background: linear-gradient(to top, #333, #555); /* 基本の台座色 */
+    background: linear-gradient(to top, #333, #555);
     color: var(--color-text-primary);
     font-size: 2.5em;
     font-weight: bold;
     font-family: var(--font-family-title);
     padding: calc(var(--spacing-unit) * 1) 0;
-    border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0; /* 上角丸 */
+    border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0;
     box-shadow: inset 0 5px 10px rgba(0,0,0,0.4);
     border: 1px solid #222;
     border-bottom: none;
-    display: flex; /* 数字を中央揃え */
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 /* 1位 */
-.podium-place.place-1 { order: 1; } /* 中央に配置 */
+.podium-place.place-1 { order: 1; }
 .podium-place.place-1 .podium-base {
     height: 150px;
     background: linear-gradient(to top, var(--color-primary-dark), var(--color-primary-light));
@@ -104,7 +104,7 @@
 }
 .podium-place.place-1 .podium-name { font-size: 1.2em; }
 /* 2位 */
-.podium-place.place-2 { order: 0; } /* 左に配置 */
+.podium-place.place-2 { order: 0; }
 .podium-place.place-2 .podium-base {
     height: 110px;
     background: linear-gradient(to top, #aaa, #ddd);
@@ -113,10 +113,10 @@
 }
 .podium-place.place-2 img { border-color: #ccc; }
 /* 3位 */
-.podium-place.place-3 { order: 2; } /* 右に配置 */
+.podium-place.place-3 { order: 2; }
 .podium-place.place-3 .podium-base {
     height: 80px;
-    background: linear-gradient(to top, #a0522d, #cd853f); /* 銅色 */
+    background: linear-gradient(to top, #a0522d, #cd853f);
     color: #fff;
     border-color: #8b4513;
 }
@@ -124,10 +124,10 @@
 
 /* ランキングリストセクション */
 .ranking-section {
-    background-color: transparent; /* ★ 背景を透明に */
+    background-color: transparent;
     border-radius: var(--border-radius-large);
     padding: calc(var(--spacing-unit) * 3);
-    box-shadow: none; /* 背景透明なので影もなしに */
+    box-shadow: none;
     margin-top: calc(var(--spacing-unit) * 4);
     max-width: 1200px;
     width: 90%;
@@ -137,28 +137,28 @@
 .ranking-controls {
     display: flex;
     justify-content: space-between;
-    align-items: stretch; /* 高さを揃える */
+    align-items: stretch;
     margin-bottom: calc(var(--spacing-unit) * 3);
-    flex-wrap: wrap; /* 折り返し */
+    flex-wrap: wrap;
     gap: calc(var(--spacing-unit) * 2);
 }
 .ranking-search {
     display: flex;
     gap: var(--spacing-unit);
-    flex-grow: 1; /* スペースを埋める */
-    min-width: 250px; /* 最小幅 */
+    flex-grow: 1;
+    min-width: 250px;
 }
 .ranking-search input[type="text"] {
     flex-grow: 1;
-    margin-bottom: 0; /* 下マージン解除 */
+    margin-bottom: 0;
 }
 .ranking-search .button {
-    flex-shrink: 0; /* 縮まない */
+    flex-shrink: 0;
 }
 .ranking-type-selector {
     display: flex;
     gap: var(--spacing-unit);
-    flex-shrink: 0; /* 縮まない */
+    flex-shrink: 0;
 }
 .ranking-type-selector .button.active {
     background-color: var(--color-primary);
@@ -169,23 +169,23 @@
 
 /* ランキングテーブル */
 .ranking-list {
-    overflow-x: auto; /* 横スクロール可能に */
-    position: relative; /* ローディング表示の位置基準 */
-    min-height: 200px; /* ローディング中に高さ確保 */
+    overflow-x: auto;
+    position: relative;
+    min-height: 200px;
 }
 #ranking-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: var(--spacing-unit);
-    min-width: 600px; /* テーブルが潰れない最小幅 */
+    min-width: 600px;
 }
 #ranking-table th,
 #ranking-table td {
     padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
     text-align: left;
     border-bottom: 1px solid var(--color-border);
-    vertical-align: middle; /* 中央揃え */
-    white-space: nowrap; /* 基本的に折り返さない */
+    vertical-align: middle;
+    white-space: nowrap;
 }
 #ranking-table th {
     background-color: rgba(0, 0, 0, 0.3);
@@ -194,20 +194,20 @@
     font-size: 0.9em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    position: sticky; /* ヘッダー固定 (オプション) */
-    top: 0; /* スクロール時にヘッダーが追従する場合 */
-    z-index: 1; /* 他の要素より手前に */
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 #ranking-table tbody tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.1);
 }
 #ranking-table tbody tr:hover {
-    background-color: rgba(255, 215, 0, 0.1); /* ホバー色 */
-    cursor: pointer; /* クリック可能を示す */
+    background-color: rgba(255, 215, 0, 0.1);
+    cursor: pointer;
 }
 /* カラム幅 */
 .rank-col { width: 8%; text-align: center; font-weight: bold; }
-.name-col { width: 40%; white-space: normal; } /* 名前は折り返し許可 */
+.name-col { width: 40%; white-space: normal; }
 .rate-col { width: 20%; text-align: right; font-family: var(--font-family-mono); }
 .matches-col { width: 20%; text-align: right; font-family: var(--font-family-mono); }
 /* データセルのスタイル */
@@ -229,7 +229,7 @@
 }
 /* 自分のランク強調 */
 #ranking-table tbody tr.current-user-rank {
-    background-color: rgba(255, 215, 0, 0.2) !important; /* !importantで上書き */
+    background-color: rgba(255, 215, 0, 0.2) !important;
     border-left: 3px solid var(--color-primary);
     border-right: 3px solid var(--color-primary);
 }
@@ -241,7 +241,7 @@
 
 /* ページネーション */
 .pagination {
-    display: flex; /* JSで表示制御 */
+    display: flex;
     justify-content: center;
     margin-top: calc(var(--spacing-unit) * 3);
     gap: var(--spacing-unit);
@@ -249,7 +249,6 @@
 .pagination button {
     padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.5);
     min-width: 40px;
-    /* .button, .button-secondary スタイルを適用 */
 }
 .pagination button.active {
     background-color: var(--color-primary);
@@ -258,31 +257,30 @@
     cursor: default;
 }
 
-/* ローディング表示 (ranking.css) */
+/* ローディング表示 */
 .loading-indicator {
-    display: flex; /* JSで表示制御 */
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 50px;
     color: var(--color-text-secondary);
-    position: absolute; /* テーブルの上に重ねる */
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 100%;
-    background-color: rgba(var(--color-surface-rgb, 26, 26, 26), 0.8); /* 半透明背景 */
-    z-index: 2; /* テーブルより手前 */
+    background-color: rgba(26, 26, 26, 0.8); /* var(--color-surface-rgb, 26, 26, 26) */
+    z-index: 2;
 }
 
-/* 結果なし表示 (ranking.css) */
+/* 結果なし表示 */
 .notice-text {
     text-align: center;
     padding: 40px 20px;
     color: var(--color-text-secondary);
     font-style: italic;
     font-size: 1.1rem;
-    /* display: none; はJSで制御 */
 }
 .notice-text a {
     color: var(--color-primary);
@@ -290,6 +288,167 @@
     font-weight: 600;
 }
 
+/* ==========================
+   ranking.html 固有スタイル
+   ========================== */
+
+/* (既存のスタイル ... 表彰台、ランキングセクション基本、コントロール、ページネーションなど ... は変更なし) */
+/* 既存の .podium から .pagination までのスタイルは省略します */
+
+/* ランキングリストセクション */
+.ranking-section {
+    background-color: transparent;
+    border-radius: var(--border-radius-large);
+    padding: calc(var(--spacing-unit) * 3);
+    box-shadow: none;
+    margin-top: calc(var(--spacing-unit) * 4);
+    max-width: 1200px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ranking-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-bottom: calc(var(--spacing-unit) * 3);
+    flex-wrap: wrap;
+    gap: calc(var(--spacing-unit) * 2);
+}
+.ranking-search {
+    display: flex;
+    gap: var(--spacing-unit);
+    flex-grow: 1;
+    min-width: 250px;
+}
+.ranking-search input[type="text"] {
+    flex-grow: 1;
+    margin-bottom: 0;
+}
+.ranking-search .button {
+    flex-shrink: 0;
+}
+.ranking-type-selector {
+    display: flex;
+    gap: var(--spacing-unit);
+    flex-shrink: 0;
+}
+.ranking-type-selector .button.active {
+    background-color: var(--color-primary);
+    color: var(--color-background);
+    border-color: var(--color-primary);
+    cursor: default;
+}
+
+/* ランキングテーブル */
+.ranking-list {
+    overflow-x: auto; /* 横スクロール可能に */
+    position: relative;
+    min-height: 200px;
+}
+#ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-unit);
+    min-width: 600px; /* テーブルが潰れない最小幅、これより画面が狭いと横スクロール */
+}
+#ranking-table th,
+#ranking-table td {
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    white-space: nowrap; /* 基本的に折り返さないことで、列幅が内容に影響されにくくなる */
+}
+#ranking-table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+#ranking-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+#ranking-table tbody tr:hover {
+    background-color: rgba(255, 215, 0, 0.1);
+    cursor: pointer;
+}
+
+/* カラム幅の基本設定 */
+.rank-col { width: 10%; text-align: center; font-weight: bold; } /* 8% -> 10% */
+.name-col { width: 45%; white-space: normal; } /* 40% -> 45%, 名前は折り返し許可 */
+.rate-col { width: 22.5%; text-align: right; font-family: var(--font-family-mono); } /* 20% -> 22.5% */
+.matches-col { width: 22.5%; text-align: right; font-family: var(--font-family-mono); } /* 20% -> 22.5% */
+
+#ranking-table td.rate-col,
+#ranking-table td.matches-col {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+}
+.rank-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    margin-right: calc(var(--spacing-unit) * 1.5);
+    vertical-align: middle;
+    object-fit: cover;
+    border: 1px solid var(--color-border-light);
+}
+#ranking-table tbody tr.current-user-rank {
+    background-color: rgba(255, 215, 0, 0.2) !important;
+    border-left: 3px solid var(--color-primary);
+    border-right: 3px solid var(--color-primary);
+}
+#ranking-table tr.current-user-rank td.rate-col,
+#ranking-table tr.current-user-rank td.matches-col {
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+/* ページネーション、ローディング、結果なし表示のスタイルは変更なし */
+.pagination { /* ... */ }
+.loading-indicator { /* ... */ }
+.notice-text { /* ... */ }
+
+
+/* ランキングテーブルの列表示切り替え */
+#ranking-table .rate-col,
+#ranking-table .matches-col {
+    display: table-cell;
+}
+body.show-ranking-rate #ranking-table .matches-col {
+    display: none;
+}
+body.show-ranking-rate #ranking-table .rate-col {
+    /* 幅は基本設定の rate-col + matches-col を考慮して name-col とバランスを取る */
+    width: 45%; /* .rank-col (10%) + .name-col (45%) + .rate-col (45%) = 100% */
+}
+body.show-ranking-rate #ranking-table .name-col {
+     width: 45%;
+}
+
+body.show-ranking-matches #ranking-table .rate-col {
+    display: none;
+}
+body.show-ranking-matches #ranking-table .matches-col {
+    width: 45%;
+}
+body.show-ranking-matches #ranking-table .name-col {
+    width: 45%;
+}
+
+
+/* ranking.css */
+
+/* (既存のスタイル ... .podium から .pagination や基本の列表示切り替えCSS ... は変更なし) */
+/* 省略 */
 
 /* ==========================
    ranking.html レスポンシブ
@@ -297,11 +456,12 @@
 
 /* --- 中間サイズ --- */
 @media (max-width: 992px) {
-    /* 特に変更なし */
+    /* (変更なし) */
 }
 
 /* --- 小さめサイズ --- */
 @media (max-width: 768px) {
+    /* (前回の提案通り、または既存のスタイル) */
     .podium { min-height: 200px; margin-bottom: calc(var(--spacing-unit) * 3); gap: 3px; }
     .podium-place img { width: 60px; height: 60px; }
     .podium-place.place-1 img { width: 75px; height: 75px; }
@@ -320,37 +480,79 @@
     .ranking-controls { flex-direction: column; align-items: stretch; }
     .ranking-search { width: 100%; }
     .ranking-type-selector { justify-content: center; }
-    .ranking-type-selector .button { flex-grow: 1; } /* ボタン幅を均等に */
+    .ranking-type-selector .button { flex-grow: 1; }
 
     #ranking-table th,
     #ranking-table td { padding: var(--spacing-unit) calc(var(--spacing-unit) * 0.8); font-size: 0.85em; }
     .rank-avatar { width: 28px; height: 28px; margin-right: calc(var(--spacing-unit)*0.8); }
-    #ranking-table td.rate-col,
-    #ranking-table td.matches-col { font-size: 0.9em; }
+
+    /* 768pxでの列表示切り替えと幅調整 */
+    .rank-col { width: 15%; }
+    body.show-ranking-rate table#ranking-table th.rate-col, /* IDを追加して特異性向上 */
+    body.show-ranking-rate table#ranking-table td.rate-col {
+        width: 40%;
+    }
+    body.show-ranking-rate table#ranking-table th.name-col, /* IDを追加して特異性向上 */
+    body.show-ranking-rate table#ranking-table td.name-col {
+        width: 45%;
+    }
+
+    body.show-ranking-matches table#ranking-table th.matches-col, /* IDを追加して特異性向上 */
+    body.show-ranking-matches table#ranking-table td.matches-col {
+        width: 40%;
+        font-size: 0.9em;
+        display: table-cell !important;
+    }
+    body.show-ranking-matches table#ranking-table th.name-col, /* IDを追加して特異性向上 */
+    body.show-ranking-matches table#ranking-table td.name-col {
+        width: 45%;
+    }
 }
 
-/* --- さらに小さいサイズ --- */
+/* ranking.css の @media (max-width: 480px) 内の修正案（横スクロールを無くす場合） */
 @media (max-width: 480px) {
-    .podium { min-height: 160px; margin-bottom: calc(var(--spacing-unit) * 2.5); }
-    .podium-place img { width: 45px; height: 45px; border-width: 2px; }
-    .podium-place.place-1 img { width: 55px; height: 55px; }
-    .podium-name { font-size: 0.8em; }
-    .podium-rate { font-size: 0.8em; }
-    .podium-place.place-1 .podium-rate,
-    .podium-place.place-2 .podium-rate,
-    .podium-place.place-3 .podium-rate { font-size: 1em; }
-    .podium-place.place-1 .podium-rate { font-size: 1.1em; }
-    .podium-base { font-size: 1.3em; }
-    .podium-place.place-1 .podium-base { height: 90px; }
-    .podium-place.place-2 .podium-base { height: 70px; }
-    .podium-place.place-3 .podium-base { height: 55px; }
+    #ranking-table {
+        min-width: 100%; /* テーブルの最小幅を画面幅に合わせる */
+        width: 100%;     /* テーブル幅を画面幅に固定 */
+        table-layout: fixed; /* 列幅を厳密に制御 */
+    }
 
     #ranking-table th,
-    #ranking-table td { font-size: 0.8em; }
-    .rank-avatar { display: none; } /* アバター非表示 */
-    .rank-col { width: 15%; } /* ランク列少し広げる */
-    .name-col { width: 50%; }
-    .rate-col { width: 35%; } /* レート列広げる */
-    .matches-col { display: none; } /* マッチ数列非表示 */
-    #ranking-table td.rate-col { font-size: 0.8em; }
+    #ranking-table td {
+        white-space: nowrap; /* セル内でテキストを折り返さない */
+        overflow: hidden;      /* はみ出た内容は隠す */
+        text-overflow: ellipsis; /* はみ出たテキストを「...」で表示 */
+        /* font-size や padding は現状維持またはさらに詰める */
+    }
+
+    .rank-avatar {
+        width: 18px; /* アバターをさらに小さく */
+        height: 18px;
+        margin-right: 3px;
+    }
+
+    /* カラム幅の合計を100%に収まるように再計算 */
+    .rank-col { width: 15%; }
+    .name-col {
+        width: 50%; /* アバター込みの幅 */
+        /* ↓ 名前テキスト自体がアバター分を除いた領域ではみ出ないようにする工夫が必要な場合あり */
+    }
+    /* 例: 名前のspanタグにスタイルを適用する場合 (HTML構造による) */
+    .name-col > span {
+        display: inline-block;
+        max-width: calc(100% - 22px); /* アバター幅+マージンを引いた概算 */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+
+    body.show-ranking-rate #ranking-table .rate-col {
+        width: 35%; /* (100% - 15% - 50%) */
+    }
+    body.show-ranking-matches #ranking-table .matches-col {
+        width: 35%; /* (100% - 15% - 50%) */
+    }
+    /* display: none !important; や display: table-cell !important; の指定は維持 */
 }

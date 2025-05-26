@@ -10,8 +10,8 @@
 .mypage-content-layout {
     display: flex;
     flex-wrap: wrap; /* PC表示で折り返さないように、レスポンシブで制御 */
-    gap: var(--spacing-unit-large, 30px);
-    margin-bottom: var(--spacing-unit-large, 30px);
+    gap: calc(var(--spacing-unit) * 4); /* 30px から変更 */
+    margin-bottom: calc(var(--spacing-unit) * 4); /* 30px から変更 */
 }
 
 /* --- 各セクションの幅調整 --- */
@@ -27,7 +27,7 @@
     min-width: 320px; /* PCでの最小幅 */
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-unit-large, 30px);
+    gap: calc(var(--spacing-unit) * 4); /* 30px から変更 */
 }
 
 /* --- プロフィールカード --- */
@@ -107,8 +107,8 @@
     align-items: center;
     justify-content: center;
     gap: 15px;
-    margin-top: var(--spacing-unit-medium, 15px);
-    margin-bottom: var(--spacing-unit-medium, 15px);
+    margin-top: calc(var(--spacing-unit) * 2); /* 15px から変更 */
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 15px から変更 */
     flex-wrap: wrap;
 }
 
@@ -151,23 +151,68 @@
     width: 100%;
     text-align: left;
     border-top: 1px solid var(--color-border);
-    padding-top: var(--spacing-unit-medium, 15px);
+    padding-top: calc(var(--spacing-unit) * 2); /* 15px から変更 */
     margin-top: auto;
 }
+
+/* ▼▼▼ ここから修正・追加 ▼▼▼ */
 .profile-extra-info .info-item {
     margin-bottom: calc(var(--spacing-unit) * 2);
+    border: 1px solid var(--color-primary); /* 金色の枠線を追加 */
+    padding: calc(var(--spacing-unit) * 1.5); /* 内側に余白を追加 */
+    border-radius: var(--border-radius-small); /* 角を少し丸める */
+    background-color: rgba(0, 0, 0, 0.15); /* 背景を少し暗くして区別しやすく */
 }
+
 .profile-extra-info label {
     display: block;
     font-size: 0.9rem;
-    color: var(--color-text-secondary);
+    color: var(--color-primary); /* ★ ラベルを金色に変更 */
     margin-bottom: calc(var(--spacing-unit) * 0.5);
     font-weight: 600;
 }
-.profile-extra-info p#self-intro-display.display-mode {
-    min-height: 120px;
+
+/* common.css の .detail-comment を上書き & 調整 */
+.profile-extra-info .detail-comment {
+    background-color: transparent; /* 背景をなくす */
+    padding: 0; /* パディングをなくす */
+    border: none; /* ボーダーをなくす */
+    min-height: auto; /* 高さを自動に */
+    margin-top: calc(var(--spacing-unit) * 0.5);
+    border-left: 3px solid var(--color-primary); /* 左ボーダーは維持 */
+    padding-left: calc(var(--spacing-unit) * 1.5); /* 左パディングは維持 */
+    color: var(--color-text-primary);
+    word-break: break-word;
+    font-size: 0.9em;
+    line-height: 1.5;
+    margin-bottom: 0; /* pタグのマージンリセット */
+}
+
+/* p タグの display-mode */
+.profile-extra-info p.display-mode {
+    margin-bottom: 0; /* .info-item にマージンがあるので不要 */
+}
+/* span タグの display-mode */
+.profile-extra-info span.display-mode {
+    color: var(--color-text-primary);
+    word-break: break-word;
+    display: block;
+    margin-top: calc(var(--spacing-unit) * 0.5);
+}
+
+/* 自己紹介の white-space を維持 */
+#self-intro-display {
     white-space: pre-wrap;
 }
+
+/* 編集モードの入力欄 */
+.profile-extra-info input.edit-mode,
+.profile-extra-info textarea.edit-mode {
+    margin-top: calc(var(--spacing-unit) * 1);
+    margin-bottom: 0; /* info-item にマージンがあるので不要 */
+    /* common.css のスタイルを基本とする */
+}
+/* ▲▲▲ ここまで修正・追加 ▲▲▲ */
 
 .profile-edit-actions {
     margin-top: calc(var(--spacing-unit) * 3);
@@ -203,12 +248,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 -2px 0 rgba(0,0,0,0.15);
 }
 .button-profile-cancel {
-    background-color: var(--color-background-medium, #333);
+    background-color: var(--color-background-medium);
     color: var(--color-text-secondary);
     border: 1px solid var(--color-border);
 }
 .button-profile-cancel:hover {
-    background-color: var(--color-background-dark, #222);
+    background-color: var(--color-background-dark);
     color: var(--color-text-primary);
     border-color: var(--color-border-light);
 }
@@ -319,13 +364,13 @@
 /* --- バッジ図鑑 --- */
 .mypage-badge-dex {
     margin-top: calc(var(--spacing-unit) * 4);
-    padding: var(--spacing-unit-medium, 15px);
+    padding: calc(var(--spacing-unit) * 2); /* 15px から変更 */
     background: linear-gradient(170deg, rgba(35, 35, 40, 0.8), rgba(20, 20, 25, 0.9));
     border-radius: var(--border-radius-large);
     border: 1px solid rgba(255, 215, 0, 0.1);
     box-shadow: var(--shadow-medium);
     clear: both;
-    max-width: var(--container-max-width, 1200px); /* common.cssのコンテナ最大幅に合わせるか、適切な値を設定 */
+    max-width: var(--container-max-width);
     margin-left: auto;
     margin-right: auto;
 }
@@ -333,7 +378,7 @@
 .mypage-badge-dex h2 {
     text-align: center;
     color: var(--color-primary-light);
-    margin-bottom: var(--spacing-unit-medium, 15px);
+    margin-bottom: calc(var(--spacing-unit) * 2); /* 15px から変更 */
     font-family: var(--font-family-title);
 }
 
@@ -343,7 +388,6 @@
 
 #badge-dex-grid {
   display: grid;
-  /* デフォルトは6列、アイテム最小幅80px程度を想定 */
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 15px;
   padding: 15px 0;
@@ -381,7 +425,7 @@
                 0 0 15px var(--color-primary);
 }
 .badge-dex-item.not-owned {
-    border-color: var(--color-border-light, #444);
+    border-color: var(--color-border-light);
     background-color: rgba(10, 10, 10, 0.7);
     box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
 }
@@ -392,7 +436,7 @@
 .badge-dex-item.not-owned:hover {
     transform: none;
     box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-    border-color: var(--color-border-light, #444);
+    border-color: var(--color-border-light);
 }
 
 .badge-dex-detail {
@@ -400,29 +444,37 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 400px;
+    width: 400px; /* ★ 幅を固定値に設定 */
+    max-width: 90%; /* ★ 画面幅の90%を最大幅とする */
+    max-height: 80vh; /* ★ 高さが画面の80%を超えないように設定 */
+    overflow-y: auto; /* ★ 高さを超えた場合はスクロールを許可 */
     background: rgba(10, 10, 15, 0.95);
     border: 1px solid var(--color-primary);
     border-radius: var(--border-radius-large);
-    padding: calc(var(--spacing-unit) * 2);
+    padding: calc(var(--spacing-unit) * 3);
     box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-    z-index: 10;
+    z-index: 1010;
     display: none;
     flex-direction: column;
     align-items: center;
     text-align: center;
     backdrop-filter: blur(5px);
+    box-sizing: border-box; /* ★ box-sizing を追加 */
+    transition: width 0.2s ease, height 0.2s ease; /* ★ 念のためトランジション追加 */
 }
 .badge-dex-detail-close {
     position: absolute;
-    top: 5px;
-    right: 10px;
+    top: 10px; /* 5px -> 10px */
+    right: 15px; /* 10px -> 15px */
     background: none;
     border: none;
     color: var(--color-text-secondary);
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* 1.5rem -> 1.8rem */
     cursor: pointer;
+    transition: color 0.2s ease;
+}
+.badge-dex-detail-close:hover {
+    color: var(--color-text-primary);
 }
 .badge-dex-detail img { width: 80px; height: 80px; margin-bottom: var(--spacing-unit); }
 .badge-dex-detail h3 { margin-top: 0; margin-bottom: calc(var(--spacing-unit) * 0.5); color: var(--color-primary-light); }
@@ -431,16 +483,16 @@
 .badge-dex-detail #badge-dex-detail-condition,
 .badge-dex-detail #badge-dex-detail-rate,
 .badge-dex-detail #badge-dex-detail-price { font-weight: bold; }
-.badge-dex-detail #badge-dex-detail-rate { color: var(--color-warning, #ffcc00); }
-.badge-dex-detail #badge-dex-detail-price { color: var(--color-accent, var(--color-primary)); }
+.badge-dex-detail #badge-dex-detail-rate { color: #ffcc00; } /* var を直接指定 */
+.badge-dex-detail #badge-dex-detail-price { color: var(--color-primary); } /* var を直接指定 */
 .badge-dex-detail .owned-status { margin-top: var(--spacing-unit); font-weight: bold; font-size: 0.9rem; }
-.badge-dex-detail .owned-status.owned { color: var(--color-success, #4CAF50); }
-.badge-dex-detail .owned-status.not-owned { color: var(--color-danger, #F44336); }
+.badge-dex-detail .owned-status.owned { color: #4CAF50; } /* var を直接指定 */
+.badge-dex-detail .owned-status.not-owned { color: #F44336; } /* var を直接指定 */
 
 /* --- 表示バッジ編集モーダル --- */
 .edit-badges-modal-content {
     max-width: 700px;
-    background: linear-gradient(160deg, var(--color-surface-dark, #111), var(--color-background));
+    background: linear-gradient(160deg, #111, var(--color-background)); /* var を直接指定 */
     border: 1px solid var(--color-primary-dark);
 }
 .edit-badges-container { display: flex; gap: calc(var(--spacing-unit) * 3); margin-bottom: calc(var(--spacing-unit) * 2); }
@@ -451,25 +503,29 @@
 .display-slots .badge-slot.filled { border-style: solid; border-color: var(--color-primary); }
 .display-slots .badge-slot:hover { background-color: rgba(255, 255, 255, 0.1); }
 .display-slots .badge-slot img { width: 90%; height: 90%; }
-.display-slots .remove-badge-from-slot { position: absolute; top: -5px; right: -5px; background: var(--color-danger, #F44336); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; display: none; transition: background-color 0.2s ease; }
+.display-slots .remove-badge-from-slot { position: absolute; top: -5px; right: -5px; background: #F44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; display: none; transition: background-color 0.2s ease; }
 .display-slots .badge-slot.filled:hover .remove-badge-from-slot { display: block; }
 .display-slots .remove-badge-from-slot:hover { background: #d32f2f; }
 .owned-badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: var(--spacing-unit); max-height: 300px; overflow-y: auto; padding: var(--spacing-unit); background-color: rgba(0, 0, 0, 0.2); border-radius: var(--border-radius-medium); }
 .owned-badges-grid .badge-item { aspect-ratio: 1 / 1; background-color: rgba(0, 0, 0, 0.5); border-radius: var(--border-radius-small); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease; }
 .owned-badges-grid .badge-item.selected { opacity: 0.4; cursor: not-allowed; }
 .owned-badges-grid .badge-item img { max-width: 90%; max-height: 90%; object-fit: contain; }
-.owned-badges-grid .badge-item:not(.selected):hover { transform: scale(1.1); border-color: var(--color-primary); background-color: rgba(var(--color-primary-rgb, 255, 215, 0), 0.1); }
+.owned-badges-grid .badge-item:not(.selected):hover { transform: scale(1.1); border-color: var(--color-primary); background-color: rgba(255, 215, 0, 0.1); }
 
 
 /* ==========================
    mypage.html レスポンシブ
    ========================== */
 
+/* ==========================
+   mypage.html レスポンシブ (全体・修正版)
+   ========================== */
+
 /* --- 中間サイズ (992px以下) --- */
 @media (max-width: 992px) {
     .mypage-content-layout {
-        flex-direction: row; /* ★ 横並びを維持 */
-        gap: var(--spacing-unit-medium, 20px); /* 間隔を少し詰める */
+        flex-direction: row; /* 横並びを維持 */
+        gap: calc(var(--spacing-unit) * 3); /* 間隔を少し詰める (20px -> 24px 相当) */
     }
     .mypage-user-info {
         flex: 1 1 40%; /* 比率調整 */
@@ -478,7 +534,7 @@
     .mypage-charts {
         flex: 1 1 55%; /* 比率調整 */
         min-width: 0; /* 縮小しやすく */
-        gap: var(--spacing-unit-medium, 20px); /* チャート間隔調整 */
+        gap: calc(var(--spacing-unit) * 3); /* チャート間隔調整 */
     }
 
     .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 100px; height: 100px; }
@@ -490,68 +546,70 @@
     .chart-wrapper-half { min-height: 220px; }
 
     #badge-dex-grid {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* 5列程度を想定 */
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
         gap: 12px;
     }
+    /* バッジモーダルは 992px では基本スタイルを継承 (max-width: 90% が効く) */
 }
 
 /* --- 小さめサイズ (スマホ, 768px以下) --- */
 @media (max-width: 768px) {
     .mypage-content-layout {
-        flex-direction: row; /* ★ プロフィールとグラフを横並びに変更 */
-        gap: var(--spacing-unit-medium, 20px); /* ★ 横並び時のコンテナ間隔 */
-        align-items: flex-start; /* 上揃えに戻す */
+        flex-direction: row; /* プロフィールとグラフを横並び */
+        gap: calc(var(--spacing-unit) * 2.5); /* 間隔 (20px -> 17.5px 相当) */
+        align-items: flex-start;
     }
     .mypage-user-info {
-        flex: 1 1 40%; /* ★ プロフィールエリアの幅の割合 (少し狭く) */
-        min-width: 250px; /* ★ 最小幅を調整 */
-        max-width: none; /* 最大幅の制限を解除 */
+        flex: 1 1 40%;
+        min-width: 0; /* 最小幅を0に */
+        max-width: none;
     }
     .mypage-charts {
-        flex: 1 1 55%; /* ★ グラフエリアの幅の割合 (少し広く) */
-        min-width: 0; /* グラフエリアは縮小しやすく */
-        margin-top: 0; /* 横並びなので不要 */
-        gap: var(--spacing-unit-medium, 15px); /* チャート間の隙間を調整 */
-        max-width: none; /* 最大幅の制限を解除 */
+        flex: 1 1 55%;
+        min-width: 0;
+        margin-top: 0;
+        gap: calc(var(--spacing-unit) * 2); /* 間隔 (15px -> 14px 相当) */
+        max-width: none;
     }
 
-    .mypage-user-info .profile-card { padding: var(--spacing-unit-medium, 15px); }
-    .mypage-user-info .profile-main-info-mypage { flex-direction: column; gap: var(--spacing-unit-small, 8px); margin-bottom: var(--spacing-unit, 10px); }
+    .mypage-user-info .profile-card { padding: calc(var(--spacing-unit) * 2); }
+    .mypage-user-info .profile-main-info-mypage { flex-direction: column; gap: var(--spacing-unit); margin-bottom: calc(var(--spacing-unit) * 1.5); }
     .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 60px; height: 60px; }
     .mypage-user-info .profile-name-details-mypage { align-items: center; text-align: center; }
     .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.3rem; line-height: 1.2; }
-    .mypage-user-info .profile-stats { padding: var(--spacing-unit, 10px); gap: var(--spacing-unit-small, 8px); margin-bottom: var(--spacing-unit-medium, 15px); }
+    .mypage-user-info .profile-stats { padding: var(--spacing-unit); gap: var(--spacing-unit); margin-bottom: calc(var(--spacing-unit) * 2); }
     .mypage-user-info .profile-stats .stat-item { min-width: 50px; padding: 5px 0; }
     .mypage-user-info .profile-stats .stat-label { font-size: 0.6rem; margin-bottom: 3px; }
     .mypage-user-info .profile-stats .stat-value { font-size: 1rem; }
 
-    .profile-badges-container { gap: 8px; margin-top: var(--spacing-unit, 10px); margin-bottom: var(--spacing-unit, 10px); }
-    .profile-badges { gap: var(--spacing-unit, 10px); }
+    .profile-badges-container { gap: 8px; margin-top: var(--spacing-unit); margin-bottom: var(--spacing-unit); }
+    .profile-badges { gap: var(--spacing-unit); }
     .profile-badges .badge-slot { width: 35px; height: 35px; border-width: 1px; }
     #edit-display-badges-button { padding: 4px 8px; font-size: 0.65rem; }
 
-    .mypage-user-info .profile-extra-info { padding-top: var(--spacing-unit, 10px); }
-    .profile-extra-info .info-item { margin-bottom: var(--spacing-unit, 10px); }
+    .mypage-user-info .profile-extra-info { padding-top: var(--spacing-unit); }
+    .profile-extra-info .info-item { margin-bottom: var(--spacing-unit); padding: var(--spacing-unit); }
     .profile-extra-info label { font-size: 0.7rem; margin-bottom: 3px; }
     .profile-extra-info p.display-mode,
+    .profile-extra-info span.display-mode,
     .profile-extra-info input.edit-mode,
     .profile-extra-info textarea.edit-mode { font-size: 0.75rem; padding: 5px; }
-    .profile-extra-info p#self-intro-display.display-mode { min-height: 50px; font-size: 0.75rem; }
-    .profile-edit-actions { margin-top: var(--spacing-unit-medium, 15px); gap: var(--spacing-unit-small, 8px); }
+    .profile-extra-info .detail-comment { font-size: 0.75rem; padding-left: calc(var(--spacing-unit) * 1) !important; }
+    .profile-edit-actions { margin-top: calc(var(--spacing-unit) * 2); gap: var(--spacing-unit); }
     .button-profile-edit, .button-profile-save, .button-profile-cancel { padding: 5px 10px; font-size: 0.75rem; }
 
     /* グラフ */
-    .mypage-charts .chart-container { padding: var(--spacing-unit, 10px); }
+    .mypage-charts .chart-container { padding: var(--spacing-unit); }
     .mypage-charts .chart-container h3 { font-size: 0.85rem; margin-bottom: 8px; padding-bottom: 5px; }
     .mypage-charts .chart-wrapper { height: 160px; }
     .charts-row-within {
-        gap: var(--spacing-unit-small, 8px);
-        flex-direction: row; /* ★ 円グラフも横並びを維持 */
-        align-items: flex-start; /* 上揃えに戻す */
+        gap: var(--spacing-unit);
+        flex-direction: row;
+        align-items: flex-start;
     }
     .chart-wrapper-half {
-        flex-basis: calc(50% - 4px); /* ★ 横並びで半分弱の幅 (gapを考慮) */
-        width: auto; /* width: 100% を解除 */
+        flex-basis: calc(50% - 4px);
+        width: auto;
         min-height: 130px;
         padding: 5px;
     }
@@ -559,89 +617,108 @@
     .chart-wrapper-half canvas { max-height: 100px; }
 
     /* バッジ図鑑 */
-    .mypage-badge-dex { margin-top: var(--spacing-unit-large, 20px); padding: var(--spacing-unit-small, 8px); }
-    .mypage-badge-dex h2 { font-size: 1rem; margin-bottom: var(--spacing-unit-small, 8px); }
+    .mypage-badge-dex { margin-top: calc(var(--spacing-unit) * 3); padding: var(--spacing-unit); }
+    .mypage-badge-dex h2 { font-size: 1rem; margin-bottom: var(--spacing-unit); }
     #badge-dex-grid {
-        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* 4列程度を想定 */
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
         gap: 8px;
     }
     .badge-dex-item { border-width: 1px; }
-    .badge-dex-detail { max-width: 95%; padding: var(--spacing-unit-small, 8px); bottom: 10px; }
+
+    /* ▼▼▼ バッジ図鑑モーダルの修正 ▼▼▼ */
+    .badge-dex-detail {
+        width: 70%; /* 幅を90%に設定 */
+        max-width: 400px; /* 最大幅は維持 */
+        padding: calc(var(--spacing-unit) * 2); /* パディングを調整 */
+        max-height: 85vh; /* 高さを設定 */
+        overflow-y: auto; /* スクロールを許可 */
+    }
     .badge-dex-detail img { width: 45px; height: 45px; margin-bottom: 5px; }
     .badge-dex-detail h3 { font-size: 0.9rem; }
     .badge-dex-detail p { font-size: 0.8rem; margin: 3px 0; }
+    /* ▲▲▲ バッジ図鑑モーダルの修正 ▲▲▲ */
 
     /* 編集モーダル */
-    .edit-badges-modal-content { padding: var(--spacing-unit-medium, 15px); }
-    .edit-badges-container { flex-direction: column; gap: var(--spacing-unit-medium, 15px); }
+    .edit-badges-modal-content { padding: calc(var(--spacing-unit) * 2); }
+    .edit-badges-container { flex-direction: column; gap: calc(var(--spacing-unit) * 2); }
     .display-slots-container h3,
-    .owned-badges-container h3 { font-size: 0.9rem; margin-bottom: var(--spacing-unit-small, 8px); }
-    .display-slots { gap: var(--spacing-unit-small, 8px); min-height: 60px; }
+    .owned-badges-container h3 { font-size: 0.9rem; margin-bottom: var(--spacing-unit); }
+    .display-slots { gap: var(--spacing-unit); min-height: 60px; }
     .display-slots .badge-slot { width: 45px; height: 45px; }
-    .owned-badges-grid { max-height: 100px; gap: var(--spacing-unit-small, 8px); }
-    .modal-actions .button { padding: 7px 12px; font-size: 0.85rem; }
+    .owned-badges-grid { max-height: 100px; gap: var(--spacing-unit); }
+    /* .modal-actions .button は common.css で調整 */
 }
+
 /* --- さらに小さいサイズ (480px以下) --- */
 @media (max-width: 480px) {
     .mypage-content-layout {
-        flex-direction: row; /* ★ プロフィールとグラフを横並びに変更 */
-        gap: var(--spacing-unit-medium, 12px); /* ★ 横並び時のコンテナ間隔 */
-        align-items: flex-start; /* 上揃えに戻す */
+        flex-direction: row;
+        gap: calc(var(--spacing-unit) * 2); /* 12px -> 12px */
+        align-items: flex-start;
     }
     .mypage-user-info {
         min-width: 0;
-        flex-basis: 42%; /* プロフィールエリアの割合を少し調整 */
-        max-width: none; /* 最大幅の制限を解除 */
+        flex-basis: 42%;
+        max-width: none;
     }
     .mypage-charts {
-        flex-basis: 53%; /* グラフエリアの割合を少し調整 */
-        min-width: 0; /* 縮小しやすく */
-        margin-top: 0; /* 横並びなので不要 */
-        gap: var(--spacing-unit-medium, 12px); /* チャート間の隙間を調整 */
-        max-width: none; /* 最大幅の制限を解除 */
+        flex-basis: 53%;
+        min-width: 0;
+        margin-top: 0;
+        gap: calc(var(--spacing-unit) * 2);
+        max-width: none;
     }
 
-    .mypage-user-info .profile-card { padding: var(--spacing-unit-small, 8px); }
-    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 60px; height: 60px; }
-    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1.1rem; }
-    .mypage-user-info .profile-stats { gap: 5px; padding: 8px; }
-    .mypage-user-info .profile-stats .stat-item { min-width: 45px; }
-    .mypage-user-info .profile-stats .stat-value { font-size: 0.9rem; }
-    .mypage-user-info .profile-stats .stat-label { font-size: 0.55rem; }
+    .mypage-user-info .profile-card { padding: var(--spacing-unit); }
+    .mypage-user-info .profile-main-info-mypage img#profile-pic { width: 50px; height: 50px; }
+    .mypage-user-info .profile-name-details-mypage h2#profile-name { font-size: 1rem; }
+    .mypage-user-info .profile-stats { gap: 5px; padding: 6px; }
+    .mypage-user-info .profile-stats .stat-item { min-width: 40px; }
+    .mypage-user-info .profile-stats .stat-value { font-size: 0.8rem; }
+    .mypage-user-info .profile-stats .stat-label { font-size: 0.5rem; }
     .profile-badges .badge-slot { width: 30px; height: 30px; }
-    .profile-extra-info label { font-size: 0.7rem; }
+    .profile-extra-info label { font-size: 0.65rem; }
     .profile-extra-info p.display-mode,
+    .profile-extra-info span.display-mode,
     .profile-extra-info input.edit-mode,
     .profile-extra-info textarea.edit-mode { font-size: 0.7rem; }
+    .profile-extra-info .detail-comment { font-size: 0.7rem; }
 
     /* グラフ */
-    .mypage-charts .chart-container { padding: 8px; }
-    .mypage-charts .chart-container h3 { font-size: 0.75rem; margin-bottom: 8px; }
-    .mypage-charts .chart-wrapper { height: 130px; }
+    .mypage-charts .chart-container { padding: 6px; }
+    .mypage-charts .chart-container h3 { font-size: 0.7rem; }
+    .mypage-charts .chart-wrapper { height: 120px; }
     .charts-row-within {
-        flex-direction: row; /* ★ 円グラフも横並びを維持 */
-        gap: var(--spacing-unit-small, 8px); /* 横並び時の円グラフ間隔 */
-        align-items: flex-start; /* 上揃えに戻す */
+        flex-direction: row;
+        gap: var(--spacing-unit);
+        align-items: flex-start;
     }
     .chart-wrapper-half {
-        min-height: 110px;
-        flex-basis: calc(50% - 4px); /* ★ 横並びで半分弱の幅 (gapを考慮) */
-        width: auto; /* width: 100% を解除 */
-        max-width: none; /* 最大幅の制限を解除 */
+        min-height: 100px;
+        flex-basis: calc(50% - 3px);
+        width: auto;
+        max-width: none;
     }
-    .chart-wrapper-half canvas { max-height: 80px; }
-    .chart-wrapper-half h4 { font-size: 0.65rem; }
+    .chart-wrapper-half canvas { max-height: 70px; }
+    .chart-wrapper-half h4 { font-size: 0.6rem; }
 
     /* バッジ図鑑 */
-    .mypage-badge-dex h2 { font-size: 0.9rem; }
+    .mypage-badge-dex h2 { font-size: 0.8rem; }
     #badge-dex-grid {
         grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
         gap: 5px;
     }
-    .badge-dex-detail { padding: 5px; font-size: 0.8rem; }
+
+    /* ▼▼▼ バッジ図鑑モーダルの修正 ▼▼▼ */
+    .badge-dex-detail {
+        width: 70%; 
+        padding: var(--spacing-unit); /* パディングを調整 */
+        font-size: 0.8rem; /* 基本フォントサイズ */
+        max-height: 90vh; /* 高さを設定 */
+        overflow-y: auto; /* スクロールを許可 */
+    }
     .badge-dex-detail img { width: 40px; height: 40px; }
-    .badge-dex-detail h3 { font-size: 0.9rem; }
+    .badge-dex-detail h3 { font-size: 0.85rem; }
     .badge-dex-detail p { font-size: 0.7rem; }
+    /* ▲▲▲ バッジ図鑑モーダルの修正 ▲▲▲ */
 }
-
-

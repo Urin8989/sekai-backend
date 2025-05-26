@@ -31,8 +31,16 @@ let currentDisplayBadgeSelection = [];
 // もし script.js で MyApp.DEFAULT_BADGE_PATH のようなグローバル変数を設定していればそれを使う。
 // ここでは getBadgeImagePath に不正なIDを渡してデフォルトパスを取得する。
 const getDefaultBadgePath = () => typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath('__INVALID_ID_FOR_DEFAULT__') : '/images/default_badge.svg';
-const getDefaultAvatarPath = () => '/images/placeholder-avatar.png'; // これは固定で良いと判断
-
+const getDefaultAvatarPath = () => {
+    // script.jsのgetBadgeImagePathと同様のロジックで環境判定するか、
+    // script.jsで MyApp.DEFAULT_AVATAR_PATH のようなグローバル変数を設定してそれを使う。
+    // ここでは、サーバーのルートからの絶対パスとして解決されることを期待。
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '/public/images/default_avatar.svg';
+    } else {
+        return '/images/default_avatar.svg';
+    }
+};
 async function authenticatedFetch(url, options = {}, requiresAuth = true) {
     const headers = { ...options.headers };
     if (requiresAuth) {

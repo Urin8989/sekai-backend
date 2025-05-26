@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <style>
+      /* <![CDATA[ */
+      .bg { fill: #1a1a1a; } /* サイトの表面色 (var(--color-surface)) */
+      .border { fill: none; stroke: #FFD700; stroke-width: 3; } /* 金色の枠線 (var(--color-primary)) */
+      .handle { fill: none; stroke: #666; stroke-width: 8; } /* ハンドルの色 */
+      .spoke { stroke: #666; stroke-width: 6; } /* スポークの色 */
+      .center-circle { fill: #FFD700; } /* 中央の円 (金色) */
+      .center-text {
+          font-family: 'Cinzel', serif; /* サイトのタイトルフォント */
+          font-size: 12px; /* 文字サイズ調整 */
+          fill: #111; /* 黒色 (var(--color-text-on-primary)) */
+          text-anchor: middle; /* 中央揃え */
+          font-weight: 700; /* 太字 */
+          dominant-baseline: central; /* 垂直中央揃え */
+      }
+      /* ]]> */
+    </style>
+  </defs>
+
+  <circle cx="50" cy="50" r="50" class="bg"/>
+
+  <circle cx="50" cy="50" r="47" class="border"/>
+
+  <circle cx="50" cy="50" r="30" class="handle"/>
+
+  <line x1="50" y1="50" x2="50" y2="23" class="spoke"/>
+  <line x1="50" y1="50" x2="25.98" y2="65" class="spoke"/>
+  <line x1="50" y1="50" x2="74.02" y2="65" class="spoke"/>
+
+  <circle cx="50" cy="50" r="10" class="center-circle"/>
+
+  <text x="50" y="50" class="center-text">M</text>
+
+</svg>

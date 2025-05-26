@@ -60,17 +60,24 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // !origin は Postman や curl のようなオリジンを持たないリクエストを許可 (開発中は便利)
-        // 本番環境では !origin を許可するかどうかはセキュリティポリシーによります。
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        // allowedOrigins に含まれるオリジン、
+        // またはオリジンがない場合 (!origin、null や undefined を含む)、
+        // またはオリジンが文字列の "null" の場合、アクセスを許可します。
+        if (!origin || origin === "null" || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
             console.error('CORS policy denied access for origin:', origin);
-            callback(new Error('Not allowed by CORS'));
+            // ここでエラーを throw するのではなく、CORSエラーとして callback に渡すのが
+            // cors ミドルウェアの標準的な使い方ですが、既存の挙動を維持します。
+            // ただし、500エラーを防ぐためには、単に false を渡す方が良いかもしれません。
+            // callback(new Error('Not allowed by CORS')); 
+            // ↓↓↓ CORSエラーとして処理させる (500ではなくCORSエラーになるはず)
+            callback(new Error('Not allowed by CORS')); // ← 既存の挙動を維持。もしこれでまだ500になるなら、下の行を試す。
+            // callback(null, false); // ← CORSとして拒否する（500エラーにはしない）
         }
     },
-    credentials: true, // クレデンシャル（Cookie, Authorizationヘッダーなど）を許可
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
 
 app.use(express.json());

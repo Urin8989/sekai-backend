@@ -45,15 +45,13 @@ const paginationContainer = document.getElementById('ranking-pagination');
  * @returns {Promise<{ranking: Array<object>, currentPage: number, totalPages: number, totalUsers: number}>} APIからのレスポンスデータ
  */
 async function fetchRankingData(type, page, search) {
-    console.log(`Fetching ranking data - Type: ${type}, Page: ${page}, Search: "${search}"`);
+    console.log(`Workspaceing ranking data - Type: ${type}, Page: ${page}, Search: "${search}"`);
     if (loadingIndicator) loadingIndicator.style.display = 'block';
     if (noResultsIndicator) noResultsIndicator.style.display = 'none';
     if (paginationContainer) paginationContainer.style.display = 'none';
 
     try {
-        // APIエンドポイントを構築 (クエリパラメータを追加)
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/ranking?type=${type}&page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}`;
-
         const response = await fetch(apiUrl);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
@@ -61,9 +59,7 @@ async function fetchRankingData(type, page, search) {
         }
         const data = await response.json();
         console.log("API Response Data:", data);
-
         return data;
-
     } catch (error) {
         console.error(`Error fetching ranking data:`, error);
         if (noResultsIndicator) {
@@ -84,14 +80,15 @@ async function fetchRankingData(type, page, search) {
 function displayPodium(topPlayers, type) {
     const places = ['1st', '2nd', '3rd'];
     places.forEach((place, index) => {
-        const player = topPlayers[index]; // 1ページ目のデータから取得
+        const player = topPlayers[index];
         const elements = podiumElements[place];
 
-        if (elements) { // DOM要素が存在するか確認
+        if (elements) {
             if (player) {
                 if (elements.pic) {
-                    elements.pic.src = player.picture || 'images/placeholder-avatar.png';
+                    elements.pic.src = player.picture || getDefaultAvatarPath(); // getDefaultAvatarPath を使用
                     elements.pic.alt = player.name || 'プレイヤー';
+                    elements.pic.onerror = () => { elements.pic.src = getDefaultAvatarPath(); };
                 }
                 if (elements.name) elements.name.textContent = player.name || 'プレイヤー';
                 if (elements.value) {
@@ -100,9 +97,8 @@ function displayPodium(topPlayers, type) {
                         : (player.matches ?? '--');
                 }
             } else {
-                // プレイヤーデータがない場合はプレースホルダー表示
                 if (elements.pic) {
-                    elements.pic.src = 'images/placeholder-avatar.png';
+                    elements.pic.src = getDefaultAvatarPath();
                     elements.pic.alt = `${index + 1}位`;
                 }
                 if (elements.name) elements.name.textContent = `${index + 1}位プレイヤー`;
@@ -114,13 +110,13 @@ function displayPodium(topPlayers, type) {
 
 /**
  * ランキングデータをテーブルに表示する
- * @param {Array<object>} rankingData 表示するランキングデータ (APIから取得したもの)
+ * @param {Array<object>} rankingData 表示するランキングデータ
  */
 function displayRankingTable(rankingData) {
     if (!rankingTableBody) return;
     rankingTableBody.innerHTML = '';
-
     const currentUserSub = window.MyApp?.currentUserData?.sub;
+    const defaultAvatar = getDefaultAvatarPath();
 
     if (!rankingData || rankingData.length === 0) {
         if (noResultsIndicator) {
@@ -134,15 +130,14 @@ function displayRankingTable(rankingData) {
     rankingData.forEach((player) => {
         const row = document.createElement('tr');
         row.dataset.userId = player.sub;
-
         if (currentUserSub && player.sub === currentUserSub) {
             row.classList.add('current-user-rank');
         }
-
+        const imgSrc = player.picture || defaultAvatar;
         row.innerHTML = `
             <td class="rank-col">${player.rank ?? '-'}</td>
             <td class="name-col">
-                <img src="${player.picture || 'images/placeholder-avatar.png'}" alt="${player.name || '不明'}" class="rank-avatar">
+                <img src="${imgSrc}" alt="${player.name || '不明'}" class="rank-avatar" onerror="this.onerror=null; this.src='${defaultAvatar}';">
                 <span>${player.name || 'プレイヤー'}</span>
             </td>
             <td class="rate-col">${player.rate ?? '----'}</td>
@@ -154,13 +149,12 @@ function displayRankingTable(rankingData) {
 
 /**
  * ページネーションUIを生成・更新する
- * @param {number} total 総ページ数 (APIから取得)
- * @param {number} current 現在のページ (APIから取得)
+ * @param {number} total 総ページ数
+ * @param {number} current 現在のページ
  */
 function setupPagination(total, current) {
     if (!paginationContainer) return;
     paginationContainer.innerHTML = '';
-
     if (total <= 1) {
         paginationContainer.style.display = 'none';
         return;
@@ -179,7 +173,6 @@ function setupPagination(total, current) {
         });
         return button;
     };
-
     const createEllipsis = () => {
         const ellipsis = document.createElement('span');
         ellipsis.textContent = '...';
@@ -188,58 +181,39 @@ function setupPagination(total, current) {
         return ellipsis;
     };
 
-    // 「前へ」ボタン
     paginationContainer.appendChild(createPageButton('前へ', current - 1, current === 1));
-
-    // ページ番号ボタン
     const maxPagesToShow = 5;
     let startPage = Math.max(1, current - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(total, startPage + maxPagesToShow - 1);
-    startPage = Math.max(1, endPage - maxPagesToShow + 1); // endPage に合わせて startPage を再調整
+    startPage = Math.max(1, endPage - maxPagesToShow + 1);
 
     if (startPage > 1) {
         paginationContainer.appendChild(createPageButton('1', 1));
-        if (startPage > 2) {
-            paginationContainer.appendChild(createEllipsis());
-        }
+        if (startPage > 2) paginationContainer.appendChild(createEllipsis());
     }
-
     for (let i = startPage; i <= endPage; i++) {
-        paginationContainer.appendChild(createPageButton(i.toString(), i, i === current, i === current));
+        paginationContainer.appendChild(createPageButton(i.toString(), i, false, i === current));
     }
-
-     if (endPage < total) {
-        if (endPage < total - 1) {
-            paginationContainer.appendChild(createEllipsis());
-        }
+    if (endPage < total) {
+        if (endPage < total - 1) paginationContainer.appendChild(createEllipsis());
         paginationContainer.appendChild(createPageButton(total.toString(), total));
     }
-
-    // 「次へ」ボタン
     paginationContainer.appendChild(createPageButton('次へ', current + 1, current === total));
 }
 
-
 /**
- * ランキング表示全体を更新する (API呼び出しとUI更新)
+ * ランキング表示全体を更新する
  */
 async function updateRankingView() {
     try {
         const data = await fetchRankingData(currentRankingType, currentPage, currentSearchQuery);
-
         currentPage = data.currentPage;
         totalPages = data.totalPages;
-
-        // 表彰台表示: 常にAPIから返されたランキングデータの先頭3名を表示
-        // (APIが常にソート済みで、かつ検索結果もソート済みであることを期待)
         displayPodium(data.ranking.slice(0, 3), currentRankingType);
-
         displayRankingTable(data.ranking);
         setupPagination(data.totalPages, data.currentPage);
-
     } catch (error) {
         console.error("Error updating ranking view:", error);
-        // fetchRankingData内でエラー表示済み
     }
 }
 
@@ -268,11 +242,20 @@ function handleTypeChange(newType) {
     }
     currentRankingType = newType;
     currentPage = 1;
-    // currentSearchQuery は維持する（種別変更時に検索クエリをリセットしない仕様）
 
     rankTypeButtons.forEach(button => {
         button.classList.toggle('active', button.dataset.rankType === newType);
     });
+
+    // ▼▼▼ bodyにクラスを付け替える処理を追加 ▼▼▼
+    document.body.classList.remove('show-ranking-rate', 'show-ranking-matches');
+    if (newType === 'rate') {
+        document.body.classList.add('show-ranking-rate');
+    } else if (newType === 'matches') {
+        document.body.classList.add('show-ranking-matches');
+    }
+    // ▲▲▲ ここまで ▲▲▲
+
     updateRankingView();
 }
 
@@ -289,6 +272,18 @@ function handleRowClick(event) {
     }
 }
 
+// デフォルトアバターパス取得関数 (script.js にはないのでここで定義)
+const getDefaultAvatarPath = () => {
+    // script.jsのgetBadgeImagePathと同様のロジックで環境判定するか、
+    // script.jsで MyApp.DEFAULT_AVATAR_PATH のようなグローバル変数を設定してそれを使う。
+    // ここでは、サーバーのルートからの絶対パスとして解決されることを期待。
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '/public/images/default_avatar.svg';
+    } else {
+        return '/images/default_avatar.svg';
+    }
+};
+
 // --- イベントリスナー設定 ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("ランキングページ読み込み完了");
@@ -298,9 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (searchInput) {
         searchInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                handleSearch();
-            }
+            if (event.key === 'Enter') handleSearch();
         });
     }
 
@@ -314,10 +307,16 @@ document.addEventListener('DOMContentLoaded', () => {
         rankingTableBody.addEventListener('click', handleRowClick);
     }
 
-    // 初期表示
-    updateRankingView();
+    // ▼▼▼ 初期表示時のクラス設定を追加 ▼▼▼
+    if (currentRankingType === 'rate') {
+        document.body.classList.add('show-ranking-rate');
+    } else if (currentRankingType === 'matches') {
+        document.body.classList.add('show-ranking-matches');
+    }
+    // ▲▲▲ ここまで ▲▲▲
 
-    // ログイン状態の変化を監視
+    updateRankingView(); // 初期表示
+
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((user) => {
             console.log("ログイン状態変更検知 (ランキングページ)");
@@ -330,6 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else {
-        console.warn("onLoginStatusChange 関数が定義されていません。ログイン状態の動的な反映は行われません。");
+        console.warn("onLoginStatusChange 関数が定義されていません。");
     }
 });
