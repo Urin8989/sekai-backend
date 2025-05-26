@@ -1,12 +1,11 @@
-// frontend/shop.js (修正版)
+// frontend/shop.js
 
 const GACHA_COST_DISPLAY = 200;
-let allAvailableBadges = [];
+let allAvailableBadges = []; // ショップで購入可能なバッジのリスト
 let isInitializingShop = false;
 let isGachaAnimating = false;
 
-// DOM要素 (変更なし)
-// ... (以前のコードと同じなので省略) ...
+// DOM要素
 let userPointsDisplay, regularShopItemsGrid, regularShopLoading, noRegularItemsMsg,
     limitedShopItemsGrid, limitedShopLoading, noLimitedItemsMsg,
     playGachaButton, gachaCostSpan, gachaErrorMessage,
@@ -16,6 +15,11 @@ let userPointsDisplay, regularShopItemsGrid, regularShopLoading, noRegularItemsM
     gachaResultName, gachaResultDesc, gachaResultRarityContainer, gachaRarityValue,
     gachaResultNewPoints;
 
+// ★★★ 環境に応じたデフォルト画像パスを script.js から取得する想定 ★★★
+// getBadgeImagePath に不正なIDを渡してデフォルトパスを取得するか、
+// script.js で MyApp.DEFAULT_BADGE_PATH のようなグローバル変数を定義する
+const getDefaultBadgePath = () => typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath('__INVALID_ID_FOR_DEFAULT__') : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '/public/images/default_badge.svg' : '/images/default_badge.svg');
+
 document.addEventListener('DOMContentLoaded', () => {
     userPointsDisplay = document.getElementById('user-points-display');
     regularShopItemsGrid = document.getElementById('shop-regular-items-grid');
@@ -24,18 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
     limitedShopItemsGrid = document.getElementById('shop-limited-items-grid');
     limitedShopLoading = document.getElementById('shop-limited-loading');
     noLimitedItemsMsg = document.getElementById('no-limited-items');
+
     playGachaButton = document.getElementById('play-gacha-button');
     gachaCostSpan = document.getElementById('gacha-cost-display');
     gachaErrorMessage = document.getElementById('gacha-error-message');
     gachaResultModal = document.getElementById('gacha-result-modal');
     closeGachaResultButton = document.getElementById('close-gacha-result');
     gachaButtonSpinner = playGachaButton?.querySelector('.spinner-small');
+
     gachaAnimationArea = document.getElementById('gacha-animation-area');
     if (gachaAnimationArea) {
         document.querySelectorAll('.gacha-reels .reel img').forEach(img => gachaReels.push(img));
     }
     gachaEffectOverlay = document.getElementById('gacha-演出-effect');
     gachaKakuteiScreen = document.getElementById('gacha-確定-演出');
+
     gachaResultDisplayArea = document.getElementById('gacha-result-display');
     gachaResultTitle = document.getElementById('gacha-result-title');
     gachaResultBadgeImg = document.getElementById('gacha-result-badge-img');
@@ -50,34 +57,40 @@ document.addEventListener('DOMContentLoaded', () => {
             gachaAnimationArea, gachaReels, gachaEffectOverlay, gachaKakuteiScreen
         });
     } else {
-        console.warn("[shop.js] Gacha animation script or its initialize function not found.");
+        console.warn("[shop.js] Gacha animation script (gacha-animation.js) or its initialize function not found.");
     }
+
     if (typeof window.registerUserDataReadyCallback === 'function') {
         window.registerUserDataReadyCallback(initializeShop);
     } else {
-        console.error("shop.js: registerUserDataReadyCallback is not defined. Initializing without user data.");
+        console.error("shop.js: registerUserDataReadyCallback is not defined in script.js! Initializing without user data.");
         initializeShop(null);
     }
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange(initializeShop);
     } else {
-        console.error("shop.js: onLoginStatusChange is not defined.");
+        console.error("shop.js: onLoginStatusChange is not defined in script.js!");
     }
+
     playGachaButton?.addEventListener('click', handlePlayGacha);
     closeGachaResultButton?.addEventListener('click', closeGachaResultModal);
     gachaResultModal?.addEventListener('click', (event) => {
-        if (event.target === gachaResultModal) closeGachaResultModal();
+        if (event.target === gachaResultModal) {
+            closeGachaResultModal();
+        }
     });
 });
 
 async function initializeShop(userData) {
     if (isInitializingShop) return;
     isInitializingShop = true;
+
     if (!userPointsDisplay) {
-        console.error("[shop.js] Shop page core element (userPointsDisplay) not found.");
+        console.error("[shop.js] Shop page core element (userPointsDisplay) not found. Aborting initialization.");
         isInitializingShop = false;
         return;
     }
+
     if(regularShopLoading) regularShopLoading.style.display = 'flex';
     if(limitedShopLoading) limitedShopLoading.style.display = 'flex';
     if(noRegularItemsMsg) noRegularItemsMsg.style.display = 'none';
@@ -86,12 +99,15 @@ async function initializeShop(userData) {
     if(limitedShopItemsGrid) limitedShopItemsGrid.innerHTML = '';
     if(gachaErrorMessage) gachaErrorMessage.style.display = 'none';
     if(gachaCostSpan) gachaCostSpan.textContent = GACHA_COST_DISPLAY.toLocaleString();
+
     try {
         const currentUser = window.MyApp?.currentUserData || userData;
+
         if (currentUser && window.MyApp?.isUserLoggedIn) {
             displayUserPoints(currentUser.points);
             updateGachaButtonState(currentUser.points);
             await fetchAvailableBadges();
+
             const limitedBadges = allAvailableBadges.filter(b => b.isLimited).sort((a, b) => (a.price || 0) - (b.price || 0));
             const nonLimitedBadges = allAvailableBadges.filter(b => !b.isLimited);
             const rateBadgeIds = new Set(nonLimitedBadges.filter(b => b.badgeId.startsWith('badge-rate-')).map(b => b.badgeId));
@@ -99,6 +115,7 @@ async function initializeShop(userData) {
             const rateBadges = nonLimitedBadges.filter(b => rateBadgeIds.has(b.badgeId)).sort((a, b) => (a.requiredRate || 0) - (b.requiredRate || 0));
             const matchBadges = nonLimitedBadges.filter(b => matchBadgeIds.has(b.badgeId)).sort((a, b) => (a.requiredMatches || 0) - (b.requiredMatches || 0));
             const normalBadges = nonLimitedBadges.filter(b => !rateBadgeIds.has(b.badgeId) && !matchBadgeIds.has(b.badgeId)).sort((a,b) => (a.price || 0) - (b.price||0) || a.name.localeCompare(b.name));
+
             let regularItemsExist = false;
             if (regularShopItemsGrid) {
                 if (normalBadges.length > 0) { addCategoryHeader(regularShopItemsGrid, "通常バッジ"); displayShopItems(currentUser, normalBadges, regularShopItemsGrid, null); regularItemsExist = true; }
@@ -161,14 +178,15 @@ function displayShopItems(currentUserData, badges, gridContainer, noItemsMsgElem
     }
     if (noItemsMsgElement) noItemsMsgElement.style.display = 'none';
 
+    const fallbackImgPath = getDefaultBadgePath(); // ★ 修正
+
     badges.forEach(badge => {
-        const { badgeId, name, description, price, img, isLimited, requiredRate = 0, requiredMatches = 0 } = badge;
-        
-        // ★★★ script.js の getBadgeImagePath を使用して一貫性を保つ ★★★
-        const primaryImagePath = typeof window.getBadgeImagePath === 'function' 
-                               ? window.getBadgeImagePath(badgeId) 
-                               : `/public/images/${img || `${badgeId}.svg`}`; // フォールバック
-        const fallbackImagePath = '/public/images/default_badge.svg';
+        const { badgeId, name, description, price, isLimited, requiredRate = 0, requiredMatches = 0 } = badge;
+
+        // ★★★ script.js の getBadgeImagePath を使用 ★★★
+        const primaryImagePath = typeof window.getBadgeImagePath === 'function'
+                               ? window.getBadgeImagePath(badgeId)
+                               : fallbackImgPath; // getBadgeImagePath がなければデフォルト
 
         const isOwned = currentUserData?.badges?.includes(badgeId);
         const canAfford = currentUserData?.points >= price;
@@ -187,7 +205,7 @@ function displayShopItems(currentUserData, badges, gridContainer, noItemsMsgElem
         if (requiredMatches > 0) requirementText += `<p class="shop-item-requirement">必要対戦数: ${requiredMatches}</p>`;
 
         itemDiv.innerHTML = `
-            <div class="shop-item-badge-display"><img src="${primaryImagePath}" alt="${name || 'バッジ'}" onerror="this.onerror=null; this.src='${fallbackImagePath}';"></div>
+            <div class="shop-item-badge-display"><img src="${primaryImagePath}" alt="${name || 'バッジ'}" onerror="this.onerror=null; this.src='${fallbackImgPath}';"></div>
             <div class="shop-item-details">
                 <h3 class="shop-item-name">${name || 'バッジ名なし'}</h3>
                 ${description ? `<p class="shop-item-description">${description}</p>` : ''}
@@ -269,7 +287,7 @@ function setButtonLoading(button, isLoading, loadingText = '処理中...') {
         }
         button.innerHTML = `<span class="spinner-small" style="display: inline-block; margin-right: 8px;"></span>${loadingText}`;
     } else {
-        button.disabled = false; 
+        button.disabled = false;
         if (button.dataset.originalContent) {
             button.innerHTML = button.dataset.originalContent;
             delete button.dataset.originalContent;
@@ -283,7 +301,6 @@ function setButtonLoading(button, isLoading, loadingText = '処理中...') {
                  else button.textContent = '購入する';
              } else button.textContent = '操作';
         }
-         // 状態に応じてボタンの有効/無効を再設定
         if (button.id === 'play-gacha-button') updateGachaButtonState(window.MyApp?.currentUserData?.points || 0);
         else if (button.classList.contains('shop-buy-button')) {
             const badgeId = button.dataset.badgeId;
@@ -365,7 +382,7 @@ async function handlePlayGacha() {
         const response = await fetch(apiUrl, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }});
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || `ガチャ失敗 (${response.status})`);
-        const wonBadge = result.wonBadge;
+        const wonBadge = result.wonBadge; // バックエンドは img プロパティも返す想定
         if (!wonBadge || !wonBadge.badgeId) throw new Error('ガチャ結果のバッジ情報が不正です。');
         if (gachaResultModal) gachaResultModal.style.display = 'flex';
         if (gachaAnimationArea) gachaAnimationArea.style.display = 'flex';
@@ -377,13 +394,11 @@ async function handlePlayGacha() {
             }
         }
         if (typeof window.MKBR_GachaAnimations?.playMainReelAnimation === 'function') {
-            // ★★★ ガチャアニメーションに渡すバッジリストはガチャプールから取得するべき。
-            //     ひとまず空配列を渡すが、必要に応じてバックエンドから取得したガチャプール情報を渡す。
-            let gachaPoolForAnimation = []; 
-            // if (window.MyApp?.allGachaPoolBadges) { // 例えばこのようにグローバルに保持する場合
-            //    gachaPoolForAnimation = window.MyApp.allGachaPoolBadges;
-            // }
-            await window.MKBR_GachaAnimations.playMainReelAnimation(wonBadge, gachaReels, gachaPoolForAnimation); 
+            let gachaPoolForAnimation = [];
+            // 必要に応じて、ガチャ対象の全バッジ情報をここで取得または事前に準備
+            // const allGachaBadges = await fetchAllGachaPoolBadges(); // 例: APIから取得する場合
+            // gachaPoolForAnimation = allGachaBadges;
+            await window.MKBR_GachaAnimations.playMainReelAnimation(wonBadge, gachaReels, gachaPoolForAnimation);
         }
         if (window.MyApp?.currentUserData) {
             window.MyApp.currentUserData.points = result.newPoints;
@@ -412,17 +427,19 @@ async function handlePlayGacha() {
 function showGachaResultDetails(wonBadge, newPoints) {
     if (!gachaResultDisplayArea || !wonBadge) return;
 
-    // ★★★ script.js の getBadgeImagePath を使用して一貫性を保つ ★★★
-    const primaryImagePath = typeof window.getBadgeImagePath === 'function' 
-                           ? window.getBadgeImagePath(wonBadge.badgeId) 
-                           : `/public/images/${wonBadge.img || `${wonBadge.badgeId}.svg`}`; // フォールバック
-    const fallbackImagePath = '/public/images/default_badge.svg';
+    // ★★★ script.js の getBadgeImagePath を使用 ★★★
+    const primaryImagePath = typeof window.getBadgeImagePath === 'function'
+                           ? window.getBadgeImagePath(wonBadge.badgeId)
+                           // getBadgeImagePath が未定義の場合のフォールバック
+                           // (wonBadge.img はバックエンドがセットしてくると期待)
+                           : (wonBadge.img ? `/images/${wonBadge.img}` : getDefaultBadgePath());
+    const fallbackImagePath = getDefaultBadgePath();
 
     if (gachaResultTitle) gachaResultTitle.textContent = "バッジ獲得！";
     if (gachaResultBadgeImg) {
         gachaResultBadgeImg.src = primaryImagePath;
         gachaResultBadgeImg.alt = wonBadge.name;
-        gachaResultBadgeImg.onerror = () => { 
+        gachaResultBadgeImg.onerror = () => {
             gachaResultBadgeImg.src = fallbackImagePath;
         };
     }
@@ -434,8 +451,8 @@ function showGachaResultDetails(wonBadge, newPoints) {
         const rarityString = (typeof wonBadge.rarity === 'string') ? wonBadge.rarity.toLowerCase() : 'common';
         const displayRarityText = rarityString.toUpperCase();
         gachaRarityValue.textContent = displayRarityText;
-        gachaRarityValue.className = 'rarity-value'; 
-        gachaRarityValue.classList.add(`rarity-${rarityString}`); 
+        gachaRarityValue.className = 'rarity-value';
+        gachaRarityValue.classList.add(`rarity-${rarityString}`);
         if (rarityString === 'legendary' || rarityString === 'ssr') {
             gachaRarityValue.classList.add('rainbow');
         } else {
@@ -451,12 +468,10 @@ function closeGachaResultModal() {
     if (gachaResultModal) gachaResultModal.style.display = 'none';
     if (isGachaAnimating) {
         isGachaAnimating = false;
-        setGachaButtonLoading(false); 
+        setGachaButtonLoading(false);
     }
     if (gachaResultDisplayArea) gachaResultDisplayArea.classList.remove('show');
 }
 
-// ★★★ window.getBadgeImagePath は script.js でグローバルに定義されることを推奨 ★★★
-// shop.js 内でのフォールバック定義は、他のスクリプトとの整合性の問題を生む可能性があるため削除。
-// 必ず script.js で getBadgeImagePath が定義・ロードされるようにしてください。
-// もし script.js に getBadgeImagePath がない場合は、前の回答の script.js の定義を script.js に配置してください。
+// ★★★ shop.js 末尾の getBadgeImagePath のフォールバック定義は削除 ★★★
+// (script.js にあるグローバルな定義を使用するため)

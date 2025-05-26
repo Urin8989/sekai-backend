@@ -1,34 +1,36 @@
 // frontend/index.js
-console.log('[index.js] ファイルが読み込まれ、実行が開始されました。');
-// 以降、元の index.js のコードが続く
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("index.js loaded");
+    const welcomeIntro = document.querySelector('.welcome-intro');
+    const indexUserProfileSection = document.getElementById('user-profile-section');
+    const loggedInIconHeader = document.querySelector('.logged-in-icon-header');
 
-    // --- index.html 固有の要素を取得 ---
-    const welcomeIntro = document.querySelector('.welcome-intro'); // ウェルカムメッセージ
-    const indexUserProfileSection = document.getElementById('user-profile-section'); // プロフィールセクション
-    const loggedInIconHeader = document.querySelector('.logged-in-icon-header'); // ★ ログイン後メッセージ要素
-    // IDが他のページと重複する可能性があるため、親要素から取得する方が安全
     const indexProfilePic = indexUserProfileSection ? indexUserProfileSection.querySelector('#profile-pic') : null;
     const indexProfileName = indexUserProfileSection ? indexUserProfileSection.querySelector('#profile-name') : null;
     const indexProfileRate = indexUserProfileSection ? indexUserProfileSection.querySelector('#profile-rate') : null;
     const indexProfilePoints = indexUserProfileSection ? indexUserProfileSection.querySelector('#profile-points') : null;
-    const indexProfileBadgesContainer = indexUserProfileSection ? indexUserProfileSection.querySelector('.profile-badges') : null; // バッジのコンテナを取得
+    const indexProfileBadgesContainer = indexUserProfileSection ? indexUserProfileSection.querySelector('.profile-badges') : null;
 
-    /**
-     * index.html のプロフィールセクションの *内容* を表示/更新する関数
-     * @param {object | null} userData - ユーザー情報オブジェクト (nullの場合は内容をクリア)
-     */
+    // ★★★ 環境に応じたデフォルトアバターパス (script.js から取得するか、ここで同様に定義) ★★★
+    const getDefaultAvatarPath = () => {
+        // script.js に MyApp.DEFAULT_AVATAR_PATH のようなものが定義されていればそれを使う
+        // ここでは location.hostname で判定する例
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return '/public/images/placeholder-avatar.png';
+        } else {
+            return '/images/placeholder-avatar.png';
+        }
+    };
+
     function updateIndexProfileUI(userData) {
-        // プロフィールセクション自体の表示/非表示は updateUserSpecificContentVisibility で行う
         if (!indexUserProfileSection) return;
+        const defaultAvatar = getDefaultAvatarPath(); // ★ 修正
 
         if (userData) {
-            // --- ログイン状態の内容表示 ---
             if (indexProfilePic) {
-                indexProfilePic.src = userData.picture || 'images/placeholder-avatar.png';
+                indexProfilePic.src = userData.picture || defaultAvatar;
                 indexProfilePic.alt = `${userData.name || 'プレイヤー'}のプロフィール画像`;
+                indexProfilePic.onerror = () => { indexProfilePic.src = defaultAvatar; }; // ★ 修正
             }
             if (indexProfileName) {
                 indexProfileName.textContent = userData.name || 'プレイヤー名';
@@ -39,17 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (indexProfilePoints) {
                 indexProfilePoints.textContent = userData.points !== undefined ? `${userData.points.toLocaleString()} P` : '---- P';
             }
-            // バッジ表示処理 (script.jsの共通関数を呼び出す)
+            // ★★★ script.js の displayBadges を使用 ★★★
             if (indexProfileBadgesContainer && typeof window.displayBadges === 'function') {
                 const badgeSlots = indexProfileBadgesContainer.querySelectorAll('.badge-slot');
-                window.displayBadges(badgeSlots, userData.displayBadges || userData.badges || []); // displayBadges優先、なければbadges
+                const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
+                                      ? userData.displayBadges
+                                      : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
+                window.displayBadges(badgeSlots, badgesToDisplay);
             } else if (indexProfileBadgesContainer) {
                 console.warn("index.js: window.displayBadges function not found or badge container missing.");
             }
         } else {
-            // --- ログアウト状態の内容クリア (非表示なら不要かも) ---
             if (indexProfilePic) {
-                indexProfilePic.src = 'images/placeholder-avatar.png';
+                indexProfilePic.src = defaultAvatar; // ★ 修正
                 indexProfilePic.alt = 'プロフィール画像';
             }
             if (indexProfileName) indexProfileName.textContent = '';
@@ -61,53 +65,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * ログイン状態に応じてウェルカムメッセージ、プロフィール、アイコンヘッダーの表示/非表示を切り替える関数
-     */
     function updateUserSpecificContentVisibility() {
         const isLoggedIn = window.MyApp?.isUserLoggedIn === true;
-        console.log("index.js: updateUserSpecificContentVisibility called. isLoggedIn:", isLoggedIn);
-
         if (welcomeIntro) {
             welcomeIntro.style.display = isLoggedIn ? 'none' : 'block';
         }
         if (indexUserProfileSection) {
-          indexUserProfileSection.style.display = isLoggedIn ? 'block' : 'none'; // ログインしていれば表示、そうでなければ非表示
+          indexUserProfileSection.style.display = isLoggedIn ? 'block' : 'none';
         }
-        // ▼▼▼ loggedInIconHeader の表示切り替え ▼▼▼
         if (loggedInIconHeader) {
-            loggedInIconHeader.style.display = isLoggedIn ? 'block' : 'none'; // ログイン時のみ表示
+            loggedInIconHeader.style.display = isLoggedIn ? 'block' : 'none';
         } else {
-            console.warn("index.js: loggedInIconHeader element not found."); // 要素が見つからない場合の警告
+            console.warn("index.js: loggedInIconHeader element not found.");
         }
-        // ▲▲▲ ここまで ▲▲▲
     }
 
-    // --- 初期表示処理 ---
     if (typeof window.registerUserDataReadyCallback === 'function') {
         window.registerUserDataReadyCallback((userData) => {
-            console.log("index.js received user data ready callback with:", userData ? userData.name : null);
-            updateIndexProfileUI(userData); // プロフィール内容を更新
-            updateUserSpecificContentVisibility(); // ★ 表示/非表示を切り替え
+            updateIndexProfileUI(userData);
+            updateUserSpecificContentVisibility();
         });
     } else {
         console.error("index.js: registerUserDataReadyCallback is not defined in script.js!");
         updateIndexProfileUI(null);
-        updateUserSpecificContentVisibility(); // フォールバック
+        updateUserSpecificContentVisibility();
     }
 
-    // --- script.jsからのイベントを監視 ---
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((userData) => {
-            console.log('index.js received login status change via onLoginStatusChange:', userData ? userData.name : null);
-            updateIndexProfileUI(userData); // プロフィール内容を更新
-            updateUserSpecificContentVisibility(); // ★ 表示/非表示を切り替え
+            updateIndexProfileUI(userData);
+            updateUserSpecificContentVisibility();
         });
     } else {
         console.error("index.js: onLoginStatusChange is not defined in script.js!");
-        // 代替カスタムイベントリスナー (省略)
     }
-
-    // --- index.html 固有のその他の初期化処理 ---
-    // (省略)
 });

@@ -294,44 +294,45 @@ window.getAuthToken = () => {
     return window.MyApp.currentUserData?.token || null;
 };
 
-// ★★★ バッジ画像パス取得用関数 (修正済み) ★★★
+// frontend/script.js
+
+// ... (他のグローバル変数、MyAppオブジェクトの定義などは変更なし) ...
+
+// ★★★ バッジ画像パス取得用関数 (環境に応じてパスプレフィックスを切り替え) ★★★
 window.getBadgeImagePath = (badgeId) => {
-    // createBadge.js の img プロパティに格納されているファイル名を使用します。
+    // createBadge.js の img プロパティと実際のファイル拡張子に合わせる
     const badgeFileMap = {
-        // --- ガチャ対象: 基本バッジ ---
+        // (badgeFileMapの内容は前回提示したものと同じなので省略します。
+        //  動物バッジは .jpg、その他は .svg であることを確認してください。)
+        // --- ガチャ対象: 基本バッジ (.svg) ---
         'badge-gold': 'badge-gold.svg',
         'badge-safe-driver': 'badge-safe-driver.svg',
         'badge-speedster': 'badge-speedster.svg',
-
-        // --- レート達成記念バッジ ---
+        // --- レート達成記念バッジ (.svg) ---
         'badge-rate-1600': 'badge-rate-1600.svg',
         'badge-rate-1700': 'badge-rate-1700.svg',
         'badge-rate-1800': 'badge-rate-1800.svg',
         'badge-rate-1900': 'badge-rate-1900.svg',
         'badge-rate-2000': 'badge-rate-2000.svg',
-
-        // --- 対戦数記念バッジ ---
+        // --- 対戦数記念バッジ (.svg) ---
         'badge-matches-100': 'badge-100matches.svg',
         'badge-matches-300': 'badge-300matches.svg',
         'badge-matches-1000': 'badge-1000matches.svg',
         'badge-matches-5000': 'badge-5000matches.svg',
         'badge-matches-10000': 'badge-10000matches.svg',
-
-        // --- 期間限定バッジ ---
+        // --- 期間限定バッジ (.svg) ---
         'badge-event-2024spring': 'badge-event-2024spring.svg',
         'badge-event-halloween': 'badge-event-halloween.svg',
         'badge-event-newyear': 'badge-event-newyear.svg',
-
-        // --- ガチャ対象: 動物バッジ (createBadge.js の定義に合わせる) ---
-        'badge-animal-cat': 'badge-animal-cat.jpg',    // 修正 (例: animal-neko.jpg -> badge-animal-cat.svg)
-        'badge-animal-dog': 'badge-animal-dog.jpg',    // 修正
-        'badge-animal-rabbit': 'badge-animal-rabbit.jpg',// 修正
-        'badge-animal-wolf': 'badge-animal-wolf.jpg',  // 修正
-        'badge-animal-eagle': 'badge-animal-eagle.jpg', // 修正
-        'badge-animal-bear': 'badge-animal-bear.jpg',  // 修正
-        'badge-animal-fox': 'badge-animal-fox.jpg',    // 修正
-
-        // --- ガチャ対象: 宝石バッジ ---
+        // --- ガチャ対象: 動物バッジ (.jpg) ---
+        'badge-animal-cat': 'badge-animal-cat.jpg',
+        'badge-animal-dog': 'badge-animal-dog.jpg',
+        'badge-animal-rabbit': 'badge-animal-rabbit.jpg',
+        'badge-animal-wolf': 'badge-animal-wolf.jpg',
+        'badge-animal-eagle': 'badge-animal-eagle.jpg',
+        'badge-animal-bear': 'badge-animal-bear.jpg',
+        'badge-animal-fox': 'badge-animal-fox.jpg',
+        // --- ガチャ対象: 宝石バッジ (.svg) ---
         'badge-gem-ruby': 'badge-gem-ruby.svg',
         'badge-gem-sapphire': 'badge-gem-sapphire.svg',
         'badge-gem-emerald': 'badge-gem-emerald.svg',
@@ -341,10 +342,15 @@ window.getBadgeImagePath = (badgeId) => {
         'badge-gem-pearl': 'badge-gem-pearl.svg',
     };
 
-    // 画像ファイルが public/images/ 直下にあるため、パスプレフィックスを修正
-    // ブラウザがリクエストするURLを考慮し、サーバーのルートからの絶対パス形式にする
-    const commonPathPrefix = '/public/images/';
-    const defaultFileName = 'default_badge.svg'; // 統一されたデフォルトファイル名
+    let commonPathPrefix;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // ローカル環境の場合 (Nginxのrootがプロジェクトルートを指す場合)
+        commonPathPrefix = '/public/images/';
+    } else {
+        // 本番環境の場合 (Nginxのrootが /public を指す場合)
+        commonPathPrefix = '/images/';
+    }
+    const defaultFileName = 'default_badge.svg';
 
     const fileName = badgeFileMap[badgeId];
 
@@ -355,14 +361,14 @@ window.getBadgeImagePath = (badgeId) => {
         return commonPathPrefix + defaultFileName;
     }
 };
-// ★★★ 修正ここまで ★★★
 
 window.displayBadges = (badgeSlots, badgeIds) => {
     if (!badgeSlots || badgeSlots.length === 0) return;
     if (!Array.isArray(badgeIds)) badgeIds = [];
-    
-    // 正しいデフォルトパスをここで定義（getBadgeImagePathと共通化できるとより良い）
-    const defaultImagePath = '/public/images/default_badge.svg';
+
+    // ★★★ getBadgeImagePath を使ってデフォルト画像のフルパスを生成 ★★★
+    // getBadgeImagePath に存在しないIDを渡すとデフォルトパスが返る想定を利用
+    const defaultImagePath = window.getBadgeImagePath('__non_existent_badge_id_for_default__');
 
     badgeSlots.forEach((slot, index) => {
         slot.innerHTML = '';
@@ -370,14 +376,18 @@ window.displayBadges = (badgeSlots, badgeIds) => {
         slot.style.opacity = '0.5';
         const badgeId = badgeIds[index];
         if (badgeId) {
-            const imgPath = window.getBadgeImagePath(badgeId); // 修正された関数を呼び出す
+            const imgPath = window.getBadgeImagePath(badgeId);
             const img = document.createElement('img');
             img.src = imgPath;
             img.alt = badgeId; 
-            img.onerror = () => { 
-                // getBadgeImagePathがデフォルトを返すので、このonerrorは最終手段
-                if (img.src !== defaultImagePath) { // 無限ループ防止
+            img.onerror = () => {
+                // onerror 時には、既に getBadgeImagePath がデフォルトを返しているはずだが、
+                // 万が一、そのデフォルトすら表示できない場合の最終手段 (ただし、無限ループに注意)
+                if (img.src !== defaultImagePath) {
                    img.src = defaultImagePath;
+                } else {
+                    // 最終フォールバックも失敗したら、これ以上何もしない
+                    img.onerror = null; 
                 }
             };
             slot.appendChild(img);
@@ -386,7 +396,6 @@ window.displayBadges = (badgeSlots, badgeIds) => {
         }
     });
 };
-
 window.updateUserPoints = (newPoints) => {
     if (window.MyApp.currentUserData) {
         window.MyApp.currentUserData.points = newPoints;

@@ -7,233 +7,43 @@ let currentMatchId = null;
 let currentOpponentData = null;
 let matchWebSocket = null;
 
-// DOM要素 (DOMContentLoaded後に取得)
+// DOM要素
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
-let myProfilePic, myProfileName, myProfileRate, myProfilePoints, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer; // ★ myProfileCourse/Comment を Element に変更
+let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
 let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, battleStatusText;
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
 
-
-/**
- * 自分のプロフィール情報をHTMLに表示する
- * @param {object|null} userData - ユーザーデータオブジェクト
- */
-function displayMyProfileInfo(userData) {
-    console.log("[match.js] displayMyProfileInfo called with user data:", userData ? userData.name : "null");
-
-    if (!myProfilePic || !myProfileName || !myProfileRate || !document.getElementById('my-profile-points')) { // IDで直接確認
-        console.error("[match.js] プロフィール表示に必要な主要要素が見つかりません。HTMLのIDを確認してください。");
-        return;
-    }
-
-    if (userData) {
-        myProfilePic.src = userData.picture || 'images/placeholder-avatar.png';
-        myProfileName.textContent = userData.name || 'プレイヤー名';
-        myProfileRate.textContent = userData.rate ?? '----'; // myProfileRate は stat-value の span
-        document.getElementById('my-profile-points').textContent = `${userData.points ?? '----'} P`; // 直接IDで
-
-        const profile = userData.profile || {};
-        if (myProfileCourseElement) myProfileCourseElement.textContent = profile.favCourse || '未設定'; // span#my-profile-course
-        if (myProfileCommentElement) myProfileCommentElement.textContent = profile.comment || '未設定';   // p#my-profile-comment
-
-        if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
-            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
-            window.displayBadges(badgeSlots, userData.badges || []);
-        } else {
-            // (フォールバック処理は変更なし)
-             console.warn("[match.js] displayBadges or badge container not found. Using fallback for my profile.");
-             const badgeSlots = myProfileBadgesContainer?.querySelectorAll('.badge-slot');
-             if (badgeSlots) {
-                const badgeIds = userData.badges || [];
-                badgeSlots.forEach((slot, index) => {
-                    slot.innerHTML = '';
-                    const badgeId = badgeIds[index];
-                    if (badgeId && typeof window.getBadgeImagePath === 'function') {
-                        const imgPath = window.getBadgeImagePath(badgeId);
-                        const img = document.createElement('img');
-                        img.src = imgPath;
-                        img.alt = badgeId;
-                        slot.appendChild(img);
-                        slot.style.opacity = '1';
-                    } else {
-                        slot.style.opacity = '0.5';
-                    }
-                });
-            }
-        }
+// ★★★ 環境に応じたデフォルト画像パスを script.js から取得する想定 ★★★
+const getDefaultAvatarPath = () => {
+    // script.jsのgetBadgeImagePathと同様のロジックで環境判定するか、
+    // script.jsで MyApp.DEFAULT_AVATAR_PATH のようなグローバル変数を設定してそれを使う。
+    // ここでは、サーバーのルートからの絶対パスとして解決されることを期待。
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '/public/images/placeholder-avatar.png';
     } else {
-        myProfilePic.src = 'images/placeholder-avatar.png';
-        myProfileName.textContent = '---';
-        myProfileRate.textContent = '----';
-        document.getElementById('my-profile-points').textContent = '---- P';
-        if (myProfileCourseElement) myProfileCourseElement.textContent = '---';
-        if (myProfileCommentElement) myProfileCommentElement.textContent = '---';
-        if (myProfileBadgesContainer) {
-            myProfileBadgesContainer.querySelectorAll('.badge-slot').forEach(slot => {
-                slot.innerHTML = '';
-                slot.style.opacity = '0.5';
-            });
-        }
+        return '/images/placeholder-avatar.png';
     }
-}
-
-/**
- * 対戦相手の情報をHTMLに表示する (★ 大幅に修正)
- * @param {object} opponentData - 対戦相手のデータ
- */
-function displayOpponentInfo(opponentData) {
-    console.log("[match.js] displayOpponentInfo called with:", opponentData);
-    if (!opponentInfoArea) {
-        console.warn("[match.js] displayOpponentInfo: opponentInfoArea element not found.");
-        return;
-    }
-
-    // 新しいHTML構造に合わせてコンテンツを生成
-    opponentInfoArea.innerHTML = `
-        <img src="${opponentData.picture || 'images/placeholder-avatar.png'}" alt="${opponentData.name || '対戦相手'}" class="profile-avatar">
-
-        <div class="profile-name-rate">
-            <h3>${opponentData.name || '対戦相手'}</h3>
-            <div class="stat-item profile-rate-display">
-                <span class="stat-label">レート</span>
-                <span class="stat-value">${opponentData.rate ?? '----'}</span>
-            </div>
-        </div>
-
-        <div class="profile-comment-display">
-            <span class="detail-label">対戦コメント:</span>
-            <p class="detail-comment">${opponentData.profile?.comment || '---'}</p>
-        </div>
-
-        <div class="profile-badges">
-            ${(opponentData.badges && opponentData.badges.length > 0 ? opponentData.badges.slice(0, 3) : Array(3).fill(null))
-                .map(badgeId => `
-                    <div class="badge-slot" style="opacity: ${badgeId ? 1 : 0.5};">
-                        ${badgeId && typeof window.getBadgeImagePath === 'function' ? `<img src="${window.getBadgeImagePath(badgeId)}" alt="${badgeId}">` : '<span></span>'}
-                    </div>
-                `).join('')}
-        </div>
-
-        <div class="profile-home-course-display">
-            <span class="detail-label">ホームコース:</span>
-            <span class="detail-value">${opponentData.profile?.favCourse || '---'}</span>
-        </div>
-
-        <div class="profile-stats" style="display: none !important;">
-            </div>
-    `;
-
-    // バッジ表示処理 (もしopponentData.badgesの形式がIDの配列なら、共通関数を使う)
-    // 上のテンプレートリテラル内で簡易的に処理したが、共通関数を使いたい場合は以下のようにする
-    // const opponentBadgesContainer = opponentInfoArea.querySelector('.profile-badges');
-    // if (opponentBadgesContainer && typeof window.displayBadges === 'function') {
-    //     const badgeSlots = opponentBadgesContainer.querySelectorAll('.badge-slot');
-    //     window.displayBadges(badgeSlots, opponentData.badges || []);
-    // }
-
-    if (opponentProfileSection) opponentProfileSection.classList.add('visible');
-    if (opponentPlaceholder) opponentPlaceholder.style.display = 'none'; // プレースホルダーを非表示
-    if (opponentSpinner) opponentSpinner.style.display = 'none';
-}
+};
+const getDefaultBadgePath = () => typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath('__DEFAULT__') : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? '/public/images/default_badge.svg' : '/images/default_badge.svg');
 
 
-// --- UI更新関数 (変更なし) ---
-function updateMatchUI() {
-    // (この関数は前のままでOK、displayMyProfileInfoの呼び出しは新しい構造に対応済み)
-    const user = window.MyApp?.currentUserData;
-    const loggedIn = !!window.MyApp?.isUserLoggedIn;
-    console.log("[match.js] updateMatchUI called. Logged in:", loggedIn, "isMatching:", isMatching, "currentMatchId:", currentMatchId);
-
-    displayMyProfileInfo(user); // ★ 自分の情報を更新
-
-    if (resultReportingArea) resultReportingArea.style.display = 'none';
-    if (reportResultButtons) reportResultButtons.style.display = 'none';
-    if (startBattleButton) startBattleButton.style.display = 'none';
-    if (battleStatusText) battleStatusText.textContent = '';
-    if (reportWinButton) reportWinButton.disabled = false;
-    if (reportLoseButton) reportLoseButton.disabled = false;
-
-    if (loggedIn) {
-        if (isMatching) {
-            if(matchButton) matchButton.style.display = 'none';
-            if(cancelButton) cancelButton.style.display = 'inline-block';
-            if(cancelButton) cancelButton.disabled = false;
-            if (matchStatusText) matchStatusText.textContent = '対戦相手を探しています...';
-            if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-            if (opponentInfoArea) opponentInfoArea.style.display = 'none'; // ★ opponent-info を非表示
-            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; // ★ placeholder を表示
-            if (opponentSpinner) opponentSpinner.style.display = 'block';
-            if (matchChatSection) matchChatSection.style.display = 'none';
-            disconnectWebSocket();
-        } else if (currentMatchId && currentOpponentData) {
-            if(matchButton) matchButton.style.display = 'none';
-            if(cancelButton) cancelButton.style.display = 'none';
-            if (matchStatusText) matchStatusText.textContent = '対戦相手が見つかりました！結果を報告してください。';
-            if (resultReportingArea) resultReportingArea.style.display = 'block';
-            if (startBattleButton) startBattleButton.style.display = 'inline-block';
-            if (opponentSpinner) opponentSpinner.style.display = 'none';
-            if (opponentPlaceholder) opponentPlaceholder.style.display = 'none';// ★ placeholder を非表示
-            if (opponentInfoArea) opponentInfoArea.style.display = 'grid'; // ★ opponent-info を表示 (grid or flex)
-            if (matchChatSection) matchChatSection.style.display = 'flex';
-            if (!matchWebSocket) {
-                connectWebSocket();
-            }
-        } else {
-            if(matchButton) matchButton.textContent = 'ライバルを探す';
-            if(matchButton) matchButton.style.display = 'inline-block';
-            if(matchButton) matchButton.disabled = false;
-            if(cancelButton) cancelButton.style.display = 'none';
-            if (matchStatusText) matchStatusText.textContent = 'ボタンを押して対戦相手を探しましょう！';
-            if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-            if (opponentInfoArea) opponentInfoArea.style.display = 'none'; // ★ opponent-info を非表示
-            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; // ★ placeholder を表示
-            if (opponentSpinner) opponentSpinner.style.display = 'none';
-            if (matchChatSection) matchChatSection.style.display = 'none';
-            disconnectWebSocket();
-        }
-    } else {
-        // (未ログイン状態の処理は変更なし)
-        isMatching = false;
-        stopPollingMatchStatus();
-        currentMatchId = null;
-        currentOpponentData = null;
-        if(matchButton) matchButton.textContent = 'ログインが必要です';
-        if(matchButton) matchButton.style.display = 'inline-block';
-        if(matchButton) matchButton.disabled = true;
-        if(cancelButton) cancelButton.style.display = 'none';
-        if (matchStatusText) matchStatusText.textContent = '対戦するにはログインしてください。';
-        if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        if (opponentInfoArea) opponentInfoArea.style.display = 'none';
-        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
-        if (opponentSpinner) opponentSpinner.style.display = 'none';
-        if (matchChatSection) matchChatSection.style.display = 'none';
-        disconnectWebSocket();
-    }
-}
-
-
-// --- 初期化 (DOM要素取得部分を修正) ---
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[match.js] DOMContentLoaded");
-
     matchButton = document.getElementById('match-button');
     cancelButton = document.getElementById('cancel-match-button');
-    opponentInfoArea = document.getElementById('opponent-info'); // これは相手情報全体のコンテナ
+    opponentInfoArea = document.getElementById('opponent-info');
     matchStatusText = document.getElementById('match-status');
-    opponentProfileSection = document.getElementById('opponent-profile'); // opponent-info を含む section
+    opponentProfileSection = document.getElementById('opponent-profile');
     opponentPlaceholder = document.getElementById('opponent-placeholder');
     opponentSpinner = document.getElementById('opponent-spinner');
 
-    // 自分の情報表示用要素
     myProfilePic = document.getElementById('my-profile-pic');
     myProfileName = document.getElementById('my-profile-name');
-    myProfileRate = document.getElementById('my-profile-rate'); // これはレート値のspan
-    // myProfilePoints は displayMyProfileInfo内で直接ID指定
-    myProfileCourseElement = document.querySelector('#my-profile .profile-home-course-display .detail-value'); // ★ セレクタ変更
-    myProfileCommentElement = document.querySelector('#my-profile .profile-comment-display .detail-comment'); // ★ セレクタ変更
+    myProfileRate = document.getElementById('my-profile-rate');
+    myProfilePointsElement = document.getElementById('my-profile-points'); // ★ IDで取得
+    myProfileCourseElement = document.querySelector('#my-profile .profile-home-course-display .detail-value');
+    myProfileCommentElement = document.querySelector('#my-profile .profile-comment-display .detail-comment');
     myProfileBadgesContainer = document.querySelector('#my-profile .profile-badges');
-
 
     matchChatSection = document.getElementById('match-chat-section');
     matchChatMessagesArea = document.getElementById('match-chat-messages');
@@ -256,33 +66,26 @@ document.addEventListener('DOMContentLoaded', () => {
     resultNewPoints = document.getElementById('result-new-points');
     closeResultModalButton = document.getElementById('close-result-modal');
 
-    // 初期UI状態設定
     if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
     if (opponentInfoArea) opponentInfoArea.style.display = 'none';
-    if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; // ★ 初期はプレースホルダー表示
+    if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
     if (opponentSpinner) opponentSpinner.style.display = 'none';
     if (matchChatSection) matchChatSection.style.display = 'none';
     if (matchStatusText && !window.MyApp?.isUserLoggedIn && !isMatching) {
         matchStatusText.textContent = '対戦するにはログインしてください。';
     }
 
-
-    if (typeof registerUserDataReadyCallback === 'function') {
-        registerUserDataReadyCallback((user) => {
-            console.log("[match.js] User data ready callback executed:", user ? user.name : "null");
-            updateMatchUI();
-        });
+    if (typeof window.registerUserDataReadyCallback === 'function') {
+        window.registerUserDataReadyCallback(updateMatchUI);
     } else {
         console.error("[match.js] registerUserDataReadyCallback function not found.");
-        updateMatchUI(); // fallback
+        updateMatchUI();
     }
 
-    if (typeof onLoginStatusChange === 'function') {
-        onLoginStatusChange((user) => {
-            console.log("[match.js] Login status changed:", user ? user.name : "null");
+    if (typeof window.onLoginStatusChange === 'function') {
+        window.onLoginStatusChange((user) => {
             updateMatchUI();
             if (!window.MyApp?.isUserLoggedIn) {
-                console.log("[match.js] User logged out, resetting matchmaking state.");
                 isMatching = false;
                 stopPollingMatchStatus();
                 currentMatchId = null;
@@ -294,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("[match.js] onLoginStatusChange function not found.");
     }
 
-    // イベントリスナー (変更なし)
     matchButton?.addEventListener('click', startMatchmaking);
     cancelButton?.addEventListener('click', cancelMatchmakingRequest);
     startBattleButton?.addEventListener('click', () => {
@@ -315,8 +117,201 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('beforeunload', disconnectWebSocket);
 });
 
+function displayMyProfileInfo(userData) {
+    if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) {
+        console.error("[match.js] プロフィール表示に必要な主要要素が見つかりません。");
+        return;
+    }
+    const defaultAvatar = getDefaultAvatarPath();
+    const defaultBadgeImg = getDefaultBadgePath();
 
-// --- マッチング関連関数 (startMatchmaking, startPollingMatchStatus, stopPollingMatchStatus, handleMatchFound, cancelMatchmakingRequest は変更なし) ---
+    if (userData) {
+        myProfilePic.src = userData.picture || defaultAvatar;
+        myProfilePic.onerror = () => { myProfilePic.src = defaultAvatar; };
+        myProfileName.textContent = userData.name || 'プレイヤー名';
+        myProfileRate.textContent = userData.rate ?? '----';
+        myProfilePointsElement.textContent = `${userData.points ?? '----'} P`;
+
+        const profile = userData.profile || {};
+        if (myProfileCourseElement) myProfileCourseElement.textContent = profile.favCourse || '未設定';
+        if (myProfileCommentElement) myProfileCommentElement.textContent = profile.comment || '未設定';
+
+        // ★★★ script.js の displayBadges を使用 ★★★
+        if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
+            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
+            // 表示バッジがあればそれを、なければ所持バッジから表示
+            const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
+                                  ? userData.displayBadges
+                                  : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
+            window.displayBadges(badgeSlots, badgesToDisplay);
+        } else if (myProfileBadgesContainer) {
+            // フォールバック的な簡易表示 (getBadgeImagePathは必須)
+            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
+            const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
+                                  ? userData.displayBadges
+                                  : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
+            badgeSlots.forEach((slot, i) => {
+                slot.innerHTML = '';
+                const badgeId = badgesToDisplay[i];
+                if(badgeId && typeof window.getBadgeImagePath === 'function'){
+                    const img = document.createElement('img');
+                    img.src = window.getBadgeImagePath(badgeId);
+                    img.alt = badgeId;
+                    img.onerror = () => {img.src = defaultBadgeImg;};
+                    slot.appendChild(img);
+                    slot.style.opacity = '1';
+                    slot.classList.add('filled');
+                } else {
+                    slot.style.opacity = '0.5';
+                    slot.classList.remove('filled');
+                }
+            });
+        }
+    } else {
+        myProfilePic.src = defaultAvatar;
+        myProfileName.textContent = '---';
+        myProfileRate.textContent = '----';
+        myProfilePointsElement.textContent = '---- P';
+        if (myProfileCourseElement) myProfileCourseElement.textContent = '---';
+        if (myProfileCommentElement) myProfileCommentElement.textContent = '---';
+        if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
+            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
+            window.displayBadges(badgeSlots, []);
+        }
+    }
+}
+
+function displayOpponentInfo(opponentData) {
+    if (!opponentInfoArea) {
+        console.warn("[match.js] displayOpponentInfo: opponentInfoArea element not found.");
+        return;
+    }
+    const defaultAvatar = getDefaultAvatarPath();
+    const defaultBadgeImg = getDefaultBadgePath();
+
+    const opponentBadgesToDisplay = opponentData.displayBadges && opponentData.displayBadges.length > 0
+                                  ? opponentData.displayBadges
+                                  : (opponentData.badges ? [...new Set(opponentData.badges)].slice(0, 3) : []);
+
+    let badgesHtml = '';
+    if (typeof window.getBadgeImagePath === 'function') {
+        badgesHtml = opponentBadgesToDisplay.map(badgeId => {
+            const imgPath = window.getBadgeImagePath(badgeId);
+            const badgeName = badgeId; // 本来はallBadgesDataから名前を引くが、match.jsにはない
+            return `
+                <div class="badge-slot filled" style="opacity: 1;">
+                    <img src="${imgPath}" alt="${badgeName}" onerror="this.onerror=null; this.src='${defaultBadgeImg}';">
+                </div>`;
+        }).join('');
+        for (let i = opponentBadgesToDisplay.length; i < 3; i++) {
+            badgesHtml += `<div class="badge-slot" style="opacity: 0.5;"><span></span></div>`;
+        }
+    } else {
+        for (let i = 0; i < 3; i++) {
+            badgesHtml += `<div class="badge-slot" style="opacity: 0.5;"><span></span></div>`;
+        }
+    }
+
+    opponentInfoArea.innerHTML = `
+        <img src="${opponentData.picture || defaultAvatar}" alt="${opponentData.name || '対戦相手'}" class="profile-avatar" onerror="this.onerror=null; this.src='${defaultAvatar}';">
+        <div class="profile-name-rate">
+            <h3>${opponentData.name || '対戦相手'}</h3>
+            <div class="stat-item profile-rate-display">
+                <span class="stat-label">レート</span>
+                <span class="stat-value">${opponentData.rate ?? '----'}</span>
+            </div>
+        </div>
+        <div class="profile-comment-display">
+            <span class="detail-label">対戦コメント:</span>
+            <p class="detail-comment">${opponentData.profile?.comment || '---'}</p>
+        </div>
+        <div class="profile-badges">
+            ${badgesHtml}
+        </div>
+        <div class="profile-home-course-display">
+            <span class="detail-label">ホームコース:</span>
+            <span class="detail-value">${opponentData.profile?.favCourse || '---'}</span>
+        </div>
+        <div class="profile-stats" style="display: none !important;"></div>
+    `;
+
+    if (opponentProfileSection) opponentProfileSection.classList.add('visible');
+    if (opponentPlaceholder) opponentPlaceholder.style.display = 'none';
+    if (opponentSpinner) opponentSpinner.style.display = 'none';
+}
+
+function updateMatchUI() {
+    const user = window.MyApp?.currentUserData;
+    const loggedIn = !!window.MyApp?.isUserLoggedIn;
+    displayMyProfileInfo(user);
+
+    if (resultReportingArea) resultReportingArea.style.display = 'none';
+    if (reportResultButtons) reportResultButtons.style.display = 'none';
+    if (startBattleButton) startBattleButton.style.display = 'none';
+    if (battleStatusText) battleStatusText.textContent = '';
+    if (reportWinButton) reportWinButton.disabled = false;
+    if (reportLoseButton) reportLoseButton.disabled = false;
+
+    if (loggedIn) {
+        if (isMatching) {
+            if(matchButton) matchButton.style.display = 'none';
+            if(cancelButton) cancelButton.style.display = 'inline-block';
+            if(cancelButton) cancelButton.disabled = false;
+            if (matchStatusText) matchStatusText.textContent = '対戦相手を探しています...';
+            if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
+            if (opponentInfoArea) opponentInfoArea.innerHTML = '';
+            if (opponentInfoArea) opponentInfoArea.style.display = 'none';
+            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
+            if (opponentSpinner) opponentSpinner.style.display = 'block';
+            if (matchChatSection) matchChatSection.style.display = 'none';
+            disconnectWebSocket();
+        } else if (currentMatchId && currentOpponentData) {
+            if(matchButton) matchButton.style.display = 'none';
+            if(cancelButton) cancelButton.style.display = 'none';
+            if (matchStatusText) matchStatusText.textContent = '対戦相手が見つかりました！結果を報告してください。';
+            if (resultReportingArea) resultReportingArea.style.display = 'block';
+            if (startBattleButton) startBattleButton.style.display = 'inline-block';
+            if (opponentSpinner) opponentSpinner.style.display = 'none';
+            if (opponentPlaceholder) opponentPlaceholder.style.display = 'none';
+            if (opponentInfoArea) opponentInfoArea.style.display = 'grid';
+            if (matchChatSection) matchChatSection.style.display = 'flex';
+            if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) {
+                connectWebSocket();
+            }
+        } else {
+            if(matchButton) matchButton.textContent = 'ライバルを探す';
+            if(matchButton) matchButton.style.display = 'inline-block';
+            if(matchButton) matchButton.disabled = false;
+            if(cancelButton) cancelButton.style.display = 'none';
+            if (matchStatusText) matchStatusText.textContent = ''; // 初期状態のテキストを空に
+            if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
+            if (opponentInfoArea) opponentInfoArea.innerHTML = '';
+            if (opponentInfoArea) opponentInfoArea.style.display = 'none';
+            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
+            if (opponentSpinner) opponentSpinner.style.display = 'none';
+            if (matchChatSection) matchChatSection.style.display = 'none';
+            disconnectWebSocket();
+        }
+    } else {
+        isMatching = false;
+        stopPollingMatchStatus();
+        currentMatchId = null;
+        currentOpponentData = null;
+        if(matchButton) matchButton.textContent = 'ログインが必要です';
+        if(matchButton) matchButton.style.display = 'inline-block';
+        if(matchButton) matchButton.disabled = true;
+        if(cancelButton) cancelButton.style.display = 'none';
+        if (matchStatusText) matchStatusText.textContent = '対戦するにはログインしてください。';
+        if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
+        if (opponentInfoArea) opponentInfoArea.innerHTML = '';
+        if (opponentInfoArea) opponentInfoArea.style.display = 'none';
+        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
+        if (opponentSpinner) opponentSpinner.style.display = 'none';
+        if (matchChatSection) matchChatSection.style.display = 'none';
+        disconnectWebSocket();
+    }
+}
+
 async function startMatchmaking() {
     if (isMatching) return;
     if (!window.MyApp?.isUserLoggedIn) {
@@ -354,7 +349,7 @@ function startPollingMatchStatus() {
             if (!token) { isMatching = false; updateMatchUI(); stopPollingMatchStatus(); return; }
             const response = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
             if (!response.ok) {
-                if (response.status === 404 || response.status === 400) { // 400も追加 (キューにない場合など)
+                if (response.status === 404 || response.status === 400) {
                     if (matchStatusText) matchStatusText.textContent = 'マッチングが終了しました。';
                     isMatching = false; updateMatchUI(); stopPollingMatchStatus(); return;
                 }
@@ -364,7 +359,7 @@ function startPollingMatchStatus() {
             }
             const result = await response.json();
             switch (result.status) {
-                case 'waiting': console.log("[match.js] Matchmaking status: waiting..."); break;
+                case 'waiting': break; // console.log("[match.js] Matchmaking status: waiting...");
                 case 'matched': handleMatchFound(result.opponent, result.matchId); stopPollingMatchStatus(); break;
                 case 'timeout':
                     if (matchStatusText) matchStatusText.textContent = '時間内に相手が見つかりませんでした。';
@@ -383,10 +378,9 @@ function stopPollingMatchStatus() {
 }
 
 function handleMatchFound(opponentData, matchId) {
-    console.log("[match.js] Match found. Opponent:", opponentData, "Match ID:", matchId);
     currentOpponentData = opponentData; currentMatchId = matchId; isMatching = false;
-    displayOpponentInfo(opponentData); // ★ opponent-info を更新
-    updateMatchUI(); // ★ UI全体を更新
+    displayOpponentInfo(opponentData);
+    updateMatchUI();
     if (matchChatMessagesArea) matchChatMessagesArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
     connectWebSocket();
 }
@@ -409,13 +403,13 @@ async function cancelMatchmakingRequest() {
     } finally {
         isMatching = false; currentMatchId = null; currentOpponentData = null;
         if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        if (opponentInfoArea) opponentInfoArea.style.display = 'none'; // ★ opponent-infoを非表示に戻す
-        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; // ★ placeholderを表示に戻す
+        if (opponentInfoArea) opponentInfoArea.innerHTML = ''; // ★ 内容をクリア
+        if (opponentInfoArea) opponentInfoArea.style.display = 'none';
+        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
         updateMatchUI(); disconnectWebSocket();
     }
 }
 
-// --- 結果報告関連関数 (reportMatchResult, showResultModal, closeResultModal は変更なし) ---
 async function reportMatchResult(didWin) {
     if (!currentMatchId || !window.MyApp?.currentUserData) {
         if (battleStatusText) battleStatusText.textContent = '結果報告エラー: 情報不足'; return;
@@ -461,7 +455,7 @@ function showResultModal(didWin, resultData, originalRate) {
     if (resultRateChange) {
         const change = resultData.rateChange ?? 0;
         resultRateChange.textContent = `${change >= 0 ? '+' : ''}${change}`;
-        resultRateChange.style.color = change >= 0 ? (didWin ? 'var(--color-success, green)' : 'var(--color-warning, orange)') : 'var(--color-danger, red)'; // 勝敗で色分け
+        resultRateChange.style.color = change >= 0 ? (didWin ? 'var(--color-success, green)' : 'var(--color-warning, orange)') : 'var(--color-danger, red)';
     }
     if (resultPointsEarned) resultPointsEarned.textContent = resultData.pointsEarned ?? '--';
     if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
@@ -471,13 +465,12 @@ function showResultModal(didWin, resultData, originalRate) {
 function closeResultModal() {
     if (resultModal) resultModal.style.display = 'none';
     if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
+    if (opponentInfoArea) opponentInfoArea.innerHTML = ''; // ★ 内容をクリア
     if (opponentInfoArea) opponentInfoArea.style.display = 'none';
     if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
     updateMatchUI();
 }
 
-
-// --- チャット関連関数 (appendChatMessage, sendChatMessage, connectWebSocket, disconnectWebSocket は変更なし) ---
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
@@ -506,46 +499,49 @@ function sendChatMessage() {
 }
 
 function connectWebSocket() {
-    if (matchWebSocket && matchWebSocket.readyState === WebSocket.OPEN) return;
+    if (matchWebSocket && (matchWebSocket.readyState === WebSocket.OPEN || matchWebSocket.readyState === WebSocket.CONNECTING)) return;
     const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
     if (!currentMatchId || !token) {
-        appendChatMessage("チャット接続情報なし。", false, "システム"); return;
+        appendChatMessage("チャット接続情報が不足しています。", false, "システム"); return;
     }
     const wsUrl = `${window.MyApp.WEBSOCKET_URL}?token=${token}&matchId=${currentMatchId}`;
-    appendChatMessage("チャット接続中...", false, "システム");
+    appendChatMessage("チャットサーバーに接続中...", false, "システム");
     try {
         matchWebSocket = new WebSocket(wsUrl);
-        matchWebSocket.onopen = () => appendChatMessage("接続しました。", false, "システム");
+        matchWebSocket.onopen = () => appendChatMessage("チャットに接続しました。", false, "システム");
         matchWebSocket.onmessage = (event) => {
             try {
                 const messageData = JSON.parse(event.data);
                 if (messageData.type === 'chat_message' && messageData.text) {
                     const senderName = messageData.senderName || '相手';
-                    const isMyMsg = messageData.senderId === window.MyApp?.currentUserData?.sub;
-                    if (!isMyMsg) appendChatMessage(messageData.text, false, senderName);
+                    if (messageData.senderId !== window.MyApp?.currentUserData?.sub) { // 自分自身のメッセージは表示しない
+                         appendChatMessage(messageData.text, false, senderName);
+                    }
                 } else if (messageData.type === 'system_message') {
                     appendChatMessage(messageData.text, false, "システム");
                 } else if (messageData.type === 'opponent_disconnected') {
                     appendChatMessage("相手が切断しました。", false, "システム");
                 }
-            } catch (e) { console.error("WS message parse error:", e); }
+            } catch (e) { console.error("WebSocket message parse error:", e); }
         };
-        matchWebSocket.onerror = (error) => { console.error("WS error:", error); appendChatMessage("チャット接続エラー。", false, "システム");};
+        matchWebSocket.onerror = (error) => { console.error("WebSocket error:", error); appendChatMessage("チャット接続エラーが発生しました。", false, "システム");};
         matchWebSocket.onclose = (event) => {
-            if (event.code !== 1000) appendChatMessage(`チャット切断 (Code: ${event.code})`, false, "システム");
+            if (event.code !== 1000) { // 1000は正常なクローズ
+                 appendChatMessage(`チャット接続が切れました (Code: ${event.code})`, false, "システム");
+            } else {
+                 appendChatMessage("チャットから切断しました。", false, "システム");
+            }
             matchWebSocket = null;
         };
-    } catch (error) { console.error("WS create error:", error); appendChatMessage("チャット接続失敗。", false, "システム");}
+    } catch (error) { console.error("WebSocket creation error:", error); appendChatMessage("チャット接続に失敗しました。", false, "システム");}
 }
 
 function disconnectWebSocket() {
-    if (matchWebSocket) { matchWebSocket.close(1000, "Client disconnect"); matchWebSocket = null; }
+    if (matchWebSocket) {
+        matchWebSocket.close(1000, "Client requested disconnect");
+        matchWebSocket = null;
+    }
 }
 
-
-// フォールバック displayBadges (変更なし)
-if (typeof window.displayBadges === 'undefined') {
-    window.displayBadges = function(badgeSlots, badgeIds) {
-        // ... (変更なし)
-    };
-}
+// ★★★ match.js から window.getBadgeImagePath と window.displayBadges のフォールバック定義を削除 ★★★
+// (script.js にあるグローバルな定義を使用するため)

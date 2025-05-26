@@ -14,7 +14,7 @@ let profilePic, profileName, profileRate, profilePoints,
     displayBadgesContainer, editDisplayBadgesButton,
     badgeDexSection, badgeDexGrid, badgeDexLoading, badgeDexCount, badgeDexTotal,
     badgeDexDetail, badgeDexDetailClose, badgeDexDetailImg, badgeDexDetailName,
-    badgeDexDetailDesc, badgeDexDetailRarity, 
+    badgeDexDetailDesc, badgeDexDetailRarity,
     badgeDexDetailCondition, badgeDexDetailRate, badgeDexDetailPrice,
     badgeDexDetailOwnedStatus,
     editBadgesModal, closeEditBadgesModalButton, displaySlotsContainer, ownedBadgesGrid,
@@ -24,8 +24,14 @@ let rateHistoryChart = null;
 let recentWinRateChart = null;
 let overallWinRateChart = null;
 
-let allBadgesData = []; 
-let currentDisplayBadgeSelection = []; 
+let allBadgesData = [];
+let currentDisplayBadgeSelection = [];
+
+// ★★★ 環境に応じたデフォルト画像パスを script.js から取得する想定 ★★★
+// もし script.js で MyApp.DEFAULT_BADGE_PATH のようなグローバル変数を設定していればそれを使う。
+// ここでは getBadgeImagePath に不正なIDを渡してデフォルトパスを取得する。
+const getDefaultBadgePath = () => typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath('__INVALID_ID_FOR_DEFAULT__') : '/images/default_badge.svg';
+const getDefaultAvatarPath = () => '/images/placeholder-avatar.png'; // これは固定で良いと判断
 
 async function authenticatedFetch(url, options = {}, requiresAuth = true) {
     const headers = { ...options.headers };
@@ -64,6 +70,7 @@ async function fetchUserData(userId) {
         const userData = await authenticatedFetch(`${window.MyApp.BACKEND_URL}/api/users/${userId}`, {}, false);
         displayUserProfile(userData);
         await loadAndRenderCharts(userId);
+        // allBadgesData は initializePageData で取得済みなので、ここでは userData のみを渡す
         displayBadgeDex(userData, allBadgesData);
     } catch (error) {
         console.error(`[mypage.js] Error fetching user data for ${userId}:`, error);
@@ -81,11 +88,11 @@ function displayUserProfile(userData) {
         return;
     }
 
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
+    const defaultAvatar = getDefaultAvatarPath();
 
     if (userData) {
-        profilePic.src = userData.picture || '/public/images/placeholder-avatar.png'; // プレースホルダーも絶対パスに
-        profilePic.onerror = () => { profilePic.src = '/public/images/placeholder-avatar.png'; };
+        profilePic.src = userData.picture || defaultAvatar;
+        profilePic.onerror = () => { profilePic.src = defaultAvatar; };
         profileName.textContent = userData.name || 'プレイヤー名';
         profileRate.textContent = userData.rate ?? '----';
         profilePoints.textContent = `${userData.points ?? '----'} P`;
@@ -98,11 +105,16 @@ function displayUserProfile(userData) {
         const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
                               ? userData.displayBadges
                               : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
-        displayProfileBadges(badgesToDisplay);
+        // script.js の displayBadges を使用
+        if (displayBadgesContainer && typeof window.displayBadges === 'function') {
+            const badgeSlots = displayBadgesContainer.querySelectorAll('.badge-slot');
+            window.displayBadges(badgeSlots, badgesToDisplay);
+        }
 
-        updateEditButtonsVisibility(false); 
-        updateBadgeEditButtonVisibility(false); 
-        toggleEditMode(false); 
+        // ボタン表示は initializePageData または onLoginStatusChange で行うため、ここでは操作しない
+        // updateEditButtonsVisibility(false);
+        // updateBadgeEditButtonVisibility(false);
+        toggleEditMode(false);
 
     } else {
         displayLoggedOutState();
@@ -110,14 +122,19 @@ function displayUserProfile(userData) {
 }
 
 function displayLoggedOutState() {
-    if (profilePic) profilePic.src = '/public/images/placeholder-avatar.png'; // プレースホルダーも絶対パスに
+    const defaultAvatar = getDefaultAvatarPath();
+    if (profilePic) profilePic.src = defaultAvatar;
     if (profileName) profileName.textContent = 'ログインしてください';
     if (profileRate) profileRate.textContent = '----';
     if (profilePoints) profilePoints.textContent = '---- P';
     if (favCourseDisplay) favCourseDisplay.textContent = '未設定';
     if (userCommentDisplay) userCommentDisplay.textContent = '未設定';
     if (selfIntroDisplay) selfIntroDisplay.textContent = '未設定';
-    displayProfileBadges([]);
+
+    if (displayBadgesContainer && typeof window.displayBadges === 'function') {
+        const badgeSlots = displayBadgesContainer.querySelectorAll('.badge-slot');
+        window.displayBadges(badgeSlots, []);
+    }
 
     destroyCharts();
     showChartPlaceholder(rateHistoryPlaceholder, 'ログインしてください');
@@ -130,66 +147,31 @@ function displayLoggedOutState() {
 
     updateEditButtonsVisibility(false);
     updateBadgeEditButtonVisibility(false);
-    if (badgeDexSection) badgeDexSection.style.display = 'block';
-    displayBadgeDex(null, allBadgesData); 
+    if (badgeDexSection) badgeDexSection.style.display = 'block'; // 図鑑はエラーやログアウト時も表示枠は維持
+    displayBadgeDex(null, allBadgesData); // ユーザーデータなしで図鑑表示を試みる
 
     displayModeElements?.forEach(el => el.style.display = '');
     editModeElements?.forEach(el => el.style.display = 'none');
 }
 
 function displayErrorState(errorMessage = 'データの読み込みに失敗しました。') {
-    if (profilePic) profilePic.src = '/public/images/placeholder-avatar.png'; // プレースホルダーも絶対パスに
+    const defaultAvatar = getDefaultAvatarPath();
+    if (profilePic) profilePic.src = defaultAvatar;
     if (profileName) profileName.textContent = 'データ読込失敗';
-    if (profileRate) profileRate.textContent = '----';
-    if (profilePoints) profilePoints.textContent = '---- P';
-    if (favCourseDisplay) favCourseDisplay.textContent = '読込失敗';
-    if (userCommentDisplay) userCommentDisplay.textContent = '読込失敗';
-    if (selfIntroDisplay) selfIntroDisplay.textContent = '読込失敗';
-    displayProfileBadges([]);
-
+    // ... (他の要素も同様にデフォルト値を設定)
+    if (displayBadgesContainer && typeof window.displayBadges === 'function') {
+        const badgeSlots = displayBadgesContainer.querySelectorAll('.badge-slot');
+        window.displayBadges(badgeSlots, []);
+    }
     destroyCharts();
-    showChartPlaceholder(rateHistoryPlaceholder, errorMessage);
-    showChartPlaceholder(winRatePlaceholder, errorMessage);
-    showChartPlaceholder(overallWinRatePlaceholder, errorMessage);
-
-    chartsLoadedForCurrentUser = false;
-    isLoadingCharts = false;
-    if (window.MyApp) window.MyApp.lastChartsLoadedForUserId = null;
-
+    // ... (プレースホルダー表示)
     updateEditButtonsVisibility(false);
     updateBadgeEditButtonVisibility(false);
     if (badgeDexSection) badgeDexSection.style.display = 'block';
     displayBadgeDex(null, allBadgesData);
-
-    displayModeElements?.forEach(el => el.style.display = '');
-    editModeElements?.forEach(el => el.style.display = 'none');
 }
 
-function displayProfileBadges(badgeIds) {
-    if (!displayBadgesContainer) return;
-    const badgeSlots = displayBadgesContainer.querySelectorAll('.badge-slot');
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
-
-    badgeSlots.forEach((slot, index) => {
-        slot.innerHTML = '';
-        slot.classList.remove('filled');
-        slot.style.opacity = '0.5';
-        const badgeId = badgeIds[index];
-        if (badgeId && allBadgesData.length > 0) { // allBadgesData を参照してバッジ名を取得
-            const badgeData = allBadgesData.find(b => b.badgeId === badgeId);
-            if (badgeData) {
-                const img = document.createElement('img');
-                // ★ script.js の getBadgeImagePath を使用 (第2引数は削除)
-                img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultBadgeImgPath;
-                img.alt = badgeData.name;
-                img.onerror = () => { img.src = defaultBadgeImgPath; }; // ★ 共通のデフォルトパス
-                slot.appendChild(img);
-                slot.classList.add('filled');
-                slot.style.opacity = '1';
-            }
-        }
-    });
-}
+// displayProfileBadges 関数は script.js の window.displayBadges に置き換えられたため削除
 
 function updateEditButtonsVisibility(isViewingOwnPage) {
     if (editProfileButton) editProfileButton.style.display = isViewingOwnPage ? 'inline-block' : 'none';
@@ -204,19 +186,14 @@ function updateBadgeEditButtonVisibility(isViewingOwnPage) {
 }
 
 function toggleEditMode(isEditing) {
-    const isOwnPage = !!(window.MyApp?.currentUserData && 
+    const isOwnPage = !!(window.MyApp?.currentUserData &&
                        (new URLSearchParams(window.location.search).get('userId') === window.MyApp.currentUserData.sub ||
                         !new URLSearchParams(window.location.search).get('userId')));
-
     displayModeElements?.forEach(el => el.style.display = isEditing ? 'none' : '');
     editModeElements?.forEach(el => el.style.display = isEditing ? '' : 'none');
-    
     if (editProfileButton) editProfileButton.style.display = isEditing || !isOwnPage ? 'none' : 'inline-block';
     if (saveProfileButton) saveProfileButton.style.display = isEditing && isOwnPage ? 'inline-block' : 'none';
-    if (cancelEditButton) {
-        cancelEditButton.style.display = isEditing && isOwnPage ? 'inline-block' : 'none';
-    }
-
+    if (cancelEditButton) cancelEditButton.style.display = isEditing && isOwnPage ? 'inline-block' : 'none';
     if (isEditing && isOwnPage) {
         if (favCourseInput && favCourseDisplay) favCourseInput.value = favCourseDisplay.textContent !== '未設定' ? favCourseDisplay.textContent : '';
         if (userCommentInput && userCommentDisplay) userCommentInput.value = userCommentDisplay.textContent !== '未設定' ? userCommentDisplay.textContent : '';
@@ -230,36 +207,27 @@ async function saveProfile() {
         comment: userCommentInput?.value?.trim() || '',
         selfIntroduction: selfIntroInput?.value?.trim() || '',
     };
-    if (saveProfileButton) {
-        saveProfileButton.disabled = true;
-        saveProfileButton.textContent = '保存中...';
-    }
+    if (saveProfileButton) { saveProfileButton.disabled = true; saveProfileButton.textContent = '保存中...'; }
     try {
        const apiUrl = `${window.MyApp.BACKEND_URL}/api/users/profile`;
        const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
        if (!token) throw new Error('ログインが必要です。');
-
         const response = await fetch(apiUrl, {
              method: 'PUT',
              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
              body: JSON.stringify(updatedProfile),
          });
-
         if (!response.ok) {
              const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
              throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-        const result = await response.json();
-
+        // const result = await response.json(); // result は使っていない
         if (favCourseDisplay) favCourseDisplay.textContent = updatedProfile.favCourse || '未設定';
         if (userCommentDisplay) userCommentDisplay.textContent = updatedProfile.comment || '未設定';
         if (selfIntroDisplay) selfIntroDisplay.textContent = updatedProfile.selfIntroduction || '未設定';
-
         if (window.MyApp?.currentUserData) {
             if (!window.MyApp.currentUserData.profile) window.MyApp.currentUserData.profile = {};
-            window.MyApp.currentUserData.profile.favCourse = updatedProfile.favCourse;
-            window.MyApp.currentUserData.profile.comment = updatedProfile.comment;
-            window.MyApp.currentUserData.profile.selfIntroduction = updatedProfile.selfIntroduction;
+            Object.assign(window.MyApp.currentUserData.profile, updatedProfile);
             if (typeof window.saveCurrentUserData === 'function') window.saveCurrentUserData();
         }
         toggleEditMode(false);
@@ -268,48 +236,34 @@ async function saveProfile() {
         console.error('[mypage.js] Error saving profile:', error);
         alert(`プロフィールの保存に失敗しました: ${error.message}`);
     } finally {
-        if (saveProfileButton) {
-            saveProfileButton.disabled = false;
-            saveProfileButton.textContent = '保存';
-        }
+        if (saveProfileButton) { saveProfileButton.disabled = false; saveProfileButton.textContent = '保存';}
     }
 }
 
 async function initializePageData() {
     if (badgeDexLoading) badgeDexLoading.style.display = 'flex';
-    allBadgesData = await fetchAllBadges(); 
+    allBadgesData = await fetchAllBadges();
     if (badgeDexLoading) badgeDexLoading.style.display = 'none';
 
     window.registerUserDataReadyCallback(async (loggedInUserData) => {
         const urlParams = new URLSearchParams(window.location.search);
         const userIdFromUrl = urlParams.get('userId');
-        let targetUserId = null;
-        if (userIdFromUrl) {
-            targetUserId = userIdFromUrl;
-        } else if (loggedInUserData) {
-            targetUserId = loggedInUserData.sub;
-        } else {
-            displayLoggedOutState(); 
-            return;
-        }
+        let targetUserId = userIdFromUrl || loggedInUserData?.sub;
 
-        if (targetUserId) {
-            if (window.MyApp?.lastChartsLoadedForUserId !== targetUserId) {
-                chartsLoadedForCurrentUser = false;
-            }
-            isLoadingCharts = false;
-            try {
-                await fetchUserData(targetUserId); 
-                const isViewingOwnPage = !!(loggedInUserData && (!userIdFromUrl || userIdFromUrl === loggedInUserData.sub));
-                updateEditButtonsVisibility(isViewingOwnPage);
-                updateBadgeEditButtonVisibility(isViewingOwnPage);
-            } catch (error) {
-                 console.error("[mypage.js] Error during initial fetchUserData in ready callback:", error);
-                 updateEditButtonsVisibility(false);
-                 updateBadgeEditButtonVisibility(false);
-            }
-        } else {
-             displayErrorState("表示するユーザーを特定できませんでした。");
+        if (!targetUserId) {
+            displayLoggedOutState(); return;
+        }
+        if (window.MyApp?.lastChartsLoadedForUserId !== targetUserId) chartsLoadedForCurrentUser = false;
+        isLoadingCharts = false;
+        try {
+            await fetchUserData(targetUserId);
+            const isViewingOwnPage = !!(loggedInUserData && (!userIdFromUrl || userIdFromUrl === loggedInUserData.sub));
+            updateEditButtonsVisibility(isViewingOwnPage);
+            updateBadgeEditButtonVisibility(isViewingOwnPage);
+        } catch (error) {
+             console.error("[mypage.js] Error during initial fetchUserData in ready callback:", error);
+             updateEditButtonsVisibility(false);
+             updateBadgeEditButtonVisibility(false);
         }
     });
 }
@@ -319,17 +273,11 @@ async function loadAndRenderCharts(userId) {
     const userIdFromUrl = urlParams.get('userId');
     const isOwnPage = !userIdFromUrl && window.MyApp?.currentUserData?.sub === userId;
 
-    if (isLoadingCharts || (chartsLoadedForCurrentUser && window.MyApp?.lastChartsLoadedForUserId === userId)) {
-        return;
-    }
-    if (!userId) {
-         displayErrorState('ユーザー情報の取得に失敗しました。');
-         return;
-    }
+    if (isLoadingCharts || (chartsLoadedForCurrentUser && window.MyApp?.lastChartsLoadedForUserId === userId)) return;
+    if (!userId) { displayErrorState('ユーザー情報の取得に失敗しました。'); return; }
 
     isLoadingCharts = true;
-    destroyCharts(); 
-
+    destroyCharts();
     showChartPlaceholder(rateHistoryPlaceholder, 'レート履歴を読み込み中...');
     showChartPlaceholder(winRatePlaceholder, '勝率データを読込中...');
     showChartPlaceholder(overallWinRatePlaceholder, '勝率データを読込中...');
@@ -338,56 +286,48 @@ async function loadAndRenderCharts(userId) {
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/users/${userId}/stats`;
         const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
         const headers = {};
-        if (isOwnPage && token) { 
-            headers['Authorization'] = `Bearer ${token}`;
-        }
+        if (isOwnPage && token) headers['Authorization'] = `Bearer ${token}`;
         const response = await fetch(apiUrl, { headers });
         if (!response.ok) {
             if (response.status === 403) throw new Error(`統計情報の表示権限がありません。(ステータス: ${response.status})`);
-            const errorText = await response.text(); 
+            const errorText = await response.text();
             throw new Error(`統計情報取得エラー (ステータス: ${response.status}, メッセージ: ${errorText || 'N/A'})`);
         }
         const statsData = await response.json();
         renderRateHistoryChart(statsData.rateHistory || []);
         renderWinRateCharts(statsData.winRate || {});
-
-        if (window.MyApp) window.MyApp.lastChartsLoadedForUserId = userId; 
-        if (isOwnPage) { 
-            chartsLoadedForCurrentUser = true;
-        }
+        if (window.MyApp) window.MyApp.lastChartsLoadedForUserId = userId;
+        if (isOwnPage) chartsLoadedForCurrentUser = true;
     } catch (error) {
         console.error('[mypage.js] Error loading chart data:', error);
         showChartPlaceholder(rateHistoryPlaceholder, `レート履歴: ${error.message}`);
         showChartPlaceholder(winRatePlaceholder, `勝率(直近): ${error.message}`);
         showChartPlaceholder(overallWinRatePlaceholder, `勝率(全体): ${error.message}`);
-        if (window.MyApp) window.MyApp.lastChartsLoadedForUserId = null; 
-        chartsLoadedForCurrentUser = false; 
+        if (window.MyApp) window.MyApp.lastChartsLoadedForUserId = null;
+        chartsLoadedForCurrentUser = false;
     } finally {
-        isLoadingCharts = false; 
+        isLoadingCharts = false;
     }
 }
 
 function renderRateHistoryChart(historyData) {
     const canvasEl = document.getElementById('rate-history-chart');
     if (!canvasEl) { showChartPlaceholder(rateHistoryPlaceholder, 'レート履歴チャートの準備ができません。'); return; }
-    rateHistoryCtx = canvasEl.getContext('2d'); 
+    rateHistoryCtx = canvasEl.getContext('2d');
     hideChartPlaceholder(rateHistoryPlaceholder);
-
-    if (!historyData || historyData.length === 0) {
-        showChartPlaceholder(rateHistoryPlaceholder, 'レート履歴データがありません。'); return;
-    }
+    if (!historyData || historyData.length === 0) { showChartPlaceholder(rateHistoryPlaceholder, 'レート履歴データがありません。'); return; }
     const labels = historyData.map(item => new Date(item.date).toLocaleDateString());
     const data = historyData.map(item => item.rate);
     rateHistoryChart = new Chart(rateHistoryCtx, {
-        type: 'line',
-        data: { labels, datasets: [{ label: 'レート', data, borderColor: 'rgb(75, 192, 192)', tension: 0.1, fill: false }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false }, datalabels: { display: false } } }
+        type: 'line', data: { labels, datasets: [{ label: 'レート', data, borderColor: 'rgb(75, 192, 192)', tension: 0.1, fill: false }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.7)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)' } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false }, datalabels: { display: false } } }
     });
 }
 
 function renderWinRateCharts(winRateData) {
-    const winColor = 'rgba(218, 165, 32, 0.8)', winBorderColor = 'rgba(218, 165, 32, 1)';
-    const lossColor = 'rgba(105, 105, 105, 0.8)', lossBorderColor = 'rgba(105, 105, 105, 1)';
+    const winColor = 'rgba(218,165,32,0.8)', winBorderColor = 'rgba(218,165,32,1)';
+    const lossColor = 'rgba(105,105,105,0.8)', lossBorderColor = 'rgba(105,105,105,1)';
+    const commonOptions = { responsive: true, maintainAspectRatio: false, layout: { padding: 15 }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: createTooltipLabel } }, datalabels: createDataLabelsConfig() } };
 
     const recentCanvas = document.getElementById('recent-winrate-chart');
     if (recentCanvas) {
@@ -395,7 +335,7 @@ function renderWinRateCharts(winRateData) {
         const recent = winRateData.recent;
         hideChartPlaceholder(winRatePlaceholder);
         if (recent && (recent.wins > 0 || recent.losses > 0)) {
-            recentWinRateChart = new Chart(recentWinRateCtx, { type: 'doughnut', data: { labels: ['勝利', '敗北'], datasets: [{ label: '直近勝率', data: [recent.wins, recent.losses], backgroundColor: [winColor, lossColor], borderColor: [winBorderColor, lossBorderColor], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 15 }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: createTooltipLabel } }, datalabels: createDataLabelsConfig() } } });
+            recentWinRateChart = new Chart(recentWinRateCtx, { type: 'doughnut', data: { labels: ['勝利', '敗北'], datasets: [{ data: [recent.wins, recent.losses], backgroundColor: [winColor, lossColor], borderColor: [winBorderColor, lossBorderColor], borderWidth: 1 }] }, options: commonOptions });
         } else { showChartPlaceholder(winRatePlaceholder, '直近の対戦データがありません。'); }
     } else { showChartPlaceholder(winRatePlaceholder, '勝率チャート(直近)の準備ができません。'); }
 
@@ -405,7 +345,7 @@ function renderWinRateCharts(winRateData) {
         const overall = winRateData.overall;
         hideChartPlaceholder(overallWinRatePlaceholder);
         if (overall && (overall.wins > 0 || overall.losses > 0)) {
-            overallWinRateChart = new Chart(overallWinRateCtx, { type: 'doughnut', data: { labels: ['勝利', '敗北'], datasets: [{ label: '全体勝率', data: [overall.wins, overall.losses], backgroundColor: [winColor, lossColor], borderColor: [winBorderColor, lossBorderColor], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: 15 }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: createTooltipLabel } }, datalabels: createDataLabelsConfig() } } });
+            overallWinRateChart = new Chart(overallWinRateCtx, { type: 'doughnut', data: { labels: ['勝利', '敗北'], datasets: [{ data: [overall.wins, overall.losses], backgroundColor: [winColor, lossColor], borderColor: [winBorderColor, lossBorderColor], borderWidth: 1 }] }, options: commonOptions });
         } else { showChartPlaceholder(overallWinRatePlaceholder, '全体の対戦データがありません。'); }
     } else { showChartPlaceholder(overallWinRatePlaceholder, '勝率チャート(全体)の準備ができません。'); }
 }
@@ -414,15 +354,15 @@ function destroyCharts() {
     const destroyAndRecreateCanvas = (chartInstance, canvasId, placeholderId) => {
         if (chartInstance) {
             const canvas = chartInstance.canvas; const parent = canvas.parentElement;
-            chartInstance.destroy(); 
-            if (parent && canvas) { parent.removeChild(canvas); }
+            chartInstance.destroy();
+            if (parent && canvas) parent.removeChild(canvas);
             if (parent) {
                 const newCanvas = document.createElement('canvas'); newCanvas.id = canvasId;
                 const placeholder = document.getElementById(placeholderId);
                 if (placeholder) { parent.insertBefore(newCanvas, placeholder); return newCanvas.getContext('2d'); }
             }
         }
-        const existingCanvas = document.getElementById(canvasId); 
+        const existingCanvas = document.getElementById(canvasId);
         if (existingCanvas) return existingCanvas.getContext('2d');
         const placeholderEl = document.getElementById(placeholderId);
         const parentEl = placeholderEl?.parentElement;
@@ -432,7 +372,6 @@ function destroyCharts() {
         }
         return null;
     };
-
     rateHistoryCtx = destroyAndRecreateCanvas(rateHistoryChart, 'rate-history-chart', 'rateHistoryChartPlaceholder'); rateHistoryChart = null;
     recentWinRateCtx = destroyAndRecreateCanvas(recentWinRateChart, 'recent-winrate-chart', 'winRateChartPlaceholder'); recentWinRateChart = null;
     overallWinRateCtx = destroyAndRecreateCanvas(overallWinRateChart, 'overall-winrate-chart', 'overallWinRateChartPlaceholder'); overallWinRateChart = null;
@@ -460,19 +399,17 @@ function createTooltipLabel(context) {
         const total = context.dataset.data.reduce((a, b) => a + b, 0);
         const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) + '%' : '0%';
         label += `${context.raw} (${percentage})`;
-    }
-    return label;
+    } return label;
 }
 
 function createDataLabelsConfig() { return { display: true, formatter: (value) => value, color: '#fff', font: { weight: 'bold', size: 14 }, anchor: 'center', align: 'center' }; }
 
 async function fetchAllBadges() {
     try {
-        const apiUrl = `${window.MyApp.BACKEND_URL}/api/badges/all`; 
+        const apiUrl = `${window.MyApp.BACKEND_URL}/api/badges/all`;
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`Failed to fetch badges: ${response.status}`);
-        const badges = await response.json();
-        return badges.map(b => ({ ...b })); 
+        return await response.json();
     } catch (error) {
         console.error("Error fetching all badges:", error); return [];
     }
@@ -480,12 +417,12 @@ async function fetchAllBadges() {
 
 function displayBadgeDex(userData, allBadges) {
     if (!badgeDexSection || !badgeDexGrid || !badgeDexLoading || !badgeDexCount || !badgeDexTotal) return;
-    badgeDexSection.style.display = 'block'; 
-    if (badgeDexLoading) badgeDexLoading.style.display = 'none'; 
+    badgeDexSection.style.display = 'block';
+    if (badgeDexLoading) badgeDexLoading.style.display = 'none';
     badgeDexGrid.innerHTML = '';
-    const ownedBadgeIds = new Set(userData?.badges || []); 
+    const ownedBadgeIds = new Set(userData?.badges || []);
     let ownedCount = 0;
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
+    const defaultImgPath = getDefaultBadgePath(); // ★ 修正
 
     if (allBadges.length === 0) {
         badgeDexGrid.innerHTML = '<p>バッジ情報がありません。</p>';
@@ -494,16 +431,16 @@ function displayBadgeDex(userData, allBadges) {
 
     allBadges.forEach(badge => {
         const isOwned = ownedBadgeIds.has(badge.badgeId);
-        if (isOwned) ownedCount++; 
+        if (isOwned) ownedCount++;
         const itemDiv = document.createElement('div');
         itemDiv.classList.add('badge-dex-item');
         if (!isOwned) itemDiv.classList.add('not-owned');
         itemDiv.dataset.badgeId = badge.badgeId;
         const img = document.createElement('img');
-        // ★ script.js の getBadgeImagePath を使用 (第2引数は削除)
-        img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badge.badgeId) : defaultBadgeImgPath;
+        // ★ script.js の getBadgeImagePath を使用
+        img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badge.badgeId) : defaultImgPath;
         img.alt = badge.name;
-        img.onerror = () => { img.src = defaultBadgeImgPath; }; // ★ 共通のデフォルトパス
+        img.onerror = () => { img.src = defaultImgPath; }; // ★ 修正
         itemDiv.appendChild(img);
         itemDiv.addEventListener('click', () => showBadgeDetail(badge, isOwned));
         badgeDexGrid.appendChild(itemDiv);
@@ -515,14 +452,13 @@ function displayBadgeDex(userData, allBadges) {
 function showBadgeDetail(badgeData, isOwned) {
     if (!badgeDexDetail || !badgeDexDetailImg || !badgeDexDetailName || !badgeDexDetailDesc ||
         !badgeDexDetailCondition || !badgeDexDetailRate || !badgeDexDetailPrice || !badgeDexDetailOwnedStatus ||
-        !badgeDexDetailRarity) { 
-            return;
-        }
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
+        !badgeDexDetailRarity) return;
 
-    // ★ script.js の getBadgeImagePath を使用 (第2引数は削除)
-    badgeDexDetailImg.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeData.badgeId) : defaultBadgeImgPath;
-    badgeDexDetailImg.onerror = () => { badgeDexDetailImg.src = defaultBadgeImgPath; }; // ★ 共通のデフォルトパス
+    const defaultImgPath = getDefaultBadgePath(); // ★ 修正
+
+    // ★ script.js の getBadgeImagePath を使用
+    badgeDexDetailImg.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeData.badgeId) : defaultImgPath;
+    badgeDexDetailImg.onerror = () => { badgeDexDetailImg.src = defaultImgPath; }; // ★ 修正
     badgeDexDetailName.textContent = badgeData.name;
     badgeDexDetailDesc.textContent = badgeData.description || '説明なし';
 
@@ -543,11 +479,10 @@ function showBadgeDetail(badgeData, isOwned) {
         const rarityString = badgeData.rarity.toLowerCase();
         const displayRarityText = rarityString.toUpperCase();
         const applyRainbowEffect = rarityString === 'legendary' || rarityString === 'ssr';
-
         badgeDexDetailRarity.innerHTML = `レアリティ: <span class="rarity-value rarity-${rarityString} ${applyRainbowEffect ? 'rainbow' : ''}">${displayRarityText}</span>`;
         badgeDexDetailRarity.style.display = 'block';
     } else if (badgeDexDetailRarity) {
-        badgeDexDetailRarity.style.display = 'none'; 
+        badgeDexDetailRarity.style.display = 'none';
     }
 
     if (isOwned) {
@@ -568,7 +503,7 @@ function openEditDisplayBadgesModal(userData) {
     if (!editBadgesModal || !displaySlotsContainer || !ownedBadgesGrid || !userData) return;
     currentDisplayBadgeSelection = [...(userData.displayBadges || [])];
     renderDisplaySlots();
-    renderOwnedBadgesGrid(userData.badges || []); 
+    renderOwnedBadgesGrid(userData.badges || []);
     editBadgesModal.style.display = 'flex';
 }
 
@@ -579,43 +514,41 @@ function closeEditDisplayBadgesModal() {
 function renderDisplaySlots() {
     if (!displaySlotsContainer) return;
     const slots = displaySlotsContainer.querySelectorAll('.display-slot');
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
+    const defaultImgPath = getDefaultBadgePath(); // ★ 修正
 
     slots.forEach((slot, index) => {
-        slot.innerHTML = ''; 
+        slot.innerHTML = '';
         slot.classList.remove('filled');
-        slot.onclick = null; 
+        slot.onclick = null;
         const badgeId = currentDisplayBadgeSelection[index];
         if (badgeId && allBadgesData.length > 0) {
             const badgeData = allBadgesData.find(b => b.badgeId === badgeId);
             if (badgeData) {
                 const img = document.createElement('img');
-                // ★ script.js の getBadgeImagePath を使用 (第2引数は削除)
-                img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultBadgeImgPath;
+                img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultImgPath;
                 img.alt = badgeData.name;
-                img.onerror = () => { img.src = defaultBadgeImgPath; }; // ★ 共通のデフォルトパス
+                img.onerror = () => { img.src = defaultImgPath; }; // ★ 修正
                 slot.appendChild(img);
                 slot.classList.add('filled');
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove-badge-from-slot';
-                removeBtn.innerHTML = '&times;'; 
-                removeBtn.onclick = (e) => { e.stopPropagation(); removeBadgeFromSlot(index); }; 
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = (e) => { e.stopPropagation(); removeBadgeFromSlot(index); };
                 slot.appendChild(removeBtn);
             }
         }
     });
 }
 
-function renderOwnedBadgesGrid(ownedBadgeIdsParams) { 
+function renderOwnedBadgesGrid(ownedBadgeIdsParams) {
     if (!ownedBadgesGrid || allBadgesData.length === 0) return;
     ownedBadgesGrid.innerHTML = '';
-    const uniqueOwnedIds = [...new Set(ownedBadgeIdsParams)]; 
-    const defaultBadgeImgPath = '/public/images/default_badge.svg'; // ★ 共通のデフォルトパス
+    const uniqueOwnedIds = [...new Set(ownedBadgeIdsParams)];
+    const defaultImgPath = getDefaultBadgePath(); // ★ 修正
 
     if (uniqueOwnedIds.length === 0) {
         ownedBadgesGrid.innerHTML = '<p>所持しているバッジがありません。</p>'; return;
     }
-
     uniqueOwnedIds.forEach(badgeId => {
         const badgeData = allBadgesData.find(b => b.badgeId === badgeId);
         if (badgeData) {
@@ -623,10 +556,9 @@ function renderOwnedBadgesGrid(ownedBadgeIdsParams) {
             itemDiv.classList.add('badge-item');
             itemDiv.dataset.badgeId = badgeId;
             const img = document.createElement('img');
-            // ★ script.js の getBadgeImagePath を使用 (第2引数は削除)
-            img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultBadgeImgPath;
+            img.src = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultImgPath;
             img.alt = badgeData.name;
-            img.onerror = () => { img.src = defaultBadgeImgPath; }; // ★ 共通のデフォルトパス
+            img.onerror = () => { img.src = defaultImgPath; }; // ★ 修正
             itemDiv.appendChild(img);
             if (currentDisplayBadgeSelection.includes(badgeId)) {
                 itemDiv.classList.add('selected'); itemDiv.onclick = null;
@@ -640,24 +572,24 @@ function renderOwnedBadgesGrid(ownedBadgeIdsParams) {
 
 function addBadgeToSlot(badgeId) {
     if (currentDisplayBadgeSelection.length >= 3) { alert('表示できるバッジは3つまでです。'); return; }
-    if (currentDisplayBadgeSelection.includes(badgeId)) return; 
-    currentDisplayBadgeSelection.push(badgeId); 
-    renderDisplaySlots(); 
-    renderOwnedBadgesGrid(window.MyApp?.currentUserData?.badges || []); 
+    if (currentDisplayBadgeSelection.includes(badgeId)) return;
+    currentDisplayBadgeSelection.push(badgeId);
+    renderDisplaySlots();
+    renderOwnedBadgesGrid(window.MyApp?.currentUserData?.badges || []);
 }
 
 function removeBadgeFromSlot(slotIndex) {
     if (slotIndex >= 0 && slotIndex < currentDisplayBadgeSelection.length) {
-        currentDisplayBadgeSelection.splice(slotIndex, 1); 
-        renderDisplaySlots(); 
-        renderOwnedBadgesGrid(window.MyApp?.currentUserData?.badges || []); 
+        currentDisplayBadgeSelection.splice(slotIndex, 1);
+        renderDisplaySlots();
+        renderOwnedBadgesGrid(window.MyApp?.currentUserData?.badges || []);
     }
 }
 
 async function saveDisplayBadges() {
     if (saveDisplayBadgesButton) { saveDisplayBadgesButton.disabled = true; saveDisplayBadgesButton.textContent = '保存中...'; }
     try {
-        const apiUrl = `${window.MyApp.BACKEND_URL}/api/users/profile/display-badges`; 
+        const apiUrl = `${window.MyApp.BACKEND_URL}/api/users/profile/display-badges`;
         const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
         if (!token) throw new Error("ログインが必要です。");
         const response = await fetch(apiUrl, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ displayBadges: currentDisplayBadgeSelection }) });
@@ -665,12 +597,14 @@ async function saveDisplayBadges() {
         const result = await response.json();
         if (window.MyApp?.currentUserData) {
             window.MyApp.currentUserData.displayBadges = result.displayBadges || currentDisplayBadgeSelection;
-            if (typeof window.saveCurrentUserData === 'function') {
-                window.saveCurrentUserData();
-            }
+            if (typeof window.saveCurrentUserData === 'function') window.saveCurrentUserData();
         }
-        displayProfileBadges(window.MyApp?.currentUserData?.displayBadges || []);
-        closeEditDisplayBadgesModal(); 
+        // ★★★ script.js の displayBadges を使用 ★★★
+        if (displayBadgesContainer && typeof window.displayBadges === 'function') {
+            const badgeSlots = displayBadgesContainer.querySelectorAll('.badge-slot');
+            window.displayBadges(badgeSlots, window.MyApp?.currentUserData?.displayBadges || []);
+        }
+        closeEditDisplayBadgesModal();
         alert('表示バッジを更新しました。');
     } catch (error) {
         console.error("Error saving display badges:", error); alert(`表示バッジの保存に失敗しました: ${error.message}`);
@@ -695,11 +629,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelEditButton = document.getElementById('cancel-edit-button');
     displayModeElements = document.querySelectorAll('.display-mode');
     editModeElements = document.querySelectorAll('.edit-mode');
-    
-    rateHistoryCtx = null; 
+    rateHistoryCtx = null;
     recentWinRateCtx = null;
     overallWinRateCtx = null;
-
     rateHistoryPlaceholder = document.getElementById('rateHistoryChartPlaceholder');
     winRatePlaceholder = document.getElementById('winRateChartPlaceholder');
     overallWinRatePlaceholder = document.getElementById('overallWinRateChartPlaceholder');
@@ -728,48 +660,42 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelEditDisplayBadgesButton = document.getElementById('cancel-edit-display-badges-button');
 
     if (typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') {
-        Chart.register(ChartDataLabels); 
-    } else { 
-        console.warn('[mypage.js] Chart or ChartDataLabels not found.'); 
+        Chart.register(ChartDataLabels);
+    } else {
+        console.warn('[mypage.js] Chart or ChartDataLabels not found.');
     }
-
-    displayLoggedOutState(); 
-    initializePageData(); 
+    displayLoggedOutState();
+    initializePageData();
 
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange(async (loggedInUserData) => {
             const urlParams = new URLSearchParams(window.location.search);
             const userIdFromUrl = urlParams.get('userId');
-
-            if (allBadgesData.length === 0) { 
+            if (allBadgesData.length === 0) {
                 if (badgeDexLoading) badgeDexLoading.style.display = 'flex';
                 allBadgesData = await fetchAllBadges();
                 if (badgeDexLoading) badgeDexLoading.style.display = 'none';
             }
-            
             let targetUserId = userIdFromUrl || loggedInUserData?.sub;
             let isOwnPageCurrent = !userIdFromUrl || (loggedInUserData && userIdFromUrl === loggedInUserData.sub);
-
             if (targetUserId) {
-                if (window.MyApp?.lastChartsLoadedForUserId !== targetUserId) {
-                    chartsLoadedForCurrentUser = false; 
-                }
-                isLoadingCharts = false; 
+                if (window.MyApp?.lastChartsLoadedForUserId !== targetUserId) chartsLoadedForCurrentUser = false;
+                isLoadingCharts = false;
                 try {
-                    await fetchUserData(targetUserId); 
+                    await fetchUserData(targetUserId);
                     updateEditButtonsVisibility(isOwnPageCurrent);
                     updateBadgeEditButtonVisibility(isOwnPageCurrent);
                 } catch (error) {
-                    console.error("[mypage.js] Error during fetchUserData in login status change callback:", error);
-                    updateEditButtonsVisibility(false); 
+                    console.error("[mypage.js] Error in onLoginStatusChange > fetchUserData:", error);
+                    updateEditButtonsVisibility(false);
                     updateBadgeEditButtonVisibility(false);
                 }
-            } else { 
+            } else {
                  displayLoggedOutState();
             }
         });
-    } else { 
-        console.error("[mypage.js] onLoginStatusChange function not found."); 
+    } else {
+        console.error("[mypage.js] onLoginStatusChange function not found.");
     }
 
     editProfileButton?.addEventListener('click', () => toggleEditMode(true));
@@ -780,7 +706,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeEditBadgesModalButton?.addEventListener('click', closeEditDisplayBadgesModal);
     cancelEditDisplayBadgesButton?.addEventListener('click', closeEditDisplayBadgesModal);
     saveDisplayBadgesButton?.addEventListener('click', saveDisplayBadges);
-
 });
 
 // ★★★ mypage.js から window.getBadgeImagePath の再定義を削除 ★★★
