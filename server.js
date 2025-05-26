@@ -1,5 +1,5 @@
 // server.js
-// require('dotenv').config(); // config/setting.js で呼ばれている想定
+ require('dotenv').config(); // config/setting.js で呼ばれている想定
 
 console.log('--- PM2 Environment Variables ---');
 console.log('PORT from env:', process.env.PORT);
@@ -58,22 +58,17 @@ const allowedOrigins = [
     // 必要に応じて他のオリジンも追加
 ];
 
-app.use(cors({
+aapp.use(cors({
     origin: function (origin, callback) {
-        // allowedOrigins に含まれるオリジン、
-        // またはオリジンがない場合 (!origin、null や undefined を含む)、
-        // またはオリジンが文字列の "null" の場合、アクセスを許可します。
+        // デバッグ用に現在のオリジンをログに出力
+        console.log("CORS Check - Received Origin:", origin); 
+
         if (!origin || origin === "null" || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
+            console.log("CORS Check - Allowed:", origin);
+            callback(null, true); // 許可
         } else {
-            console.error('CORS policy denied access for origin:', origin);
-            // ここでエラーを throw するのではなく、CORSエラーとして callback に渡すのが
-            // cors ミドルウェアの標準的な使い方ですが、既存の挙動を維持します。
-            // ただし、500エラーを防ぐためには、単に false を渡す方が良いかもしれません。
-            // callback(new Error('Not allowed by CORS')); 
-            // ↓↓↓ CORSエラーとして処理させる (500ではなくCORSエラーになるはず)
-            callback(new Error('Not allowed by CORS')); // ← 既存の挙動を維持。もしこれでまだ500になるなら、下の行を試す。
-            // callback(null, false); // ← CORSとして拒否する（500エラーにはしない）
+            console.error('CORS Check - Denied:', origin);
+            callback(null, false); // ★★★ 許可しない (エラーではなく、CORSとして拒否) ★★★
         }
     },
     credentials: true,
