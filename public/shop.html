@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ショップ - SEKAI</title>
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/shop.css"> <!-- shop専用CSS (あれば) -->
+    <title>ショップ - SEKAI</title> <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/shop.css"><link rel="stylesheet" href="css/gacha-animation.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="js/script.js" defer></script>
+    <script src="js/gacha-animation.js" defer></script> 
     <script src="js/shop.js" defer></script>
 </head>
 <body>
     <header class="site-header">
         <div class="container header-container">
-            <!-- ナビゲーションメニュー -->
             <div class="nav-menu-container">
                 <button id="nav-menu-toggle" class="nav-menu-button" aria-label="ナビゲーションメニューを開く" aria-expanded="false" aria-controls="main-navigation-menu" title="メニュー">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
@@ -27,57 +26,51 @@
                         <li><a href="match.html">対戦</a></li>
                         <li><a href="ranking.html">ランキング</a></li>
                         <li><a href="shop.html">ショップ</a></li>
-                        <li><a href="community.html">コミュニティ</a></li> <!-- ★変更 -->
+                        <li><a href="community.html">コミュニティ</a></li>
                         <li><a href="rules.html">ルール</a></li>
-                    </ul>
+                        <li><a href="terms.html">利用規約</a></li> <li><a href="privacy.html">プライバシーポリシー</a></li> </ul>
                 </nav>
             </div>
-            <!-- サイトタイトル -->
             <div class="site-title-header">
-                <a href="index.html"><span>Mario Kart Best Rivals</span></a>
+                <a href="index.html"><span>MKBR</span></a>
             </div>
-            <!-- 認証セクション -->
             <div class="auth-section">
                 <div id="g_id_signin"></div>
                 <div id="user-info" style="display: none;">
                     <span id="header-user-name"></span>
                     <button id="logout-button" class="button">ログアウト</button>
                 </div>
-                <!-- 作成ボタンはヘッダーから削除 -->
             </div>
         </div>
     </header>
 
     <main class="shop-page-container">
-        <h1>ショップ</h1>
+        <div class="page-title-icon">
+            <img src="images/shop.jpg" alt="ショップ">
+            <h1>ショップ</h1>
+        </div>
 
         <div class="user-points-info-shop">
             現在のポイント: <span id="user-points-display">---</span> P
         </div>
 
-        <!-- ▼▼▼ ガチャセクション ▼▼▼ -->
         <section class="shop-section gacha-section">
             <h2><span class="section-icon">🎁</span> バッジガチャ</h2>
             <p>ポイントを消費して、新しいバッジをランダムで手に入れよう！<br>（レート達成記念、対戦数記念、期間限定バッジは排出されません）</p>
             <div class="gacha-area">
                 <button id="play-gacha-button" class="button button-primary button-stylish button-large" disabled>
                     ガチャを引く (<span id="gacha-cost-display">---</span> P)
-                </button>
+                    <span class="spinner-small" style="display: none; margin-left: 8px;"></span> </button>
                 <div id="gacha-loading" class="loading-indicator" style="display: none;">
-                    <div class="spinner"></div>
-                    <span>ガチャ実行中...</span>
-                </div>
+                    </div>
                 <p id="gacha-error-message" class="error-text" style="display: none;"></p>
             </div>
         </section>
-        <!-- ▲▲▲ ガチャセクションここまで ▲▲▲ -->
 
-        <!-- ▼▼▼ 購入可能バッジセクション ▼▼▼ -->
         <section class="shop-section purchasable-section">
             <h2><span class="section-icon">🛒</span> バッジ購入</h2>
             <p>特定のバッジをポイントで購入できます。</p>
 
-            <!-- 期間限定アイテム -->
             <div id="shop-limited-items">
                 <h3><span class="category-icon">✨</span> 期間限定</h3>
                 <div id="shop-limited-loading" class="loading-indicator" style="display: none;">
@@ -85,49 +78,49 @@
                 </div>
                 <p id="no-limited-items" class="notice-text" style="display: none;">現在、期間限定のバッジはありません。</p>
                 <div class="shop-items-grid" id="shop-limited-items-grid">
-                    <!-- 期間限定バッジがここに表示されます -->
                 </div>
             </div>
 
-            <!-- 通常アイテム (カテゴリー分け) -->
             <div id="shop-regular-items">
-                <h3><span class="category-icon">🔰</span> 通常バッジ</h3>
                 <div id="shop-regular-loading" class="loading-indicator" style="display: none;">
                     <div class="spinner"></div> 読み込み中...
                 </div>
                 <p id="no-regular-items" class="notice-text" style="display: none;">現在、購入可能な通常バッジはありません。</p>
                 <div class="shop-items-grid" id="shop-regular-items-grid">
-                    <!-- 通常バッジがカテゴリーごとにここに表示されます -->
                 </div>
             </div>
         </section>
-        <!-- ▲▲▲ 購入可能バッジセクションここまで ▲▲▲ -->
-
     </main>
 
-    <footer class="site-footer">
+   <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2024 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
             <nav class="footer-nav">
-                <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
             </nav>
         </div>
     </footer>
 
-    <!-- ▼▼▼ ガチャ結果表示モーダル ▼▼▼ -->
     <div id="gacha-result-modal" class="modal" style="display: none;">
-        <div class="modal-content gacha-result-content">
-            <span class="close-modal-button" id="close-gacha-result">&times;</span>
-            <h2 id="gacha-result-title">獲得！</h2>
-            <div class="badge-dex-item gacha-result-badge"> <!-- バッジ図鑑のスタイルを流用 -->
-                <img id="gacha-result-img" src="" alt="獲得したバッジ">
+        <div class="modal-content gacha-연출-modal-content"> <button id="close-gacha-result" class="close-modal-button">&times;</button>
+
+            <div id="gacha-animation-area" class="gacha-animation-area">
+                <div class="gacha-reels">
+                    <div class="reel reel1"><img src="images/badges/placeholder_badge.png" alt="reel1"></div>
+                    <div class="reel reel2"><img src="images/badges/placeholder_badge.png" alt="reel2"></div>
+                    <div class="reel reel3"><img src="images/badges/placeholder_badge.png" alt="reel3"></div>
+                </div>
+                <div id="gacha-演出-effect" class="gacha-effect-overlay"></div> <div id="gacha-確定-演出" class="gacha-kakutei-演出" style="display: none;">
+                    <p>激アツ！</p> </div>
             </div>
-            <p id="gacha-result-name" class="gacha-result-name"></p>
-            <p id="gacha-result-desc" class="gacha-result-desc"></p>
-            <p id="gacha-result-rarity" class="gacha-result-rarity"></p>
+
+            <div id="gacha-result-display" class="gacha-result-display" style="display: none;">
+                <h2 id="gacha-result-title">獲得！</h2> <div id="gacha-result-badge-container" class="gacha-result-badge">
+                    <img id="gacha-result-badge-img" src="" alt="獲得バッジ"> </div>
+                <p id="gacha-result-name" class="gacha-result-name-text"></p> <div id="gacha-result-rarity-container" class="gacha-result-rarity"> レアリティ: <span id="gacha-rarity-value" class="rarity-value"></span>
+                </div>
+                <p id="gacha-result-desc" class="gacha-result-description"></p> <p class="gacha-result-points-info">現在のポイント: <span id="gacha-result-new-points"></span> P</p> </div>
         </div>
     </div>
-    <!-- ▲▲▲ ガチャ結果表示モーダルここまで ▲▲▲ -->
-
-</body>
+    </body>
 </html>

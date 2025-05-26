@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>対戦ルール - Mario Kart Best Rivals</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        /* rules.html 専用スタイル (terms.htmlのデザインを参考に調整) */
+        .page-title-icon {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-unit, 15px);
+            margin-bottom: calc(var(--spacing-unit, 15px) * 2.5);
+            border-bottom: 2px solid var(--color-primary-mild, #D4AF37);
+            padding-bottom: calc(var(--spacing-unit, 15px) * 1.5);
+        }
+        .page-title-icon img {
+            width: 55px;
+            height: 55px;
+            border-radius: var(--border-radius-small, 4px);
+        }
+        .page-title-icon h1 {
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            font-size: 2rem;
+            color: var(--color-primary-dark, #D4AF37);
+        }
+
+        .rules-content-wrapper {
+            background-color: var(--color-surface-alpha, rgba(255, 255, 255, 0.9));
+            padding: calc(var(--spacing-unit, 15px) * 3);
+            border-radius: var(--border-radius-large, 8px);
+            margin-bottom: calc(var(--spacing-unit, 15px) * 4);
+            border: 1px solid var(--color-border, #ddd);
+            box-shadow: var(--shadow-medium, 0 4px 12px rgba(0,0,0,0.1));
+        }
+        .rules-content-wrapper h2 {
+            font-family: var(--font-family-title, 'Cinzel', serif);
+            color: var(--color-primary-light, #E6C35C);
+            margin-top: calc(var(--spacing-unit, 15px) * 3);
+            margin-bottom: calc(var(--spacing-unit, 15px) * 1.5);
+            padding-bottom: var(--spacing-unit, 15px);
+            border-bottom: 1px solid var(--color-primary-dark, #B8860B);
+            font-size: 1.8rem;
+        }
+        .rules-content-wrapper p,
+        .rules-content-wrapper ul {
+            margin-bottom: calc(var(--spacing-unit, 15px) * 1.5);
+            line-height: 1.7;
+            color: var(--color-text-secondary, #555);
+        }
+        .rules-content-wrapper ul {
+            list-style: disc;
+            padding-left: calc(var(--spacing-unit, 15px) * 3);
+        }
+        .rules-content-wrapper strong {
+            color: var(--color-primary, #DAA520); 
+            font-weight: 600;
+        }
+        .rules-content-wrapper em { /* 注釈 (※ ホームコースは...) のスタイル */
+             font-size: 0.9rem;
+             /* ★★★ 文字色を赤色に変更 ★★★ */
+             color: var(--color-danger, red); /* common.css に --color-danger があればそれを使用、なければ直接 red */
+             font-style: normal; /* emタグの斜体を解除する場合は指定 */
+             display: block; 
+             margin-top: calc(var(--spacing-unit, 15px) * 0.5);
+        }
+        .rules-content-wrapper a {
+            text-decoration: underline;
+        }
+        .rules-content-wrapper a:hover {
+            text-decoration: none;
+        }
+
+        .rules-section { 
+             margin-bottom: calc(var(--spacing-unit, 15px) * 2.5);
+        }
+        .rules-section ul { 
+            background-color: rgba(0,0,0,0.02);
+            padding: calc(var(--spacing-unit, 15px) * 1.5);
+            border-radius: var(--border-radius-medium, 4px);
+            list-style-position: inside;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="nav-menu-container">
+                <button id="nav-menu-toggle" class="nav-menu-button" aria-label="ナビゲーションメニューを開く" aria-expanded="false" aria-controls="main-navigation-menu" title="メニュー">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+                <nav id="main-navigation-menu" class="main-navigation" aria-hidden="true">
+                    <ul>
+                        <li><a href="index.html">ホーム</a></li>
+                        <li><a href="mypage.html">マイページ</a></li>
+                        <li><a href="match.html">対戦</a></li>
+                        <li><a href="ranking.html">ランキング</a></li>
+                        <li><a href="shop.html">ショップ</a></li>
+                        <li><a href="community.html">コミュニティ</a></li>
+                        <li><a href="rules.html">ルール</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="site-title-header">
+                <a href="index.html"><span>MKBR</span></a>
+            </div>
+            <div class="auth-section">
+                <div id="g_id_signin"></div>
+                <div id="user-info" style="display: none;">
+                    <span id="header-user-name"></span>
+                    <button id="logout-button" class="button">ログアウト</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="page-title-icon">
+                <img src="images/rules.jpg" alt="対戦ルールアイコン">
+                <h1>対戦ルール</h1>
+            </div>
+
+            <div class="rules-content-wrapper">
+                <section class="rules-section">
+                    <h2>基本設定</h2>
+                    <ul>
+                        <li><strong>対戦形式:</strong> 1 vs 1</li>
+                        <li><strong>勝利条件:</strong> 2レース先取 (最大3レース)</li>
+                        <li><strong>クラス:</strong> 150cc</li>
+                        <li><strong>アイテム:</strong> ダイナミック</li>
+                        <li><strong>キャラクター・マシン・パーツ:</strong> 制限なし (自由選択)</li>
+                    </ul>
+                </section>
+
+                <section class="rules-section">
+                    <h2>対戦準備 (ロビー作成と参加)</h2>
+                    <p>対戦相手が決定した後、以下の手順でゲーム内のプライベートロビー（部屋）を作成・参加してください。</p>
+                    <ul>
+                        <li><strong>レートが高い方</strong>のプレイヤーが、ゲーム内でプライベートロビーを作成します。</li>
+                        <li>レートが同じ場合は、自身のフレンドコードの<strong>下4桁の数字が大きい方</strong>のプレイヤーがロビーを作成します。</li>
+                        <li>ロビーを作成したプレイヤーは、発行された<strong>ロビーID</strong>を、本サイトの対戦ページ内にある<strong>チャット機能</strong>を使用して相手に伝えます。</li>
+                        <li>ロビーIDを受け取ったプレイヤーは、ゲーム内でそのIDを検索または入力してロビーに参加してください。</li>
+                    </ul>
+                    <p><em>※ ホームコースは、マイページで設定されているコースとします。未設定の場合は、任意の得意なコースを1つ選択してください。</em></p>
+                </section>
+
+                <section class="rules-section">
+                    <h2>コース選択</h2>
+                    <ul>
+                        <li><strong>1レース目:</strong> 両プレイヤーとも、ゲーム内で自身のホームコースを選択します。その後、ゲーム内のランダム機能によって、どちらか一方のホームコースが対戦コースとして選ばれます。</li>
+                        <li><strong>2レース目:</strong> 1レース目で選ばれなかった方のプレイヤーのホームコースを、両プレイヤーともゲーム内で選択して対戦します。</li>
+                        <li><strong>3レース目 (1勝1敗の場合):</strong> 両プレイヤーともゲーム内で「おまかせ（ランダム）」を選択します。</li>
+                    </ul>
+                </section>
+
+                <section class="rules-section">
+                    <h2>通信トラブルについて</h2>
+                    <ul>
+                        <li><strong>意図しない切断:</strong> レース中に意図せず通信が切断された場合、<strong>切断したプレイヤーはそのレースを負け扱い</strong>とします。
+                            <ul>
+                                <li>例: 1レース目にプレイヤーAが勝利し、2レース目にプレイヤーBが切断した場合、2レース目はプレイヤーBの負けとなり、プレイヤーAの2勝0敗で対戦終了となります。</li>
+                            </ul>
+                        </li>
+                        <li><strong>ラグがひどい場合:</strong> 対戦者双方の合意により、その対戦を<strong>キャンセルすることができます</strong>。キャンセルとなった場合、その対戦は無効試合とし、レートの変動はありません。レース開始前にラグを感じた場合は、速やかに対戦相手とチャットで相談してください。</li>
+                    </ul>
+                </section>
+
+                <section class="rules-section">
+                    <h2>禁止事項・マナー</h2>
+                    <p>全てのプレイヤーが快適に対戦できるよう、以下の行為は禁止とします。違反が確認された場合、運営の判断によりペナルティが科されることがあります。</p>
+                    <ul>
+                        <li>レース中の意図的な遅延行為、逆走、放置。</li>
+                        <li>対戦相手への過度な煽り行為、誹謗中傷、その他不快感を与える言動。</li>
+                        <li>ゲーム内のバグやグリッチを意図的に利用する行為。</li>
+                        <li>その他、スポーツマンシップに反する行為や、運営が不適切と判断する行為。</li>
+                    </ul>
+                    <p>楽しくフェアな対戦を心がけましょう！</p>
+                </section>
+            </div> 
+        </div>
+    </main>
+
+   <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <nav class="footer-nav">
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
+            </nav>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+</body>
+</html>

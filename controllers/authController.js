@@ -13,7 +13,12 @@ exports.googleSignIn = async (req, res) => {
     if (!credential) {
         // これはGoogleからのPOSTリダイレクトで credential がない場合のエラー
         console.error('Google Sign-In Error: Missing credential in POST body.');
-        return res.status(400).send('Authentication failed: Missing credential.'); // シンプルなエラーメッセージを返す
+        // ▼▼▼ 修正 ▼▼▼
+        // エラー時も設定されたフロントエンドURLのエラーページにリダイレクト
+        const errorRedirectUrl = `${config.frontendBaseUrl}/error-page.html?error=${encodeURIComponent('Authentication failed: Missing credential.')}`;
+        console.log(`Authentication failed (missing credential). Redirecting to: ${errorRedirectUrl}`);
+        return res.redirect(errorRedirectUrl);
+        // ▲▲▲ 修正 ▲▲▲
     }
 
     try {
@@ -58,18 +63,11 @@ exports.googleSignIn = async (req, res) => {
         );
         // ▲▲▲ JWT生成ここまで ▲▲▲
 
-        // ★★★ 認証成功後、フロントエンドのページにリダイレクトする ★★★
-        // JWTとユーザーデータをクエリパラメータやフラグメントとして渡すのはセキュリティリスクがあるため非推奨。
-        // 代わりに、サーバーサイドでセッションや一時的なキーを使ってデータを保持し、
-        // リダイレクト先のフロントエンドページがそのキーを使ってデータを取得する、
-        // または、フロントエンドにリダイレクト後、フロントエンドがlocalStorageに保存されたトークンを使って
-        // ユーザーデータを再取得する、というフローが一般的です。
-
         // フロントエンドがlocalStorageから読み込むためのユーザーデータ形式
         const frontendUserData = {
             sub: user.googleId,
             name: user.name,
-            email: user.email, // emailは通常フロントエンドに直接渡さない方が良い場合もあるが、現状のコードに合わせる
+            email: user.email,
             picture: user.picture,
             rate: user.rate,
             points: user.points,
@@ -79,18 +77,18 @@ exports.googleSignIn = async (req, res) => {
         };
 
         // トークンとユーザーデータをクエリパラメータとしてリダイレクトURLに付与
-        // 注意: この方法はURLに情報が露出するため、セキュリティリスクを伴います。
-        // 本番環境ではより安全な方法（例: HTTP-only Cookie、一時コード交換）を検討してください。
-        // リダイレクト先をマイページに設定
-        // ★★★ リダイレクト先を index.html に変更 ★★★
-        const successRedirectUrl = `https://www.mariokartbestrivals.com/index.html?token=${encodeURIComponent(token)}&userData=${encodeURIComponent(JSON.stringify(frontendUserData))}`;
+        // ▼▼▼ 修正 ▼▼▼
+        const successRedirectUrl = `${config.frontendBaseUrl}/index.html?token=${encodeURIComponent(token)}&userData=${encodeURIComponent(JSON.stringify(frontendUserData))}`;
+        // ▲▲▲ 修正 ▲▲▲
         console.log(`Authentication successful. Redirecting to: ${successRedirectUrl}`);
         res.redirect(successRedirectUrl);
 
     } catch (error) {
         console.error('Google Sign-In Error:', error);
         // エラー発生時もエラーページなどにリダイレクト
-        const errorRedirectUrl = `https://www.mariokartbestrivals.com/error-page.html?error=${encodeURIComponent(error.message)}`; // エラーページは別途作成
+        // ▼▼▼ 修正 ▼▼▼
+        const errorRedirectUrl = `${config.frontendBaseUrl}/error-page.html?error=${encodeURIComponent(error.message)}`;
+        // ▲▲▲ 修正 ▲▲▲
         console.log(`Authentication failed. Redirecting to: ${errorRedirectUrl}`);
         res.redirect(errorRedirectUrl);
     }

@@ -1,0 +1,247 @@
+/* ==========================
+   Gacha Animation Styles
+   (ガチャ演出専用スタイル)
+   ========================== */
+
+/* ガチャ結果モーダルの基本調整 */
+.gacha-연출-modal-content { /* HTMLでこのクラスを使用 */
+    text-align: center;
+    padding: 20px;
+    min-height: 450px; /* 演出のため高さを確保 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 演出エリアと結果エリアの配置調整用 */
+    align-items: center;
+    overflow: hidden; /* はみ出す演出要素をクリップ */
+    position: relative; /* エフェクトや子要素の絶対配置の基準 */
+    background-color: #0c0c0c; /* 演出用に少し暗めの背景 */
+    border: 2px solid var(--color-primary-dark); /* 枠線も少し強調 */
+}
+
+/* ガチャ演出エリア */
+.gacha-animation-area {
+    width: 100%;
+    height: 280px; /* 演出エリアの高さ (適宜調整) */
+    display: flex; /* 中の要素を中央に配置しやすくする */
+    justify-content: center;
+    align-items: center;
+    position: relative; /* 子要素の絶対配置の基準 */
+    margin-bottom: 20px;
+    /* border: 1px dashed red; デバッグ用 */
+}
+
+.gacha-reels {
+    display: flex;
+    gap: 10px; /* リール間の隙間 */
+    perspective: 800px; /* 3D的な演出を加える場合の視点 */
+}
+
+.reel {
+    width: 80px;
+    height: 100px;
+    background-color: #1a1a1a; /* リールの背景色 */
+    border: 2px solid var(--color-primary); /* リールの枠線 */
+    border-radius: 8px;
+    overflow: hidden; /* リール内の画像がはみ出ないように */
+    position: relative;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.reel img {
+    width: 100%;
+    height: auto; /* アスペクト比を保つ */
+    position: absolute;
+    left: 0;
+    top: 0; /* JSでこの値をアニメーションさせる */
+    /* transition: top 0.1s linear; JSでのアニメーションと競合しないように注意 */
+}
+
+/* エフェクト用オーバーレイ */
+.gacha-effect-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+    background-color: transparent; /* 通常時は透明 */
+}
+
+.gacha-effect-overlay.flash-white { /* 白色フラッシュ */
+    background-color: white;
+    opacity: 0; /* 初期透明 */
+    animation: flashWhiteAnim 0.15s ease-out forwards;
+}
+@keyframes flashWhiteAnim {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+.gacha-effect-overlay.flash-gold { /* 金色フラッシュ (高レア期待など) */
+    background-color: var(--color-primary);
+    opacity: 0;
+    animation: flashGoldAnim 0.2s ease-out forwards;
+}
+@keyframes flashGoldAnim {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.7; }
+}
+
+
+/* 高レアリティ確定演出 */
+.gacha-kakutei-演出 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    background-color: rgba(20, 0, 0, 0.85); /* 暗めの赤背景 */
+    color: var(--color-primary-light);
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 0 30px var(--color-primary), 0 0 15px var(--color-primary-light) inset;
+    font-size: 2.8rem;
+    font-family: var(--font-family-title);
+    text-shadow: 0 0 10px var(--color-primary), 0 0 20px #fff;
+    z-index: 20;
+    opacity: 0;
+    /* アニメーションはJSでクラスを付与して制御 */
+}
+.gacha-kakutei-演出.show {
+    animation: kakuteiAnim 1.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+@keyframes kakuteiAnim {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(-15deg); }
+    60% { opacity: 1; transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+    80% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(-2deg); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } /* 表示維持のためopacity:0にしない */
+}
+
+
+/* ガチャ結果表示エリア */
+.gacha-result-display {
+    width: 100%;
+    padding-top: 15px; /* 演出エリアとの間に少しスペース */
+    /* display: none; JSで制御 */
+    opacity: 0; /* 初期非表示、アニメーションで表示 */
+    transform: translateY(20px); /* 初期位置 */
+}
+.gacha-result-display.show {
+    animation: fadeInResult 0.5s ease-out forwards;
+    animation-delay: 0.2s; /* 演出が終わってから少し遅れて表示 */
+}
+@keyframes fadeInResult {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.gacha-result-display h2 { /* 「獲得！」のタイトル */
+    color: var(--color-primary-light);
+    font-family: var(--font-family-title);
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 0 8px var(--color-primary);
+}
+
+.gacha-result-badge {
+    width: 120px; /* サイズを少し調整 */
+    height: 120px;
+    margin: 0 auto 15px auto;
+    border: 3px solid var(--color-primary-dark);
+    border-radius: var(--border-radius-medium);
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 20px var(--color-primary-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.gacha-result-badge img { /* gacha-result-badge-img IDを持つ要素 */
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+}
+
+.gacha-result-name-text {
+    font-size: 1.4rem; /* サイズ調整 */
+    font-weight: bold;
+    color: var(--color-text-primary);
+    margin-bottom: 5px; /* 詰める */
+}
+.gacha-result-rarity-container {
+    font-size: 1rem; /* サイズ調整 */
+    margin-bottom: 8px; /* 詰める */
+    color: var(--color-text-secondary);
+}
+.rarity-value { font-weight: bold; }
+.rarity-N { color: #b0b0b0; }
+.rarity-R { color: #6cadef; }
+.rarity-SR { color: #ffc46b; }
+.rarity-SSR {
+    font-weight: bold;
+    background-image: linear-gradient(to right, #ff7070, #ffa070, #fff070, #70ff70, #70d0ff, #a070ff, #ff70e0, #ff7070);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbowTextFlow 3s linear infinite;
+    background-size: 250% auto; /* アニメーションのためにサイズを大きく */
+}
+@keyframes rainbowTextFlow {
+    0% { background-position: 0% center; }
+    100% { background-position: -125% center; } /* 背景を左に流す */
+}
+
+
+.gacha-result-description { /* gacha-result-desc IDを持つ要素 */
+    font-size: 0.85rem; /* サイズ調整 */
+    color: var(--color-text-secondary);
+    margin-bottom: 15px;
+    line-height: 1.4;
+    max-height: 4.2em; /* 約3行 */
+    overflow-y: auto;
+    padding: 0 10px; /* 横スクロールバーが出ないように少しパディング */
+}
+.gacha-result-points-info {
+    font-size: 0.9rem; /* サイズ調整 */
+    color: var(--color-text-primary);
+    margin-top: 10px;
+}
+
+/* レスポンシブ調整例 */
+@media (max-width: 480px) {
+    .gacha-연출-modal-content {
+        min-height: 380px;
+        padding: 15px;
+    }
+    .gacha-animation-area {
+        height: 200px; /* スマホでは演出エリアを少し小さく */
+        margin-bottom: 15px;
+    }
+    .reel {
+        width: 60px;
+        height: 80px;
+    }
+    .gacha-kakutei-演出 {
+        font-size: 2rem;
+        padding: 15px 30px;
+    }
+    .gacha-result-display h2 { font-size: 1.8rem; margin-bottom: 10px; }
+    .gacha-result-badge { width: 100px; height: 100px; margin-bottom: 10px; }
+    .gacha-result-name-text { font-size: 1.2rem; }
+    .gacha-result-rarity-container { font-size: 0.9rem; }
+    .gacha-result-description { font-size: 0.8rem; max-height: 4em; }
+    .gacha-result-points-info { font-size: 0.85rem; }
+}
+/* gacha-animation.css に追加 */
+.rarity-legendary {
+    /* 例: 特定の色やフォントスタイル */
+    color: #ff40ff; /* マゼンタ系など、目立つ色 */
+    /* 必要であれば .rainbow と同様のアニメーションを適用 */
+}
+.rarity-legendary.rainbow { /* SSRと同様の虹色を適用する場合 */
+    background-image: linear-gradient(to right, violet, indigo, blue, green, yellow, orange, red, violet);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbowTextFlow 3s linear infinite;
+    background-size: 250% auto;
+}

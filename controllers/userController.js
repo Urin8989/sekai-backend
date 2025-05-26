@@ -165,7 +165,7 @@ exports.getUserStats = async (req, res) => {
 
     try {
         // 1. 対象ユーザーのMongoDB _id を取得
-        const user = await User.findOne({ googleId: userGoogleId }).select('_id rate matchCount'); // 必要なフィールドのみ取得
+        const user = await User.findOne({ googleId: userGoogleId }).select('_id name rate matchCount'); // 必要なフィールドのみ取得
         if (!user) {
             console.log(`[userController] getUserStats - User not found for googleId: ${userGoogleId}`); // ★ ログ追加
             return res.status(404).json({ message: 'User not found.' });

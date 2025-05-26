@@ -34,7 +34,7 @@
                 </nav>
             </div>
             <div class="site-title-header">
-                <a href="index.html"><span>Mario Kart Best Rivals</span></a>
+                <a href="index.html"><span>MKBR</span></a>
             </div>
             <div class="auth-section">
                 <div id="g_id_signin"></div>
@@ -55,36 +55,37 @@
 
             <div class="match-layout matchmaking-controls">
                 <section id="my-profile" class="profile-card match-profile">
-                    <div class="profile-main-info">
-                        <img id="my-profile-pic" src="images/placeholder-avatar.png" alt="自分のプロフィール画像">
-                        <div class="profile-name-rate">
-                            <h3 id="my-profile-name">---</h3>
-                            <div class="stat-item profile-rate-display">
-                                <span class="stat-label">レート</span>
-                                <span id="my-profile-rate" class="stat-value">----</span>
-                            </div>
+                    <img id="my-profile-pic" src="images/placeholder-avatar.png" alt="自分のプロフィール画像" class="profile-avatar">
+
+                    <div class="profile-name-rate">
+                        <h3 id="my-profile-name">---</h3>
+                        <div class="stat-item profile-rate-display">
+                            <span class="stat-label">レート</span>
+                            <span id="my-profile-rate" class="stat-value">----</span>
                         </div>
                     </div>
-                    <div class="profile-detail">
-                        <span class="detail-label">ホームコース:</span>
+
+                    <div class="profile-comment-display"> <span class="detail-label">フレンドコード:</span>
+                        <p id="my-profile-comment" class="detail-comment">---</p>
+                    </div>
+
+                    <div class="profile-badges">
+                        <div class="badge-slot"><span></span></div>
+                        <div class="badge-slot"><span></span></div>
+                        <div class="badge-slot"><span></span></div>
+                    </div>
+
+                    <div class="profile-home-course-display"> <span class="detail-label">ホームコース:</span>
                         <span id="my-profile-course" class="detail-value">---</span>
                     </div>
-                    <div class="profile-stats">
+
+                    <div class="profile-stats" style="display: none !important;">
                         <div class="stat-item">
                             <span class="stat-label">ポイント</span>
                             <span id="my-profile-points" class="stat-value">---- P</span>
                         </div>
                     </div>
-                     <div class="profile-badges">
-                        <div class="badge-slot"><span></span></div>
-                        <div class="badge-slot"><span></span></div>
-                        <div class="badge-slot"><span></span></div>
-                    </div>
-                    <div class="profile-detail profile-comment-section">
-                        <span class="detail-label">対戦コメント:</span>
-                        <p id="my-profile-comment" class="detail-comment">---</p>
-                    </div>
-                </section>
+                    </section>
 
                 <section id="battle-controls" class="match-controls-center">
                     <p id="match-status" class="match-status-text">ライバルを探しましょう！</p>
@@ -96,7 +97,6 @@
                     <section id="match-chat-section" class="match-chat-container" style="display: none;">
                         <h4 class="match-chat-title">対戦チャット</h4>
                         <div id="match-chat-messages" class="match-chat-messages-area">
-                            <!-- メッセージがここに追加される -->
                             <p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>
                         </div>
                         <div class="match-chat-input-area">
@@ -118,13 +118,12 @@
                 </section>
 
                 <section id="opponent-profile" class="profile-card match-profile">
-                    <div id="opponent-placeholder">
+                    <div id="opponent-placeholder" style="display: block;">
                         <div id="opponent-spinner" class="spinner"></div>
-                        <p>対戦相手を探しています...</p>
+                        <p>Best Rival</p>
                     </div>
-                    <div id="opponent-info">
-                        <!-- displayOpponentInfo 関数がここに内容を追加 -->
-                    </div>
+                    <div id="opponent-info" style="display: none;">
+                        </div>
                 </section>
             </div>
         </div>
@@ -140,14 +139,13 @@
                 <button id="close-result-modal" class="button button-primary">OK</button>
             </div>
         </div>
-
     </main>
 
-    <footer class="site-footer">
+     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2024 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
             <nav class="footer-nav">
-                <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
             </nav>
         </div>
     </footer>

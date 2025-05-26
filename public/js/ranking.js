@@ -1,8 +1,6 @@
 // frontend/ranking.js
 
-// ▼▼▼ バックエンドURLを定数として定義 ▼▼▼
-    const BACKEND_URL = 'https://www.mariokartbestrivals.com'; // ★★★ Xserver上のサーバーアドレス ★★★
-// ▲▲▲ ここまで追加 ▲▲▲
+// バックエンドURLは script.js の window.MyApp.BACKEND_URL を参照
 
 // --- グローバル変数・状態管理 ---
 let currentRankingType = 'rate'; // 'rate' or 'matches'
@@ -10,8 +8,6 @@ let currentSearchQuery = '';
 let currentPage = 1;
 const itemsPerPage = 15; // 1ページあたりの表示件数 (APIと合わせる)
 let totalPages = 1;
-// let rankingCache = { ... }; // キャッシュは一旦削除 (必要なら後で再実装)
-// let fullRankingData = []; // 検索用全データも不要に (API側で処理)
 
 // --- DOM要素の取得 ---
 const podiumElements = {
@@ -50,13 +46,13 @@ const paginationContainer = document.getElementById('ranking-pagination');
  */
 async function fetchRankingData(type, page, search) {
     console.log(`Fetching ranking data - Type: ${type}, Page: ${page}, Search: "${search}"`);
-    loadingIndicator.style.display = 'block'; // ローディング表示開始
-    noResultsIndicator.style.display = 'none';
-    paginationContainer.style.display = 'none';
+    if (loadingIndicator) loadingIndicator.style.display = 'block';
+    if (noResultsIndicator) noResultsIndicator.style.display = 'none';
+    if (paginationContainer) paginationContainer.style.display = 'none';
 
     try {
         // APIエンドポイントを構築 (クエリパラメータを追加)
-        const apiUrl = `${BACKEND_URL}/api/ranking?type=${type}&page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}`;
+        const apiUrl = `${window.MyApp.BACKEND_URL}/api/ranking?type=${type}&page=${page}&limit=${itemsPerPage}&search=${encodeURIComponent(search)}`;
 
         const response = await fetch(apiUrl);
         if (!response.ok) {
@@ -66,22 +62,19 @@ async function fetchRankingData(type, page, search) {
         const data = await response.json();
         console.log("API Response Data:", data);
 
-        // APIからのデータをそのまま返す (ページネーション情報も含む)
         return data;
 
     } catch (error) {
         console.error(`Error fetching ranking data:`, error);
-        noResultsIndicator.textContent = `データの読み込みに失敗しました: ${error.message}`;
-        noResultsIndicator.style.display = 'block';
-        // エラー時は空のデータを返すか、エラーを投げる
-        return { ranking: [], currentPage: 1, totalPages: 0, totalUsers: 0 }; // 空データを返す例
-        // throw error; // エラーを投げる場合
+        if (noResultsIndicator) {
+            noResultsIndicator.textContent = `データの読み込みに失敗しました: ${error.message}`;
+            noResultsIndicator.style.display = 'block';
+        }
+        return { ranking: [], currentPage: 1, totalPages: 0, totalUsers: 0 };
     } finally {
-        loadingIndicator.style.display = 'none'; // ローディング表示終了
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
     }
 }
-
-// applyFiltersAndPagination 関数は不要になったため削除
 
 /**
  * 表彰台を表示/更新する
@@ -91,21 +84,30 @@ async function fetchRankingData(type, page, search) {
 function displayPodium(topPlayers, type) {
     const places = ['1st', '2nd', '3rd'];
     places.forEach((place, index) => {
-        const player = topPlayers[index];
+        const player = topPlayers[index]; // 1ページ目のデータから取得
         const elements = podiumElements[place];
 
-        if (player && elements) {
-            elements.pic.src = player.picture || 'images/placeholder-avatar.png';
-            elements.pic.alt = player.name || 'プレイヤー';
-            elements.name.textContent = player.name || 'プレイヤー';
-            elements.value.textContent = type === 'rate'
-                ? (player.rate ?? '----')
-                : (player.matches ?? '--');
-        } else if (elements) {
-            elements.pic.src = 'images/placeholder-avatar.png';
-            elements.pic.alt = `${index + 1}位`;
-            elements.name.textContent = `${index + 1}位プレイヤー`;
-            elements.value.textContent = '----';
+        if (elements) { // DOM要素が存在するか確認
+            if (player) {
+                if (elements.pic) {
+                    elements.pic.src = player.picture || 'images/placeholder-avatar.png';
+                    elements.pic.alt = player.name || 'プレイヤー';
+                }
+                if (elements.name) elements.name.textContent = player.name || 'プレイヤー';
+                if (elements.value) {
+                    elements.value.textContent = type === 'rate'
+                        ? (player.rate ?? '----')
+                        : (player.matches ?? '--');
+                }
+            } else {
+                // プレイヤーデータがない場合はプレースホルダー表示
+                if (elements.pic) {
+                    elements.pic.src = 'images/placeholder-avatar.png';
+                    elements.pic.alt = `${index + 1}位`;
+                }
+                if (elements.name) elements.name.textContent = `${index + 1}位プレイヤー`;
+                if (elements.value) elements.value.textContent = '----';
+            }
         }
     });
 }
@@ -116,20 +118,21 @@ function displayPodium(topPlayers, type) {
  */
 function displayRankingTable(rankingData) {
     if (!rankingTableBody) return;
-    rankingTableBody.innerHTML = ''; // テーブル内容をクリア
+    rankingTableBody.innerHTML = '';
 
-    const currentUserSub = window.currentUserData ? window.currentUserData.sub : null;
+    const currentUserSub = window.MyApp?.currentUserData?.sub;
 
     if (!rankingData || rankingData.length === 0) {
-        noResultsIndicator.style.display = 'block';
-        noResultsIndicator.textContent = currentSearchQuery ? '検索結果が見つかりませんでした。' : 'ランキングデータがありません。';
+        if (noResultsIndicator) {
+            noResultsIndicator.style.display = 'block';
+            noResultsIndicator.textContent = currentSearchQuery ? '検索結果が見つかりませんでした。' : 'ランキングデータがありません。';
+        }
         return;
     }
-    noResultsIndicator.style.display = 'none';
+    if (noResultsIndicator) noResultsIndicator.style.display = 'none';
 
     rankingData.forEach((player) => {
         const row = document.createElement('tr');
-        // APIレスポンスの `sub` を userId として使用
         row.dataset.userId = player.sub;
 
         if (currentUserSub && player.sub === currentUserSub) {
@@ -164,83 +167,56 @@ function setupPagination(total, current) {
     }
     paginationContainer.style.display = 'flex';
 
+    const createPageButton = (text, pageNum, isDisabled = false, isActive = false) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.classList.add('button', 'button-secondary');
+        if (isDisabled) button.disabled = true;
+        if (isActive) button.classList.add('active');
+        button.addEventListener('click', () => {
+            currentPage = pageNum;
+            updateRankingView();
+        });
+        return button;
+    };
+
+    const createEllipsis = () => {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.style.padding = '0 8px';
+        ellipsis.style.alignSelf = 'center';
+        return ellipsis;
+    };
+
     // 「前へ」ボタン
-    const prevButton = document.createElement('button');
-    prevButton.textContent = '前へ';
-    prevButton.classList.add('button', 'button-secondary');
-    prevButton.disabled = current === 1;
-    prevButton.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            updateRankingView(); // APIを再呼び出し
-        }
-    });
-    paginationContainer.appendChild(prevButton);
+    paginationContainer.appendChild(createPageButton('前へ', current - 1, current === 1));
 
     // ページ番号ボタン
     const maxPagesToShow = 5;
     let startPage = Math.max(1, current - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(total, startPage + maxPagesToShow - 1);
-    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    startPage = Math.max(1, endPage - maxPagesToShow + 1); // endPage に合わせて startPage を再調整
 
     if (startPage > 1) {
-        const firstPageButton = document.createElement('button');
-        firstPageButton.textContent = '1';
-        firstPageButton.classList.add('button', 'button-secondary');
-        firstPageButton.addEventListener('click', () => { currentPage = 1; updateRankingView(); });
-        paginationContainer.appendChild(firstPageButton);
+        paginationContainer.appendChild(createPageButton('1', 1));
         if (startPage > 2) {
-            const ellipsis = document.createElement('span');
-            ellipsis.textContent = '...';
-            ellipsis.style.padding = '0 8px';
-            ellipsis.style.alignSelf = 'center';
-            paginationContainer.appendChild(ellipsis);
+            paginationContainer.appendChild(createEllipsis());
         }
     }
 
     for (let i = startPage; i <= endPage; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.classList.add('button', 'button-secondary');
-        if (i === current) {
-            pageButton.classList.add('active');
-            pageButton.disabled = true;
-        } else {
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                updateRankingView(); // APIを再呼び出し
-            });
-        }
-        paginationContainer.appendChild(pageButton);
+        paginationContainer.appendChild(createPageButton(i.toString(), i, i === current, i === current));
     }
 
      if (endPage < total) {
         if (endPage < total - 1) {
-             const ellipsis = document.createElement('span');
-             ellipsis.textContent = '...';
-             ellipsis.style.padding = '0 8px';
-             ellipsis.style.alignSelf = 'center';
-             paginationContainer.appendChild(ellipsis);
+            paginationContainer.appendChild(createEllipsis());
         }
-        const lastPageButton = document.createElement('button');
-        lastPageButton.textContent = total;
-        lastPageButton.classList.add('button', 'button-secondary');
-        lastPageButton.addEventListener('click', () => { currentPage = total; updateRankingView(); });
-        paginationContainer.appendChild(lastPageButton);
+        paginationContainer.appendChild(createPageButton(total.toString(), total));
     }
 
     // 「次へ」ボタン
-    const nextButton = document.createElement('button');
-    nextButton.textContent = '次へ';
-    nextButton.classList.add('button', 'button-secondary');
-    nextButton.disabled = current === total;
-    nextButton.addEventListener('click', () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            updateRankingView(); // APIを再呼び出し
-        }
-    });
-    paginationContainer.appendChild(nextButton);
+    paginationContainer.appendChild(createPageButton('次へ', current + 1, current === total));
 }
 
 
@@ -248,33 +224,22 @@ function setupPagination(total, current) {
  * ランキング表示全体を更新する (API呼び出しとUI更新)
  */
 async function updateRankingView() {
-    // ローディング表示などは fetchRankingData 内で行う
     try {
-        // APIからデータを取得
         const data = await fetchRankingData(currentRankingType, currentPage, currentSearchQuery);
 
-        // グローバルなページネーション情報を更新
         currentPage = data.currentPage;
         totalPages = data.totalPages;
 
-        // 表彰台表示 (検索クエリがなく、1ページ目の場合のみ)
-        // APIが常にソート済みデータを返すなら、取得したデータの先頭3件で良い
-        if (!currentSearchQuery && currentPage === 1 && data.ranking.length > 0) {
-            displayPodium(data.ranking.slice(0, 3), currentRankingType);
-        } else {
-            // 検索中や2ページ目以降は表彰台をクリア
-            displayPodium([], currentRankingType);
-        }
+        // 表彰台表示: 常にAPIから返されたランキングデータの先頭3名を表示
+        // (APIが常にソート済みで、かつ検索結果もソート済みであることを期待)
+        displayPodium(data.ranking.slice(0, 3), currentRankingType);
 
-        // テーブル表示
         displayRankingTable(data.ranking);
-
-        // ページネーションUI更新
         setupPagination(data.totalPages, data.currentPage);
 
     } catch (error) {
-        // fetchRankingData内でエラー表示済みなので、ここでは追加処理不要
         console.error("Error updating ranking view:", error);
+        // fetchRankingData内でエラー表示済み
     }
 }
 
@@ -283,8 +248,8 @@ async function updateRankingView() {
  */
 function handleSearch() {
     currentSearchQuery = searchInput.value.trim();
-    currentPage = 1; // 検索時は1ページ目に戻る
-    updateRankingView(); // APIを呼び出して更新
+    currentPage = 1;
+    updateRankingView();
 }
 
 /**
@@ -293,31 +258,22 @@ function handleSearch() {
  */
 function handleTypeChange(newType) {
     if (newType === currentRankingType) {
-        // 同じボタンが押された場合、検索をリセットする挙動は維持
         if (currentSearchQuery !== '') {
-            console.log(`Resetting search because the same type button (${newType}) was clicked.`);
             currentSearchQuery = '';
-            searchInput.value = '';
+            if (searchInput) searchInput.value = '';
             currentPage = 1;
-            // この後 updateRankingView が呼ばれる
-        } else {
-            console.log(`Same type button (${newType}) clicked, no search query. Doing nothing.`);
-            return; // 何もせず終了
+            updateRankingView();
         }
-    } else {
-        // 異なる種別が選択された場合
-        currentRankingType = newType;
-        currentPage = 1;
-        // currentSearchQuery = ''; // 種別変更時に検索をリセットするかどうかは仕様による
-        // searchInput.value = '';
-
-        // ボタンのアクティブ状態を更新
-        rankTypeButtons.forEach(button => {
-            button.classList.toggle('active', button.dataset.rankType === newType);
-        });
+        return;
     }
+    currentRankingType = newType;
+    currentPage = 1;
+    // currentSearchQuery は維持する（種別変更時に検索クエリをリセットしない仕様）
 
-    updateRankingView(); // APIを呼び出して更新
+    rankTypeButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.rankType === newType);
+    });
+    updateRankingView();
 }
 
 /**
@@ -326,7 +282,6 @@ function handleTypeChange(newType) {
  */
 function handleRowClick(event) {
     const clickedRow = event.target.closest('tr');
-    // APIレスポンスの `sub` (Google ID) を userId として使用
     if (clickedRow && clickedRow.dataset.userId) {
         const userId = clickedRow.dataset.userId;
         console.log(`User ID: ${userId} row clicked. Navigating to mypage.`);
@@ -335,45 +290,44 @@ function handleRowClick(event) {
 }
 
 // --- イベントリスナー設定 ---
-
-if (searchButton) {
-    searchButton.addEventListener('click', handleSearch);
-}
-if (searchInput) {
-    searchInput.addEventListener('keypress', (event) => {
-        if (event.key === 'Enter') {
-            handleSearch();
-        }
-    });
-}
-
-rankTypeButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        handleTypeChange(button.dataset.rankType);
-    });
-});
-
-if (rankingTableBody) {
-    rankingTableBody.addEventListener('click', handleRowClick);
-}
-
-// --- 初期化処理 ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("ランキングページ読み込み完了");
 
-    // 初期表示 (デフォルトはレート順、1ページ目、検索なし)
+    if (searchButton) {
+        searchButton.addEventListener('click', handleSearch);
+    }
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                handleSearch();
+            }
+        });
+    }
+
+    rankTypeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            handleTypeChange(button.dataset.rankType);
+        });
+    });
+
+    if (rankingTableBody) {
+        rankingTableBody.addEventListener('click', handleRowClick);
+    }
+
+    // 初期表示
     updateRankingView();
 
     // ログイン状態の変化を監視
-    if (typeof onLoginStatusChange === 'function') {
-        onLoginStatusChange((user) => {
+    if (typeof window.onLoginStatusChange === 'function') {
+        window.onLoginStatusChange((user) => {
             console.log("ログイン状態変更検知 (ランキングページ)");
-            // 自分のランクをハイライトするためにテーブルを再描画（API呼び出しは不要）
             const currentUserSub = user ? user.sub : null;
-            const rows = rankingTableBody.querySelectorAll('tr');
-            rows.forEach(row => {
-                row.classList.toggle('current-user-rank', currentUserSub && row.dataset.userId === currentUserSub);
-            });
+            if (rankingTableBody) {
+                const rows = rankingTableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    row.classList.toggle('current-user-rank', currentUserSub && row.dataset.userId === currentUserSub);
+                });
+            }
         });
     } else {
         console.warn("onLoginStatusChange 関数が定義されていません。ログイン状態の動的な反映は行われません。");

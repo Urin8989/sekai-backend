@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>マイページ - Mario Kart Best Rivals</title>
-    <!-- 共通スタイル -->
     <link rel="stylesheet" href="css/common.css">
-    <!-- mypage.html 固有スタイル -->
     <link rel="stylesheet" href="css/mypage.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Google Identity Services Library -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
     <header class="site-header">
-        <!-- Header content (変更なし) -->
         <div class="container header-container">
             <div class="nav-menu-container">
                 <button id="nav-menu-toggle" class="nav-menu-button" aria-label="ナビゲーションメニューを開く" aria-expanded="false" aria-controls="main-navigation-menu" title="メニュー">
@@ -41,7 +35,7 @@
                 </nav>
             </div>
             <div class="site-title-header">
-                <a href="index.html"><span>Mario Kart Best Rivals</span></a>
+                <a href="index.html"><span>MKBR</span></a>
             </div>
             <div class="auth-section">
                 <div id="g_id_signin"></div>
@@ -60,17 +54,14 @@
         </div>
 
         <div class="mypage-content-layout">
-            <!-- ユーザー基本情報 -->
             <section class="mypage-user-info">
                 <div class="profile-card">
-                    <!-- 画像と名前 -->
                     <div class="profile-main-info-mypage">
                         <img id="profile-pic" src="images/placeholder-avatar.png" alt="プロフィール画像">
                         <div class="profile-name-details-mypage">
                             <h2 id="profile-name">プレイヤー名</h2>
                         </div>
                     </div>
-                    <!-- 統計 -->
                     <div class="profile-stats">
                         <div class="stat-item">
                             <span class="stat-label">レート</span>
@@ -81,30 +72,25 @@
                             <span id="profile-points" class="stat-value">---- P</span>
                         </div>
                     </div>
-                    <!-- バッジ -->
-                    <div class="profile-badges-container"> <!-- ★ ラッパー追加 -->
-                        <div class="profile-badges" id="display-badges"> <!-- ★ ID追加 -->
+                    <div class="profile-badges-container">
+                        <div class="profile-badges" id="display-badges">
                             <div class="badge-slot"><span></span></div>
                             <div class="badge-slot"><span></span></div>
                             <div class="badge-slot"><span></span></div>
                         </div>
-                        <!-- ▼▼▼ バッジ編集ボタン ▼▼▼ -->
                         <button id="edit-display-badges-button" class="button button-secondary button-small" style="display: none;">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16px" height="16px"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
                             編集
                         </button>
-                        <!-- ▲▲▲ バッジ編集ボタン ▲▲▲ -->
                     </div>
-                    <!-- 詳細・編集 -->
                     <div class="profile-extra-info">
-                        <!-- (得意なコース、コメント、自己紹介、編集ボタンなど - 変更なし) -->
                         <div class="info-item">
                             <label for="fav-course-input">ホームコース:</label>
                             <span id="fav-course-display" class="display-mode">未設定</span>
                             <input type="text" id="fav-course-input" class="edit-mode" style="display: none;" placeholder="得意なコースを入力">
                         </div>
                         <div class="info-item">
-                            <label for="user-comment-input">対戦コメント:</label>
+                            <label for="user-comment-input">フレンドコード:</label>
                             <p id="user-comment-display" class="display-mode detail-comment">未設定</p>
                             <textarea id="user-comment-input" class="edit-mode" rows="2" style="display: none;" placeholder="一言コメントを入力"></textarea>
                         </div>
@@ -122,9 +108,7 @@
                 </div>
             </section>
 
-            <!-- 戦績チャート -->
             <section class="mypage-charts">
-                <!-- (変更なし) -->
                 <div class="chart-container chart-container-full">
                     <h3>レート推移</h3>
                     <div class="chart-wrapper">
@@ -149,7 +133,6 @@
                 </div>
             </section>
 
-            <!-- ▼▼▼ バッジ図鑑セクション ▼▼▼ -->
             <section id="badge-dex" class="mypage-badge-dex">
                 <h2>バッジ図鑑 (<span id="badge-dex-count">0</span> / <span id="badge-dex-total">0</span>)</h2>
                 <div id="badge-dex-loading" class="loading-indicator">
@@ -158,34 +141,31 @@
                 </div>
                 <div class="badge-dex-grid-container">
                     <div id="badge-dex-grid" class="badge-dex-grid">
-                        <!-- バッジはJSで動的に生成 -->
-                    </div>
+                        </div>
                 </div>
                 <div id="badge-dex-detail" class="badge-dex-detail" style="display: none;">
                     <button id="badge-dex-detail-close" class="close-detail-button">&times;</button>
                     <img id="badge-dex-detail-img" src="" alt="バッジ詳細画像">
                     <h3 id="badge-dex-detail-name">バッジ名</h3>
                     <p id="badge-dex-detail-desc">説明</p>
-                    <p id="badge-dex-detail-condition">取得条件: ---</p> <!-- 取得条件表示用 -->
-                    <p id="badge-dex-detail-rate">必要レート: ---</p> <!-- レート制限表示用 -->
-                    <p id="badge-dex-detail-price">ショップ価格: --- P</p> <!-- 価格表示用 -->
+                    <div id="badge-dex-detail-rarity" class="badge-dex-detail-item" style="display: none;">
+                        {/* レアリティ情報はここにJavaScriptによって挿入されます */}
+                    </div>
+                    <p id="badge-dex-detail-condition">取得条件: ---</p>
+                    <p id="badge-dex-detail-rate">必要レート: ---</p>
+                    <p id="badge-dex-detail-price">ショップ価格: --- P</p>
                     <span id="badge-dex-detail-owned-status" class="owned-status"></span>
                 </div>
             </section>
-            <!-- ▲▲▲ バッジ図鑑セクション ▲▲▲ -->
 
-        </div> <!-- /.mypage-content-layout -->
-    </main>
+        </div> </main>
 
-    <!-- ▼▼▼ 表示バッジ編集モーダル ▼▼▼ -->
     <div id="edit-display-badges-modal" class="modal" style="display: none;">
         <div class="modal-content edit-badges-modal-content">
             <span id="close-edit-badges-modal" class="close-modal-button">&times;</span>
             <h2>表示バッジを選択</h2>
             <p>プロフィールに表示するバッジを3つまで選択してください。</p>
-
             <div class="edit-badges-container">
-                <!-- 表示スロット -->
                 <div class="display-slots-container">
                     <h3>表示スロット</h3>
                     <div id="display-slots" class="display-slots">
@@ -194,30 +174,25 @@
                         <div class="badge-slot display-slot" data-slot-index="2"></div>
                     </div>
                 </div>
-
-                <!-- 所持バッジリスト -->
                 <div class="owned-badges-container">
                     <h3>所持バッジ</h3>
                     <div id="owned-badges-grid" class="owned-badges-grid">
-                        <!-- 所持バッジはJSで動的に生成 -->
                         <p>バッジを読み込み中...</p>
                     </div>
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button id="save-display-badges-button" class="button button-primary">保存する</button>
                 <button id="cancel-edit-display-badges-button" class="button button-cancel">キャンセル</button>
             </div>
         </div>
     </div>
-    <!-- ▲▲▲ 表示バッジ編集モーダル ▲▲▲ -->
 
-    <footer class="site-footer">
+     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2024 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
             <nav class="footer-nav">
-                <a href="#">利用規約</a> | <a href="#">プライバシーポリシー</a> | <a href="#">お問い合わせ</a>
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
             </nav>
         </div>
     </footer>

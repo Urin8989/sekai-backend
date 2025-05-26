@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライバシーポリシー - Mario Kart Best Rivals</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        /* プライバシーポリシーページ用の簡単なスタイル調整 (terms.htmlと同様) */
+        .privacy-content {
+            background-color: var(--color-surface-alpha);
+            padding: calc(var(--spacing-unit) * 3);
+            border-radius: var(--border-radius-large);
+            margin-bottom: calc(var(--spacing-unit) * 4);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-medium);
+        }
+        .privacy-content h2 {
+            font-family: var(--font-family-title);
+            color: var(--color-primary-light);
+            margin-top: calc(var(--spacing-unit) * 4);
+            margin-bottom: calc(var(--spacing-unit) * 2);
+            padding-bottom: var(--spacing-unit);
+            border-bottom: 1px solid var(--color-primary-dark);
+            font-size: 1.8rem;
+        }
+        .privacy-content h3 {
+            font-family: var(--font-family-title);
+            color: var(--color-primary);
+            margin-top: calc(var(--spacing-unit) * 3);
+            margin-bottom: var(--spacing-unit);
+            font-size: 1.3rem;
+        }
+        .privacy-content p,
+        .privacy-content ul {
+            margin-bottom: calc(var(--spacing-unit) * 1.5);
+            line-height: 1.7;
+            color: var(--color-text-secondary);
+        }
+        .privacy-content ul {
+            list-style: disc;
+            padding-left: calc(var(--spacing-unit) * 3);
+        }
+        .privacy-content strong {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+        .privacy-content a {
+            text-decoration: underline;
+        }
+        .privacy-content a:hover {
+            text-decoration: none;
+        }
+        .last-updated {
+            text-align: right;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin-bottom: calc(var(--spacing-unit) * 2);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <div class="nav-menu-container">
+                <button id="nav-menu-toggle" class="nav-menu-button" aria-label="ナビゲーションメニューを開く" aria-expanded="false" aria-controls="main-navigation-menu" title="メニュー">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24px" height="24px">
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </button>
+                <nav id="main-navigation-menu" class="main-navigation" aria-hidden="true">
+                    <ul>
+                        <li><a href="index.html">ホーム</a></li>
+                        <li><a href="mypage.html">マイページ</a></li>
+                        <li><a href="match.html">対戦</a></li>
+                        <li><a href="ranking.html">ランキング</a></li>
+                        <li><a href="shop.html">ショップ</a></li>
+                        <li><a href="community.html">コミュニティ</a></li>
+                        <li><a href="rules.html">ルール</a></li>
+                        </ul>
+                </nav>
+            </div>
+            <div class="site-title-header">
+                <a href="index.html"><span>MKBR</span></a>
+            </div>
+            <div class="auth-section">
+                <div id="g_id_signin"></div>
+                <div id="user-info" style="display: none;">
+                    <span id="header-user-name"></span>
+                    <button id="logout-button" class="button">ログアウト</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="page-title-icon">
+                <img src="images/rules.jpg" alt="プライバシーポリシー"> <h1>プライバシーポリシー</h1>
+            </div>
+
+            <div class="privacy-content">
+                <p class="last-updated">最終更新日: 2025年5月25日</p>
+
+                <p>MKBR運営が提供するウェブサイト「Mario Kart Best Rivals」（以下、「本サービス」といいます。）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」といいます。）を定めます。</p>
+
+                <h2>第1条（収集する個人情報）</h2>
+                <p>当運営は、本サービスの提供にあたり、以下の情報を収集することがあります。</p>
+                <ul>
+                    <li><strong>Googleアカウント連携により提供される情報:</strong>
+                        <ul>
+                            <li>Googleアカウントのプロフィール情報（表示名、メールアドレス、プロフィール画像URLなど、ユーザーが連携時に許可した範囲の情報）</li>
+                            <li>GoogleユーザーID（またはそれに準ずる識別子）</li>
+                        </ul>
+                    </li>
+                    <li><strong>ユーザーが本サービス上で任意に提供する情報:</strong>
+                        <ul>
+                            <li>マイページで設定するプロフィール情報（ホームコース、対戦コメントなど）</li>
+                        </ul>
+                    </li>
+                    <li><strong>本サービスの利用に伴い自動的に取得する情報:</strong>
+                        <ul>
+                            <li>レート、ポイント、バッジ獲得状況、対戦履歴などのゲームプレイに関するデータ</li>
+                            <li>IPアドレス、クッキー情報、端末情報、ログ情報など</li>
+                            <li>コミュニティ機能（チャットなど）における投稿内容</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h2>第2条（個人情報の利用目的）</h2>
+                <p>当運営は、収集した個人情報を以下の目的で利用します。</p>
+                <ul>
+                    <li>本サービスの提供、運営、維持、改善のため（ユーザー認証、プロフィール表示、対戦マッチング、ランキング表示、ショップ機能の提供などを含む）。</li>
+                    <li>ユーザー間のコミュニケーション機能を提供するため（対戦相手のプロフィール表示、チャットなど）。</li>
+                    <li>本サービスに関するご案内、お問い合わせ等への対応のため。</li>
+                    <li>本サービスの利用状況の分析、統計データの作成、およびマーケティング活動のため。</li>
+                    <li>本サービスの利用規約に違反する行為への対応のため。</li>
+                    <li>その他、上記の利用目的に付随する目的のため。</li>
+                </ul>
+                <p>特に、Googleアカウントから取得するプロフィール画像および表示名は、本サービス内でのユーザー識別およびプロフィール表示のために利用します。</p>
+
+                <h2>第3条（個人情報の第三者提供）</h2>
+                <p>当運営は、次に掲げる場合を除き、あらかじめユーザーの同意を得ることなく、第三者に個人情報を提供することはありません。ただし、個人情報保護法その他の法令で認められる場合を除きます。</p>
+                <ul>
+                    <li>法令に基づく場合。</li>
+                    <li>人の生命、身体または財産の保護のために必要がある場合であって、本人の同意を得ることが困難であるとき。</li>
+                    <li>公衆衛生の向上または児童の健全な育成の推進のために特に必要がある場合であって、本人の同意を得ることが困難であるとき。</li>
+                    <li>国の機関もしくは地方公共団体またはその委託を受けた者が法令の定める事務を遂行することに対して協力する必要がある場合であって、本人の同意を得ることにより当該事務の遂行に支障を及ぼすおそれがあるとき。</li>
+                </ul>
+                <p>なお、本サービス内では、ユーザー名、プロフィール画像、レート、バッジ、ホームコース、対戦コメントなどの情報が、他のユーザーに対して公開されることがあります。公開範囲については、ユーザー自身が設定できる場合と、サービスの性質上必然的に公開される場合があります。</p>
+
+                <h2>第4条（個人情報の管理とセキュリティ）</h2>
+                <p>当運営は、収集した個人情報の紛失、破壊、改ざん、漏えい等を防止するため、必要かつ適切なセキュリティ対策を講じます。</p>
+                <p>ユーザーのGoogleアカウント情報は、Google社のセキュリティ基準に従って管理されます。本サービスは、ユーザーのGoogleパスワードを収集・保存することはありません。</p>
+
+                <h2>第5条（ユーザーの権利）</h2>
+                <p>ユーザーは、当運営が保有する自己の個人情報について、開示、訂正、追加、削除、利用停止等を請求することができます。これらの請求については、第10条に定めるお問い合わせ窓口までご連絡ください。</p>
+                <p>Googleアカウントを通じて提供された情報（名前、プロフィール画像など）については、ユーザーご自身のGoogleアカウント設定から変更・管理することができます。また、Googleアカウントとの連携解除もGoogleアカウント設定から行うことができます。</p>
+
+                <h2>第6条（Cookie等の利用）</h2>
+                <p>本サービスは、ユーザーの利便性向上や利用状況の分析のため、Cookieおよび類似の技術を利用することがあります。ユーザーは、ブラウザの設定を変更することによりCookieを無効化することができますが、その場合、本サービスの一部機能が利用できなくなることがあります。</p>
+
+                <h2>第7条（第三者サービス）</h2>
+                <p>本サービスは、ユーザー認証のためにGoogle Sign-Inを利用しています。Googleによる個人情報の取扱いについては、Google社のプライバシーポリシーをご確認ください。</p>
+                <ul>
+                    <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google プライバシーポリシー</a></li>
+                </ul>
+
+                <h2>第8条（未成年者の利用）</h2>
+                <p>未成年者のユーザーが本サービスを利用し、個人情報を入力する場合には、必ず親権者等の法定代理人の同意を得るものとします。</p>
+
+                <h2>第9条（プライバシーポリシーの変更）</h2>
+                <p>当運営は、法令等の変更や事業運営上の必要に応じて、本ポリシーを改定することがあります。改定した場合は、本サービス上での掲載その他適切な方法によりユーザーに通知し、掲載されたときから効力を生じるものとします。</p>
+                <p>ユーザーは、定期的に本ポリシーを確認する責任を負うものとし、変更後も本サービスを使い続けることにより、変更後の本ポリシーに同意したものとみなされます。</p>
+
+                <h2>第10条（お問い合わせ窓口）</h2>
+                <p>本ポリシーに関するお問い合わせは、以下のDMまでお願いいたします。</p>
+                <p>[運営者のX @papaia8890214 ]</p>
+
+            </div>
+        </div>
+    </main>
+
+     <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
+            <nav class="footer-nav">
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
+            </nav>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+    </body>
+</html>

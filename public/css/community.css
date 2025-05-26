@@ -4,7 +4,7 @@
 
 /* --- ページ共通 --- */
 .community-page h1 {
-    color: var(--color-text-primary); /* common.css の --color-heading を参照 */
+    color: var(--color-text-primary);
     font-weight: 700;
     letter-spacing: 1px;
 }
@@ -20,6 +20,7 @@
 .page-title-icon {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin-bottom: 2.5rem;
   gap: 1.5rem;
 }
@@ -33,13 +34,12 @@
 }
 .page-title-icon h1 {
   margin: 0;
-  /* common.css の h1 スタイルを継承 */
 }
 /* ▲▲▲ ページタイトルとアイコン ▲▲▲ */
 
 .community-actions {
     margin-bottom: 2.5rem;
-    text-align: right;
+    text-align: center;
 }
 
 .section-divider {
@@ -50,416 +50,169 @@
     opacity: 0.5;
 }
 
-/* --- スタイリッシュなボタンデザイン (グロー付き) --- */
+/* --- スタイリッシュなボタンデザイン --- */
 .button.button-stylish {
-    padding: 0.9em 1.8em;
-    border-radius: 30px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
+    padding: 0.9em 1.8em; border-radius: 30px; font-weight: 700; letter-spacing: 0.8px;
     background: linear-gradient(145deg, #fff0b3, var(--gold-light-color, #e4c66a));
-    color: #111;
-    border: none;
-    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.35),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.1),
-                inset 0 1px 1px rgba(255, 255, 255, 0.3),
-                0 0 18px 4px rgba(255, 215, 0, 0.6);
+    color: #111; border: none;
+    box-shadow: 0 7px 20px rgba(0, 0, 0, 0.35), inset 0 -2px 2px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 0 18px 4px rgba(255, 215, 0, 0.6);
     transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
 }
 .button.button-stylish:hover:not(:disabled) {
     background: linear-gradient(145deg, #ffffff, #fff0b3);
-    box-shadow: 0 9px 25px rgba(0, 0, 0, 0.4),
-                inset 0 -2px 2px rgba(0, 0, 0, 0.1),
-                inset 0 1px 1px rgba(255, 255, 255, 0.3),
-                0 0 22px 5px rgba(255, 215, 0, 0.7);
+    box-shadow: 0 9px 25px rgba(0, 0, 0, 0.4), inset 0 -2px 2px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 0 22px 5px rgba(255, 215, 0, 0.7);
     transform: translateY(-4px);
 }
 .button.button-stylish:active:not(:disabled) {
     transform: translateY(0px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3),
-                inset 0 2px 4px rgba(0, 0, 0, 0.3),
-                0 0 8px 1px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 8px 1px rgba(255, 215, 0, 0.4);
 }
 
 /* --- コミュニティリスト --- */
-.community-list-section {
-    margin-bottom: 2rem;
-}
-
+.community-list-section { margin-bottom: 2rem; }
 .community-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem; justify-content: center;
 }
-
 .community-card {
-    background-color: var(--color-surface-alpha); /* 半透明の表面色 */
-    border: 1px solid var(--gold-dark-color);
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5),
-                0 0 15px 2px rgba(204, 163, 0, 0.3);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: relative;
+    background-color: var(--color-surface-alpha); border: 1px solid var(--gold-dark-color);
+    border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.5), 0 0 15px 2px rgba(204,163,0,0.3);
+    transition: all 0.25s ease; display: flex; flex-direction: column;
+    overflow: hidden; position: relative; width: 100%; max-width: 400px;
 }
-
 .community-card:hover {
-    transform: translateY(-6px);
-    border-color: var(--gold-color);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
-                0 0 25px 5px rgba(255, 215, 0, 0.4);
-    background-color: var(--color-surface-lighter); /* ホバー時に少し明るく */
+    transform: translateY(-6px); border-color: var(--gold-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 25px 5px rgba(255,215,0,0.4);
+    background-color: var(--color-surface-lighter);
 }
-
-.community-card-main {
-    padding: 2rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    position: relative;
-    z-index: 1;
-    text-align: center; /* カード内容は中央揃え */
-}
-/* 内側のハイライト */
-.community-card-main::after {
-    content: '';
-    position: absolute;
-    top: 1px; left: 1px; right: 1px;
-    height: 50%;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent);
-    border-radius: 11px 11px 0 0;
-    pointer-events: none;
-}
-
-.community-card.is-open .community-card-main {
-    background-color: rgba(0,0,0,0.25); /* 開いたときの背景 */
-}
-
-.community-card-header {
-    display: flex;
-    justify-content: center; /* 中央揃え */
-    align-items: flex-start;
-    padding-bottom: 0.5rem;
-    /* border-bottom: none; */ /* 中央揃えのため下線は削除 */
-    margin-bottom: 1rem;
-}
-.community-card-header h3 {
-    margin: 0;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--color-text-primary); /* common.css の --color-heading を参照 */
-    line-height: 1.3;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-}
-
-.organizer-info-card {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* 中央揃え */
-    gap: 0.8em;
-    margin-bottom: 1rem;
-}
-.organizer-avatar-card {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--color-border);
-    flex-shrink: 0;
-}
+.community-card-main { padding: 2rem; cursor: pointer; transition: background-color 0.2s ease; position: relative; z-index: 1; text-align: center; }
+.community-card-main::after { content: ''; position: absolute; top: 1px; left: 1px; right: 1px; height: 50%; background: linear-gradient(to bottom, rgba(255,255,255,0.05), transparent); border-radius: 11px 11px 0 0; pointer-events: none; }
+.community-card.is-open .community-card-main { background-color: rgba(0,0,0,0.25); }
+.community-card-header { display: flex; justify-content: center; align-items: flex-start; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+.community-card-header h3 { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--color-text-primary); line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.organizer-info-card { display: flex; align-items: center; justify-content: center; gap: 0.8em; margin-bottom: 1rem; }
+.organizer-avatar-card { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--color-border); flex-shrink: 0; }
 .organizer-info-card p { margin: 0; font-size: 0.9rem; color: var(--color-text-secondary); }
 .organizer-info-card strong { color: var(--color-text-primary); font-weight: 600; }
-
-.description-snippet {
-    font-size: 0.9rem;
-    color: var(--color-text-primary);
-    line-height: 1.6;
-    margin: 0 0 1.5rem 0;
-}
-
-.card-footer {
-    display: flex;
-    justify-content: center; /* 中央揃え */
-    align-items: center;
-    margin-top: auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border-light);
-    gap: 1.5rem; /* 中央揃えのためのギャップ */
-}
+.description-snippet { font-size: 0.9rem; color: var(--color-text-primary); line-height: 1.6; margin: 0 0 1.5rem 0; }
+.card-footer { display: flex; justify-content: center; align-items: center; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--color-border-light); gap: 1.5rem; }
 .participants-info { font-size: 0.9rem; color: var(--color-text-secondary); }
 .participants-info .count { font-weight: 700; color: var(--color-text-primary); }
-.card-footer .button { /* 詳細を見るボタン */
-    padding: 0.6em 1.2em;
-    font-size: 0.85rem;
-    background: transparent;
-    border: 1px solid var(--color-border-light);
-    color: var(--color-text-secondary);
-    box-shadow: none;
-}
-.card-footer .button:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--gold-color);
-    color: var(--gold-color);
-}
-
-/* カード内詳細エリア */
-.community-card-details {
-    padding: 1.5rem 2rem 2rem 2rem;
-    background-color: rgba(0,0,0,0.6); /* 少し濃いめの透過黒 */
-    border-top: 1px solid var(--color-border-light);
-    text-align: left; /* 詳細エリアは左揃え */
-}
-.community-card-details h4 {
-    font-size: 0.85rem;
-    color: var(--gold-light-color, #e4c66a);
-    margin-top: 0;
-    margin-bottom: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-weight: 600;
-}
-.card-participants-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1.5rem 0;
-    max-height: 160px;
-    overflow-y: auto;
-    font-size: 0.9rem;
-}
+.card-footer .button { padding: 0.6em 1.2em; font-size: 0.85rem; background: transparent; border: 1px solid var(--color-border-light); color: var(--color-text-secondary); box-shadow: none; }
+.card-footer .button:hover { background: rgba(255,255,255,0.05); border-color: var(--gold-color); color: var(--gold-color); }
+.community-card-details { padding: 1.5rem 2rem 2rem 2rem; background-color: rgba(0,0,0,0.6); border-top: 1px solid var(--color-border-light); text-align: left; }
+.community-card-details h4 { font-size: 0.85rem; color: var(--gold-light-color, #e4c66a); margin-top: 0; margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+.card-participants-list { list-style: none; padding: 0; margin: 0 0 1.5rem 0; max-height: 160px; overflow-y: auto; font-size: 0.9rem; }
 .card-participants-list::-webkit-scrollbar { width: 6px; }
 .card-participants-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px;}
 .card-participants-list::-webkit-scrollbar-thumb { background: var(--border-color-light); border-radius: 3px;}
 .card-participants-list::-webkit-scrollbar-thumb:hover { background: var(--gold-dark-color); }
-.card-participants-list li {
-    padding: 0.4rem 0;
-    color: var(--color-text-secondary);
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--color-border);
-}
+.card-participants-list li { padding: 0.4rem 0; color: var(--color-text-secondary); display: flex; align-items: center; border-bottom: 1px solid var(--color-border); }
 .card-participants-list li:last-child { border-bottom: none; }
-.card-participants-list img {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    margin-right: 0.6em;
-    border: 1px solid var(--color-border);
-}
+.card-participants-list img { width: 24px; height: 24px; border-radius: 50%; margin-right: 0.6em; border: 1px solid var(--color-border); }
 .card-participants-list .user-link { color: var(--color-text-primary); font-weight: 500; }
 .card-participants-list .user-link:hover { color: var(--gold-color); }
-.card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-    justify-content: flex-end; /* ボタンを右寄せ */
-}
+.card-actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: flex-end; }
 .card-join-status { font-size: 0.9rem; color: var(--color-text-secondary); flex-grow: 1; }
 .card-actions .button { padding: 0.7em 1.4em; font-size: 0.85rem; }
 
 
 /* --- コミュニティ詳細 (全詳細) --- */
 .community-detail-section {
-    position: relative;
-    margin-top: 2rem;
-    padding: 3rem;
-    border: 1px solid var(--gold-color);
-    border-radius: 16px;
-    background-color: var(--color-surface-alpha); /* 半透明の表面色 */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6),
-                0 0 20px 4px rgba(255, 215, 0, 0.35);
+    position: relative; margin-top: 2rem; padding: 3rem; border: 1px solid var(--gold-color);
+    border-radius: 16px; background-color: var(--color-surface-alpha);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px 4px rgba(255,215,0,0.35);
     z-index: 1;
 }
-
 .close-detail-button {
-    position: absolute;
-    top: 1.5rem;
-    right: 2rem;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-size: 2.2rem;
-    color: var(--color-text-secondary);
+    position: absolute; top: 1.5rem; right: 2rem; background: none; border: none;
+    padding: 0; cursor: pointer; font-size: 2.2rem; color: var(--color-text-secondary);
     transition: color 0.2s ease, transform 0.2s ease;
 }
 .close-detail-button:hover { color: var(--gold-color); transform: scale(1.1); }
 
 .detail-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); */ /* ★ 変更あり: 下のメディアクエリで制御 */
     gap: 2.5rem;
     margin-top: 2rem;
 }
 
-.detail-left-column {
+.detail-left-column { /* コミュニティ情報と参加者リストのコンテナ */
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* ★ 変更あり: デフォルトは縦積み、メディアクエリで変更 */
     gap: 2.5rem;
 }
 
 .detail-info-card,
 .detail-participants-card,
 .detail-chat-card {
-    padding: 2.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    /* ▼▼▼ 高級感を出すためのグラデーション背景 ▼▼▼ */
-    background: linear-gradient(170deg, rgba(40, 40, 45, 0.85), rgba(25, 25, 30, 0.95));
-    /* ▲▲▲ 背景変更 ▲▲▲ */
-    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05), /* 内側のハイライト */
-                0 8px 25px rgba(0, 0, 0, 0.5); /* 外側の影 */
+    padding: 2.5rem; border: 1px solid var(--border-color); border-radius: 12px;
+    background: linear-gradient(170deg, rgba(40,40,45,0.85), rgba(25,25,30,0.95));
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.05), 0 8px 25px rgba(0,0,0,0.5);
 }
 
-.detail-grid h3 { /* カード内タイトル */
-    margin-top: 0;
-    margin-bottom: 1.8rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color-light);
-    font-size: 1.4rem;
-    color: var(--gold-light-color, #e4c66a);
-    font-weight: 600;
-    letter-spacing: 0.5px;
+.detail-grid h3 {
+    margin-top: 0; margin-bottom: 1.8rem; padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color-light); font-size: 1.4rem;
+    color: var(--gold-light-color, #e4c66a); font-weight: 600; letter-spacing: 0.5px;
 }
-.detail-grid h4 { /* カード内サブ見出し */
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    color: var(--color-text-primary);
-    font-weight: 600;
+.detail-grid h4 {
+    margin-top: 2rem; margin-bottom: 1rem; font-size: 1.1rem;
+    color: var(--color-text-primary); font-weight: 600;
 }
 .detail-grid h4 i { margin-right: 0.6em; color: var(--gold-color); }
 
-/* コミュニティ情報カード */
 .detail-info-card .organizer-info { display: flex; align-items: center; gap: 1em; margin-bottom: 1.5rem; }
 .detail-info-card .organizer-info img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-color); }
 .detail-info-card .organizer-info span { font-weight: 600; color: var(--color-text-primary); }
 .detail-info-card p, .detail-info-card pre { margin: 0.8rem 0; font-size: 0.95rem; color: var(--color-text-secondary); line-height: 1.6; }
 .detail-info-card p strong { color: var(--color-text-primary); font-weight: 600; display: inline-block; min-width: 80px; }
 .detail-info-card pre#detail-description {
-    padding: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-small);
-    /* ▼▼▼ 説明文背景を少し暗く ▼▼▼ */
-    background-color: rgba(10, 10, 15, 0.8);
-    /* ▲▲▲ 背景変更 ▲▲▲ */
-    font-family: inherit;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    max-height: 200px;
-    overflow-y: auto;
-    color: var(--color-text-primary);
+    padding: 1rem; border: 1px solid var(--border-color); border-radius: var(--border-radius-small);
+    background-color: rgba(10,10,15,0.8); font-family: inherit;
+    white-space: pre-wrap; word-wrap: break-word; max-height: 200px;
+    overflow-y: auto; color: var(--color-text-primary);
 }
 .detail-info-card h4 { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border-color-light); }
 .point-value { color: var(--gold-color); font-weight: 700; font-size: 1.1em; }
 
-/* 参加者リスト (全詳細) */
-.participants-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.participants-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;}
 .participants-count-display { font-size: 0.9rem; color: var(--color-text-secondary); }
 .participants-count-display strong { color: var(--color-text-primary); font-weight: 700; }
 .participants-actions .join-status-message { font-size: 0.9rem; font-weight: 600; color: var(--gold-light-color); }
 .participants-actions .button { padding: 0.7em 1.4em; font-size: 0.85rem; }
+
 #participants-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    border: 1px solid var(--border-color);
-    /* ▼▼▼ 参加者リスト背景を少し暗く ▼▼▼ */
-    background-color: rgba(10, 10, 15, 0.8);
-    /* ▲▲▲ 背景変更 ▲▲▲ */
-    max-height: 300px;
-    overflow-y: auto;
+    list-style: none; padding: 0; margin: 0; border: 1px solid var(--border-color);
+    background-color: rgba(10,10,15,0.8); max-height: 300px; overflow-y: auto;
     border-radius: var(--border-radius-medium);
 }
 #participants-list li { padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; }
 #participants-list li:last-child { border-bottom: none; }
 #participants-list img { width: 32px; height: 32px; border-radius: 50%; margin-right: 1rem; border: 1px solid var(--border-color); }
-#participants-list .user-link { color: var(--color-text-primary); font-weight: 500; }
-#participants-list .user-link:hover { color: var(--gold-color); }
 
-/* --- チャットエリア (高級感のあるデザイン) --- */
 #chat-messages {
-    height: 400px;
-    /* ▼▼▼ 背景と枠線を調整 ▼▼▼ */
-    background-color: rgba(10, 10, 15, 0.85); /* 少し暗く、透明度を調整 */
-    border: 1px solid rgba(255, 255, 255, 0.1); /* 枠線を細く、白っぽく */
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4); /* 内側に影を追加 */
-    /* ▲▲▲ 背景と枠線調整 ▲▲▲ */
-    border-radius: var(--border-radius-medium);
-    padding: 1.2rem;
-    overflow-y: auto;
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    height: 400px; background-color: rgba(10,10,15,0.85);
+    border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
+    border-radius: var(--border-radius-medium); padding: 1.2rem; overflow-y: auto;
+    margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
 }
-
-/* スクロールバー (白基調のデザイン) */
 #chat-messages::-webkit-scrollbar { width: 10px; }
-#chat-messages::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.08); border-radius: 5px; }
-#chat-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.5); border-radius: 5px; border: 1px solid rgba(0, 0, 0, 0.2); }
-#chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.7); }
+#chat-messages::-webkit-scrollbar-track { background: rgba(255,255,255,0.08); border-radius: 5px; }
+#chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.5); border-radius: 5px; border: 1px solid rgba(0,0,0,0.2); }
+#chat-messages::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.7); }
 
-/* --- チャットメッセージ共通 (高級感のあるデザイン) --- */
 .chat-message {
-    max-width: 85%;
-    padding: 0.8rem 1.3rem;
-    border-radius: 10px;
-    line-height: 1.5;
-    font-size: 0.9rem;
-    word-wrap: break-word;
-    display: flex;
-    gap: 0.8rem;
-    /* ▼▼▼ 枠線を削除し、影で立体感を出す ▼▼▼ */
-    border: none;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-    /* ▲▲▲ 枠線削除、影追加 ▲▲▲ */
+    max-width: 85%; padding: 0.8rem 1.3rem; border-radius: 10px;
+    line-height: 1.5; font-size: 0.9rem; word-wrap: break-word;
+    display: flex; gap: 0.8rem; border: none; box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
-
-/* 相手のメッセージ */
-.opponent-message {
-    background: linear-gradient(145deg, rgba(70, 70, 80, 0.9), rgba(55, 55, 65, 0.95));
-    color: var(--color-text-primary);
-    align-self: flex-start;
-    border-top-left-radius: 0;
-}
-
-/* 自分のメッセージ */
-.own-message {
-    /* ▼▼▼ 背景をプライマリカラー系のグラデーションに ▼▼▼ */
-    background: linear-gradient(145deg, rgba(var(--color-primary-rgb, 255, 215, 0), 0.4), rgba(var(--color-primary-rgb, 255, 215, 0), 0.25));
-    /* ▲▲▲ 背景変更 ▲▲▲ */
-    color: #e8e8e8;
-    align-self: flex-end;
-    border-top-right-radius: 0;
-    flex-direction: row-reverse;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 5px rgba(var(--color-primary-rgb, 255, 215, 0), 0.2);
-}
-
-/* システムメッセージ */
-.system-message {
-    font-size: 0.8rem;
-    color: var(--color-text-secondary);
-    text-align: center;
-    font-style: italic;
-    align-self: center;
-    background-color: transparent;
-    padding: 0.3rem 0;
-    border: none;
-    box-shadow: none;
-    max-width: 100%;
-    display: block;
-}
-
-/* --- メッセージ内部構造 (アバター、名前、時間、テキスト) --- */
+.opponent-message { background: linear-gradient(145deg, rgba(70,70,80,0.9), rgba(55,55,65,0.95)); color: var(--color-text-primary); align-self: flex-start; border-top-left-radius: 0; }
+.own-message { background: linear-gradient(145deg, rgba(var(--color-primary-rgb,255,215,0),0.4), rgba(var(--color-primary-rgb,255,215,0),0.25)); color: #e8e8e8; align-self: flex-end; border-top-right-radius: 0; flex-direction: row-reverse; box-shadow: 0 3px 8px rgba(0,0,0,0.4), 0 0 5px rgba(var(--color-primary-rgb,255,215,0),0.2); }
+.system-message { font-size: 0.8rem; color: var(--color-text-secondary); text-align: center; font-style: italic; align-self: center; background-color: transparent; padding: 0.3rem 0; border: none; box-shadow: none; max-width: 100%; display: block; }
 .chat-message .message-sender { flex-shrink: 0; }
-.chat-message .chat-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
+.chat-message .chat-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 .chat-message .message-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
 .chat-message .message-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; order: 0; }
 .own-message .message-meta { justify-content: flex-end; }
@@ -468,137 +221,112 @@
 .chat-message .message-timestamp { font-size: 0.7rem; color: var(--color-text-secondary); opacity: 0.8; }
 .chat-message .message-text { margin: 0; order: 1; }
 
-/* --- チャット入力エリア (高級感のあるデザイン) --- */
-.chat-input-area {
-    display: flex;
-    gap: 0.8rem;
-    align-items: center;
-    padding: 0.8rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
+.chat-input-area { display: flex; gap: 0.8rem; align-items: center; padding: 0.8rem 0; border-top: 1px solid rgba(255,255,255,0.1); }
 #chat-input {
-    flex-grow: 1;
-    padding: 0.9rem 1.1rem;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 20px; /* 角を丸く */
-    background-color: rgba(30, 30, 35, 0.9); /* 背景色 */
-    color: var(--color-text-primary);
-    font-size: 0.95rem;
-    outline: none;
+    flex-grow: 1; padding: 0.9rem 1.1rem; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px; background-color: rgba(30,30,35,0.9);
+    color: var(--color-text-primary); font-size: 0.95rem; outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
-#chat-input:focus {
-    border-color: var(--gold-color);
-    background-color: rgba(40, 40, 45, 0.95);
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 255, 215, 0), 0.3);
+#chat-input:focus { border-color: var(--gold-color); background-color: rgba(40,40,45,0.95); box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb,255,215,0),0.3); }
+#send-chat-button { flex-shrink: 0; padding: 0.8rem 1.2rem; font-size: 0.9rem; border-radius: 20px; }
+
+#delete-community-button { /* 削除ボタンのスタイルは既存のものを維持 */
+    padding: 0.7em 1.4em; font-size: 0.85rem; border-radius: var(--border-radius-medium); font-weight: 600; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; text-align: center; background: linear-gradient(145deg, #a03030, #701010); color: #f0f0f0; border: 1px solid #500000; box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1), inset 0 -1px 1px rgba(0,0,0,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
-#send-chat-button {
-    flex-shrink: 0;
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
-    border-radius: 20px; /* 角を丸く */
-    /* HTML側で class="button button-primary" を適用推奨 */
-}
+#delete-community-button:hover:not(:disabled) { background: linear-gradient(145deg, #c04040, #902020); border-color: #701010; color: #fff; box-shadow: 0 6px 15px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 -1px 1px rgba(0,0,0,0.3), 0 0 12px rgba(255,80,80,0.35); transform: translateY(-2px); }
+#delete-community-button:active:not(:disabled) { background: linear-gradient(145deg, #701010, #a03030); box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3); transform: translateY(0); }
+#delete-community-button:disabled { background: #553030 !important; border-color: #442020 !important; color: #888 !important; box-shadow: none !important; text-shadow: none !important; cursor: not-allowed; }
 
 /* --- コミュニティ作成モーダル --- */
-/* (変更なし) */
-.modal-content { border: 1px solid var(--gold-color); position: relative; z-index: 1; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px 4px rgba(230, 211, 105, 0.35); background-color: var(--color-background); width: 90%; max-width: 550px; margin: auto; padding: 2.5rem 3rem; border-radius: 12px; text-align: left; }
+.modal-content { border: 1px solid var(--gold-color); position: relative; z-index: 1; box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px 4px rgba(230,211,105,0.35); background-color: var(--color-background); width: 90%; max-width: 550px; margin: auto; padding: 2.5rem 3rem; border-radius: 12px; text-align: left; }
 .modal-content h2 { color: var(--gold-light-color, #e4c66a); font-weight: 600; text-align: center; margin-top: 0; margin-bottom: 2rem; }
 #create-community-form .form-group { margin-bottom: 1.5rem; }
 #create-community-form label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text-secondary); }
 #create-community-form input[type="text"], #create-community-form input[type="number"], #create-community-form textarea { background-color: var(--color-surface); border: 1px solid var(--gold-dark-color); color: var(--color-text-primary); padding: 0.8rem 1rem; border-radius: var(--border-radius-small); width: 100%; box-sizing: border-box; font-size: 0.95rem; }
-#create-community-form input:focus, #create-community-form textarea:focus { border-color: var(--gold-color) !important; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.4); outline: none; }
+#create-community-form input:focus, #create-community-form textarea:focus { border-color: var(--gold-color) !important; box-shadow: 0 0 0 3px rgba(212,175,55,0.4); outline: none; }
 #create-community-form textarea { min-height: 100px; resize: vertical; }
 #create-form-message { color: var(--color-cancel); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.2em; }
 .modal-actions { margin-top: 2rem; text-align: right; }
 .close-modal-button { position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; font-size: 1.8rem; color: var(--color-text-secondary); cursor: pointer; padding: 0; line-height: 1; }
 .close-modal-button:hover { color: var(--gold-color); }
 
-/* --- ユーザーリンク共通 --- */
-/* (変更なし) */
 .user-link { color: var(--color-text-primary); font-weight: 500; text-decoration: none; transition: color 0.2s ease; }
 .user-link:hover { color: var(--gold-color); text-decoration: underline; }
 
 /* --- レスポンシブ --- */
-/* (変更なし) */
 @media (max-width: 768px) {
-    .community-grid { grid-template-columns: 1fr; gap: 1rem; } /* gap詰める */
-    .detail-grid { grid-template-columns: 1fr; gap: 1.5rem; } /* gap詰める */
-    .community-detail-section { padding: 1.5rem; } /* パディング詰める */
-    .detail-info-card, .detail-participants-card, .detail-chat-card { padding: 1.2rem; } /* パディング詰める */
-    .modal-content { padding: 1.5rem; max-width: 95%; } /* パディング詰める */
-}
-/* community.css */
+    .community-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    .community-card { max-width: 100%; }
+    .community-detail-section { padding: 1.5rem; }
+    /* ▼▼▼ 詳細グリッドの変更 ▼▼▼ */
+    .detail-grid {
+        grid-template-columns: 1fr; /* ★ 変更: 詳細グリッドは常に1列 */
+        gap: 1.5rem;
+    }
+    .detail-left-column {
+        display: flex;
+        flex-direction: row; /* ★ 変更: 情報カードと参加者カードを横並び試行 */
+        flex-wrap: wrap;     /* ★ 追加: 入りきらなければ折り返す */
+        gap: 1rem;           /* ★ 追加: カード間の隙間 */
+        align-items: stretch; /* ★ 追加: 高さを揃える */
+    }
+    .detail-info-card, .detail-participants-card {
+        padding: 1rem; /* ★ 変更: パディングを小さく */
+        flex: 1 1 280px; /* ★ 追加: 横並び時の基本幅と伸縮設定 (最小280pxで試行) */
+        min-width: 260px; /* ★ 追加: これ以上は小さくならないように */
+    }
+    .detail-chat-card {
+        padding: 1.2rem; /* チャットは元のパディング維持 */
+    }
+    /* 情報カード内の要素をさらに小さく */
+    .detail-grid h3 { font-size: 1.2rem; margin-bottom: 1rem; padding-bottom: 0.8rem; }
+    .detail-info-card .organizer-info img { width: 30px; height: 30px; }
+    .detail-info-card .organizer-info span { font-size: 0.9rem; }
+    .detail-info-card p, .detail-info-card pre { font-size: 0.85rem; margin: 0.5rem 0; }
+    .detail-info-card pre#detail-description { max-height: 80px; padding: 0.8rem; }
+    .point-value { font-size: 1em; }
 
-/* --- 省略: 既存のスタイル --- */
+    /* 参加者リスト内の要素を小さく */
+    .participants-count-display { font-size: 0.8rem; }
+    .participants-actions .button { font-size: 0.8rem; padding: 0.6em 1.2em; }
+    #participants-list { max-height: 120px; } /* ★ 変更: 高さを制限 */
+    #participants-list li { padding: 0.6rem 1rem; }
+    #participants-list img { width: 28px; height: 28px; margin-right: 0.8rem; }
+    #participants-list .user-link { font-size: 0.9rem; }
 
-/* --- コミュニティ詳細 (全詳細) --- */
-/* ... (既存の .community-detail-section, .detail-grid などのスタイル) ... */
+    /* チャットの高さ調整 (768px以下) */
+    #chat-messages { height: 300px; } /* ★ 変更: 少し高さを確保 */
 
-/* 参加/脱退/ステータス表示エリア */
-.participants-actions {
-    display: flex;
-    justify-content: space-between; /* ボタンとステータスを両端に */
-    align-items: center;
-    margin-bottom: 1rem;
-    flex-wrap: wrap; /* ボタンが多い場合に折り返す */
-    gap: 1rem; /* ボタン間の隙間 */
-}
-/* ... (既存の .participants-count-display, .join-status-message, 参加/脱退ボタンのスタイル) ... */
-
-
-/* ▼▼▼ コミュニティ削除ボタンのスタイル ▼▼▼ */
-#delete-community-button {
-    /* 基本的なボタンスタイルを継承しつつ、見た目を上書き */
-    padding: 0.7em 1.4em; /* 他のボタンと合わせる */
-    font-size: 0.85rem;   /* 他のボタンと合わせる */
-    border-radius: var(--border-radius-medium);
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-    text-decoration: none; /* aタグの場合も考慮 */
-    display: inline-block; /* display: none はJSで制御 */
-    text-align: center;
-
-    /* --- 削除ボタン専用デザイン --- */
-    background: linear-gradient(145deg, #a03030, #701010); /* 深い赤のグラデーション */
-    color: #f0f0f0; /* 明るい文字色 */
-    border: 1px solid #500000; /* 暗い赤の枠線 */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), /* 通常の影 */
-                inset 0 1px 1px rgba(255, 255, 255, 0.1), /* 内側のハイライト */
-                inset 0 -1px 1px rgba(0, 0, 0, 0.2); /* 内側の影 */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 文字に影 */
+    .modal-content { padding: 1.5rem; max-width: 95%; }
 }
 
-#delete-community-button:hover:not(:disabled) {
-    background: linear-gradient(145deg, #c04040, #902020); /* ホバー時少し明るく */
-    border-color: #701010;
-    color: #fff; /* ホバー時の文字色 */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5), /* 影を少し強く */
-                inset 0 1px 1px rgba(255, 255, 255, 0.15),
-                inset 0 -1px 1px rgba(0, 0, 0, 0.3),
-                0 0 12px rgba(255, 80, 80, 0.35); /* 赤い光彩 (オプション) */
-    transform: translateY(-2px); /* 少し浮き上がる */
+@media (max-width: 480px) {
+    /* ★ 480px以下では、情報カードと参加者カードは縦積みに戻す */
+    .detail-left-column {
+        flex-direction: column; /* ★ 変更: 縦積みに戻す */
+        gap: 1.5rem; /* 元のgapに戻すか、調整 */
+    }
+    .detail-info-card, .detail-participants-card {
+        flex-basis: auto; /* flex-basisを自動に戻す */
+        min-width: unset;  /* min-widthを解除 */
+        padding: 0.8rem; /* ★ さらにパディングを小さく */
+    }
+     .detail-grid h3 { font-size: 1.1rem; margin-bottom: 0.8rem; padding-bottom: 0.6rem; }
+    .detail-info-card .organizer-info img { width: 28px; height: 28px; }
+    .detail-info-card .organizer-info span { font-size: 0.8rem; }
+    .detail-info-card p, .detail-info-card pre { font-size: 0.8rem; }
+    .detail-info-card pre#detail-description { max-height: 70px; padding: 0.6rem; }
+
+    #participants-list { max-height: 100px; } /* ★ さらに高さを制限 */
+    #participants-list li { padding: 0.5rem 0.8rem; }
+    #participants-list img { width: 24px; height: 24px; margin-right: 0.6rem; }
+    #participants-list .user-link { font-size: 0.85rem; }
+
+    /* チャットの高さ調整 (480px以下) */
+    #chat-messages { height: 250px; } /* ★ 変更: 少し高さを確保 */
+    .chat-message { padding: 0.6rem 1rem; font-size: 0.85rem; }
+    .chat-message .chat-avatar { width: 32px; height: 32px; }
+    #chat-input { padding: 0.8rem 1rem; font-size: 0.9rem; }
+    #send-chat-button { padding: 0.7rem 1rem; font-size: 0.85rem; }
 }
-
-#delete-community-button:active:not(:disabled) {
-    background: linear-gradient(145deg, #701010, #a03030); /* アクティブ時反転 */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), /* 内側の影を強く */
-                0 1px 3px rgba(0, 0, 0, 0.3);
-    transform: translateY(0); /* 押し込み */
-}
-
-/* :disabled スタイルは common.css の定義を優先しつつ、必要なら上書き */
-#delete-community-button:disabled {
-    background: #553030 !important; /* 暗い赤系の無効色 */
-    border-color: #442020 !important;
-    color: #888 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    cursor: not-allowed;
-}
-/* ▲▲▲ 削除ボタンスタイルここまで ▲▲▲ */
-
-
-/* --- 省略: チャットエリア、モーダルなど --- */

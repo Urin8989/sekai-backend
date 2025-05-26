@@ -48,7 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // --- ログアウト状態の内容クリア (非表示なら不要かも) ---
-            // (必要に応じてコメントアウト解除)
+            if (indexProfilePic) {
+                indexProfilePic.src = 'images/placeholder-avatar.png';
+                indexProfilePic.alt = 'プロフィール画像';
+            }
+            if (indexProfileName) indexProfileName.textContent = '';
+            if (indexProfileRate) indexProfileRate.textContent = '----';
+            if (indexProfilePoints) indexProfilePoints.textContent = '---- P';
+            if (indexProfileBadgesContainer && typeof window.displayBadges === 'function') {
+                window.displayBadges(indexProfileBadgesContainer.querySelectorAll('.badge-slot'), []);
+            }
         }
     }
 
@@ -63,12 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeIntro.style.display = isLoggedIn ? 'none' : 'block';
         }
         if (indexUserProfileSection) {
-            // ★ CSSで #user-profile-section が初期状態で display: none; になっていることを確認
-            indexUserProfileSection.style.display = isLoggedIn ? 'block' : 'none'; // または 'flex' などCSSに合わせて
+          indexUserProfileSection.style.display = isLoggedIn ? 'block' : 'none'; // ログインしていれば表示、そうでなければ非表示
         }
         // ▼▼▼ loggedInIconHeader の表示切り替え ▼▼▼
         if (loggedInIconHeader) {
-            loggedInIconHeader.style.display = isLoggedIn ? 'block' : 'none'; // ログイン時に表示
+            loggedInIconHeader.style.display = isLoggedIn ? 'block' : 'none'; // ログイン時のみ表示
         } else {
             console.warn("index.js: loggedInIconHeader element not found."); // 要素が見つからない場合の警告
         }
