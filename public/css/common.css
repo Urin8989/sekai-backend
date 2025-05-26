@@ -49,6 +49,16 @@
 /* ==========================
    基本スタイル (Reset & Base)
    ========================== */
+   *,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0; /* 基本的なマージンリセット */
+    padding: 0; /* 基本的なパディングリセット */
+}
+html {
+    overflow-x: hidden; /* 横スクロールを禁止 (html要素に設定) */
+}
 body {
     background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.75)), url('../images/first.jpg'); /* ★パス変更 */
     background-color: var(--color-background);
@@ -58,13 +68,13 @@ body {
     background-repeat: no-repeat;
     color: var(--color-text-secondary);
     font-family: var(--font-family-base);
-    margin: 0;
-    padding: 0;
     line-height: 1.6;
     font-size: 16px;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+     width: 100%; /* bodyが画面幅を超えないように */
+    overflow-x: hidden; /* bodyの横スクロールも禁止 */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -866,4 +876,71 @@ textarea {
    .badge-dex-item.not-owned img[src*="wolf.jpg"] { */
     /* filter: grayscale(90%) contrast(80%) brightness(0.9); */ /* より暗く、コントラスト低めに */
     /* border-color: #999; */
-/* } */
+/* } *//* common.css や各ページのCSSファイルに追加 */
+
+/* レアリティ共通のベーススタイル (任意) */
+.rarity-value {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block; /* 必要に応じて */
+}
+
+/* コモン */
+.rarity-value.rarity-common {
+  color: #B0BEC5; /* 例: 落ち着いた灰色 */
+  background-color: rgba(176, 190, 197, 0.1); /* 背景を少しつける場合 */
+}
+
+/* レア (文字を金色に) */
+.rarity-value.rarity-rare {
+  color: #FFD700; /* 金色 (Gold) */
+  /* 必要であれば、背景色やテキストシャドウも追加できます */
+  /* text-shadow: 0 0 2px #B8860B; */ /* 金色に少し影をつける例 */
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+/* エピック (紫ベースの効果) */
+.rarity-value.rarity-epic {
+  color: #E1BEE7; /* 明るめの紫色 */
+  background-image: linear-gradient(45deg, #6A1B9A, #AB47BC, #CE93D8); /* 紫のグラデーション */
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  /* テキスト自体は透明にし、背景のグラデーションを見せる */
+  /* ただし、上記が効かないブラウザのためにフォールバック色も指定 */
+  color: #8E24AA; /* フォールバック用の濃い紫色 */
+  /* アニメーションやテキストシャドウでさらに「効果」を出すことも可能 */
+  text-shadow: 0 0 5px rgba(206, 147, 216, 0.7);
+  border: 1px solid rgba(206, 147, 216, 0.3);
+}
+/* もしテキスト自体に色をつけたい場合: */
+/*
+.rarity-value.rarity-epic {
+  color: #9C27B0;  // 紫色の文字
+  font-weight: bold;
+  text-shadow: 0 0 8px #CE93D8; // 紫のグロー効果
+  background-color: rgba(156, 39, 176, 0.1);
+}
+*/
+
+
+/* レジェンダリー (虹色効果 - 既存の rainbow クラスを使用) */
+.rarity-value.rarity-legendary.rainbow {
+  /* .rainbow のスタイル定義がここに適用される想定 */
+  /* 例: (必要に応じて調整してください) */
+  background-image: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow-text-animation 2s linear infinite;
+  border: none; /* 虹色の場合はボーダーが邪魔になることがある */
+}
+
+@keyframes rainbow-text-animation {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* (参考) もし .rainbow クラス自体に汎用的なスタイルがない

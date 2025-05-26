@@ -1,8 +1,8 @@
-// resetUserBadgesAndPoints.js
+// scripts/resetUserBadgesAndPoints.js
 const mongoose = require('mongoose');
-const config = require('./config/setting'); // 設定ファイルのパスを確認
-const User = require('./models/User'); // Userモデルのパスを確認
-const connectDB = require('./config/db'); // DB接続関数のパスを確認
+const config = require('../config/setting'); // ★変更: './' から '../' へ
+const User = require('../models/User');       // ★変更: './' から '../' へ
+const connectDB = require('../config/db');     // ★変更: './' から '../' へ
 
 /**
  * 指定されたユーザーのバッジを空にし、ポイントを指定値にリセットする関数
@@ -12,31 +12,32 @@ const connectDB = require('./config/db'); // DB接続関数のパスを確認
 const resetUserData = async (googleId, pointsToSet) => {
     if (!googleId || typeof pointsToSet !== 'number' || pointsToSet < 0) {
         console.error('Error: Google ID と 0以上のポイント数を指定してください。');
-        console.log('Usage: node resetUserBadgesAndPoints.js <googleId> <pointsToSet>');
-        return; // 引数が不正な場合は処理を中断
+        console.log('Usage: node scripts/resetUserBadgesAndPoints.js <googleId> <pointsToSet>');
+        // mongoose.connection.close() は接続後に呼ぶべきなので、ここでは不要
+        return;
     }
 
+    let dbConnected = false; // 接続状態を管理するフラグ
     try {
         await connectDB(); // データベースに接続
+        dbConnected = true;
         console.log('MongoDB Connected for user data reset...');
 
-        // Google ID (sub) でユーザーを検索
         const user = await User.findOne({ googleId: googleId });
 
         if (!user) {
             console.log(`ユーザーが見つかりません: Google ID = ${googleId}`);
-            return; // ユーザーが見つからない場合は処理を中断
+            // ユーザーが見つからない場合も接続は閉じる
+            return;
         }
 
         console.log(`ユーザーが見つかりました: ${user.name} (Google ID: ${googleId})`);
         console.log(`現在のバッジ数: ${user.badges.length}, 現在のポイント: ${user.points}`);
 
-        // バッジ情報を空にし、ポイントを指定値に更新
-        user.badges = []; // バッジ配列を空にする
-        user.displayBadges = []; // 表示バッジも空にする (必要に応じて)
-        user.points = pointsToSet; // ポイントを指定値に設定
+        user.badges = [];
+        user.displayBadges = [];
+        user.points = pointsToSet;
 
-        // 変更を保存
         await user.save();
 
         console.log('------------------------------------');
@@ -49,16 +50,18 @@ const resetUserData = async (googleId, pointsToSet) => {
     } catch (err) {
         console.error('ユーザーデータの更新中にエラーが発生しました:', err);
     } finally {
-        mongoose.connection.close(); // 接続を閉じる
-        console.log('MongoDB connection closed.');
+        if (dbConnected && mongoose.connection.readyState === 1) { // 接続されていた場合のみ閉じる
+            await mongoose.connection.close();
+            console.log('MongoDB connection closed.');
+        } else if (!dbConnected) {
+            console.log('MongoDBへの接続が確立されなかったため、クローズ処理はスキップされました。');
+        }
     }
 };
 
 // --- スクリプト実行 ---
-// コマンドライン引数を取得
-const args = process.argv.slice(2); // node と スクリプトファイル名を除いた引数
+const args = process.argv.slice(2);
 const targetGoogleId = args[0];
-const targetPoints = parseInt(args[1], 10); // 第2引数を数値に変換
+const targetPoints = parseInt(args[1], 10);
 
-// 関数を実行
 resetUserData(targetGoogleId, targetPoints);

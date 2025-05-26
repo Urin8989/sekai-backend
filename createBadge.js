@@ -6,9 +6,7 @@ const connectDB = require('./config/db');
 
 const badgesData = [
   // --- ガチャ対象: 基本バッジ ---
-  { badgeId: 'badge-gold', name: 'ゴールドスター', description: '輝かしい実績の証。', price: 0, img: 'badge-gold.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
-  { badgeId: 'badge-safe-driver', name: '安全運転', description: '常に冷静沈着、安定した走りが持ち味。', price: 0, img: 'badge-safe-driver.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
-  { badgeId: 'badge-speedster', name: 'スピードスター', description: '誰よりも速く！最速を目指す者の証。', price: 0, img: 'badge-speedster.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
+ 
 
   // --- ガチャ対象外: レート達成記念バッジ ---
   {
@@ -115,18 +113,16 @@ const badgesData = [
   },
 
   // --- ガチャ対象外: 期間限定バッジ ---
-  { badgeId: 'badge-event-2024spring', name: '春の祭典\'24', description: '2024年春イベント限定。桜吹雪の中を駆け抜けろ！', price: 2500, img: 'badge-event-2024spring.svg', isLimited: true, requiredRate: 0, requiredMatches: 0 },
-  { badgeId: 'badge-event-halloween', name: 'ハロウィンスペシャル', description: 'トリック・オア・トリート！限定カボチャバッジ。', price: 2000, img: 'badge-event-halloween.svg', isLimited: true, requiredRate: 0, requiredMatches: 0 },
-  { badgeId: 'badge-event-newyear', name: '謹賀新年', description: '新年を祝う特別なバッジ。期間限定配布。', price: 1800, img: 'badge-event-newyear.svg', isLimited: true, requiredRate: 0, requiredMatches: 0 },
+  
 
   // --- ガチャ対象: 新しい動物バッジ ---
-  { badgeId: 'badge-animal-cat', name: '気まぐれキャット', description: '猫のように自由気ままな走りの証。', price: 0, img: 'badge-animal-cat.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
-  { badgeId: 'badge-animal-dog', name: '忠犬レーサー', description: '信頼できる相棒のような安定した走り。', price: 0, img: 'badge-animal-dog.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
-  { badgeId: 'badge-animal-rabbit', name: '脱兎のごとく', description: '驚異的な加速力を持つ証。', price: 0, img: 'badge-animal-rabbit.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
-  { badgeId: 'badge-animal-wolf', name: '孤高の狼', description: '単独走行で真価を発揮する。', price: 0, img: 'badge-animal-wolf.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
-  { badgeId: 'badge-animal-eagle', name: 'イーグルアイ', description: 'コース全体を見渡す広い視野を持つ。', price: 0, img: 'badge-animal-eagle.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
-  { badgeId: 'badge-animal-bear', name: 'パワフルベア', description: '力強い走りで他を圧倒する。', price: 0, img: 'badge-animal-bear.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
-  { badgeId: 'badge-animal-fox', name: '賢者のキツネ', description: '巧みな戦略で勝利を掴む。', price: 0, img: 'badge-animal-fox.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
+  { badgeId: 'badge-animal-cat', name: '気まぐれキャット', description: '猫のように自由気ままな走りの証。', price: 0, img: 'badge-animal-cat.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
+  { badgeId: 'badge-animal-dog', name: '忠犬レーサー', description: '信頼できる相棒のような安定した走り。', price: 0, img: 'badge-animal-dog.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
+  { badgeId: 'badge-animal-rabbit', name: '脱兎のごとく', description: '驚異的な加速力を持つ証。', price: 0, img: 'badge-animal-rabbit.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
+  { badgeId: 'badge-animal-wolf', name: '孤高の狼', description: '単独走行で真価を発揮する。', price: 0, img: 'badge-animal-wolf.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
+  { badgeId: 'badge-animal-eagle', name: 'イーグルアイ', description: 'コース全体を見渡す広い視野を持つ。', price: 0, img: 'badge-animal-eagle.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
+  { badgeId: 'badge-animal-bear', name: 'パワフルベア', description: '力強い走りで他を圧倒する。', price: 0, img: 'badge-animal-bear.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
+  { badgeId: 'badge-animal-fox', name: '賢者のキツネ', description: '巧みな戦略で勝利を掴む。', price: 0, img: 'badge-animal-fox.jpg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
   // ... (さらに動物バッジを追加)
 
   // --- ガチャ対象: 新しい宝石バッジ ---
@@ -134,7 +130,7 @@ const badgesData = [
   { badgeId: 'badge-gem-sapphire', name: '冷静のサファイア', description: '常に冷静沈着な判断ができる証。', price: 0, img: 'badge-gem-sapphire.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
   { badgeId: 'badge-gem-emerald', name: '癒やしのエメラルド', description: '安定感のあるスムーズな走り。', price: 0, img: 'badge-gem-emerald.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
   { badgeId: 'badge-gem-diamond', name: '不屈のダイヤモンド', description: 'どんな逆境にも負けない強さを持つ。', price: 0, img: 'badge-gem-diamond.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
-  { badgeId: 'badge-gem-amethyst', name: '神秘のアメジスト', description: '予測不能なトリッキーな走り。', price: 0, img: 'badge-gem-amethyst.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'epic' },
+  { badgeId: 'badge-gem-amethyst', name: '神秘のアメジスト', description: '予測不能なトリッキーな走り。', price: 0, img: 'badge-gem-amethyst.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'legendary' },
   { badgeId: 'badge-gem-topaz', name: '閃光のトパーズ', description: '一瞬の隙を突く鋭い走り。', price: 0, img: 'badge-gem-topaz.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'rare' },
   { badgeId: 'badge-gem-pearl', name: '純粋なパール', description: '洗練された美しい走り。', price: 0, img: 'badge-gem-pearl.svg', isLimited: false, requiredRate: 0, requiredMatches: 0, rarity: 'common' },
   // ... (さらに宝石バッジを追加)
