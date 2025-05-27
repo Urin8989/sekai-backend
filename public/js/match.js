@@ -504,7 +504,7 @@ function connectWebSocket() {
     if (!currentMatchId || !token) {
         appendChatMessage("チャット接続情報が不足しています。", false, "システム"); return;
     }
-    const wsUrl = `${window.MyApp.WEBSOCKET_URL}?token=${token}&matchId=${currentMatchId}`;
+    const wsUrl = `${window.MyApp.WEBSOCKET_URL}ws/?token=${token}&communityId=${communityId}`;
     appendChatMessage("チャットサーバーに接続中...", false, "システム");
     try {
         matchWebSocket = new WebSocket(wsUrl);

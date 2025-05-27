@@ -1,5 +1,5 @@
-// server.js
- require('dotenv').config(); // config/setting.js で呼ばれている想定
+// server.js (修正版)
+require('dotenv').config(); 
 
 console.log('--- PM2 Environment Variables ---');
 console.log('PORT from env:', process.env.PORT);
@@ -17,11 +17,11 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const url = require('url');
-const mongoose = require('mongoose'); // mongoose の require を追加
+const mongoose = require('mongoose');
 const config = require('./config/setting');
 const connectDB = require('./config/db');
 const User = require('./models/User');
-const Match = require('./models/Match'); // Matchモデルをインポート
+const Match = require('./models/Match');
 const Community = require('./models/Community');
 const CommunityChatMessage = require('./models/CommunityChatMessage');
 const { WebSocketMessageTypes } = require('./constants');
@@ -42,33 +42,24 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// ★★★ 'trust proxy' の設定を追加 ★★★
-// Nginxなどのリバースプロキシの背後で動作していることをExpressに伝える
-// 1 は、最も近いプロキシ（この場合はNginx）を信頼することを意味します。
 app.set('trust proxy', 1);
-
-// Helmet ミドルウェア (セキュリティヘッダー設定)
 app.use(helmet());
 
-// CORSミドルウェア
 const allowedOrigins = [
-    'https://mariokartbestrivals.com',    // wwwなし (エラーログにあったオリジン)
-    'https://www.mariokartbestrivals.com', // wwwあり
-    'http://127.0.0.1:5500',              // 開発用フロントエンド (もし使用している場合)
-    // 必要に応じて他のオリジンも追加
+    'https://mariokartbestrivals.com',
+    'https://www.mariokartbestrivals.com',
+    'http://127.0.0.1:5500',
 ];
 
-aapp.use(cors({
+app.use(cors({
     origin: function (origin, callback) {
-        // デバッグ用に現在のオリジンをログに出力
-        console.log("CORS Check - Received Origin:", origin); 
-
+        console.log("CORS Check - Received Origin:", origin);
         if (!origin || origin === "null" || allowedOrigins.indexOf(origin) !== -1) {
             console.log("CORS Check - Allowed:", origin);
-            callback(null, true); // 許可
+            callback(null, true);
         } else {
             console.error('CORS Check - Denied:', origin);
-            callback(null, false); // ★★★ 許可しない (エラーではなく、CORSとして拒否) ★★★
+            callback(null, false); // ★★★ CORSエラーとして拒否する (500エラーにはしない) ★★★
         }
     },
     credentials: true,
@@ -78,24 +69,22 @@ aapp.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// レートリミット設定
 const limiter = rateLimit({
-	windowMs: 1 * 60 * 1000, // 1分
-	max: 100, 
-	standardHeaders: true, 
-	legacyHeaders: false, 
-    keyGenerator: (req, res) => { // Nginxの背後なので X-Forwarded-For を参照
-        return req.ip; // app.set('trust proxy', 1) により req.ip がクライアントのIPになる
+	windowMs: 1 * 60 * 1000,
+	max: 100,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator: (req, res) => {
+        return req.ip;
     }
 });
 app.use('/api', limiter);
 
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`HTTP Request: ${req.method} ${req.url}`); // HTTPリクエストのログを明確化
     next();
 });
 app.use((req, res, next) => {
-    // このヘッダーはGoogleログインのポップアップ等で必要になることがある
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
     next();
 });
@@ -109,16 +98,13 @@ app.use('/api/communities', communityRoutes);
 app.use('/api/ranking', rankingRoutes);
 app.use('/api/badges', badgeRoutes);
 
-// 基本的なエラーハンドリングミドルウェア
 app.use((err, req, res, next) => {
-    console.error("Unhandled error:", err.stack || err);
+    console.error("Unhandled HTTP error:", err.stack || err);
     res.status(err.status || 500).json({
         message: err.message || 'サーバー内部でエラーが発生しました。',
-        // error: process.env.NODE_ENV === 'development' ? err : {} // 開発時のみエラー詳細を返す
     });
 });
 
-// --- WebSocket 接続管理 ---
 const matchConnections = new Map();
 const communityConnections = new Map();
 
@@ -128,7 +114,8 @@ function sanitizeText(text) {
 }
 
 wss.on('connection', async (ws, req) => {
-    console.log('WebSocket client connected');
+    // ★★★ 接続試行時のログ ★★★
+    console.log('★★★ WebSocket client attempting connection...');
     const queryParams = url.parse(req.url, true).query;
     const token = queryParams.token;
     const communityId = queryParams.communityId;
@@ -136,18 +123,21 @@ wss.on('connection', async (ws, req) => {
 
     let userId = null;
     let userName = null;
-    let userGoogleId = null; // googleIdを保持
-    let userPicture = null;  // pictureを保持
+    let userGoogleId = null;
+    let userPicture = null;
     let connectionType = null;
     let targetId = null;
 
     if (!token) {
+        console.log('★★★ WS Close: Missing token');
         ws.close(1008, 'Missing token'); return;
     }
     if (!communityId && !matchId) {
+        console.log('★★★ WS Close: Missing communityId or matchId');
         ws.close(1008, 'Missing communityId or matchId'); return;
     }
     if (communityId && matchId) {
+        console.log('★★★ WS Close: Cannot specify both communityId and matchId');
         ws.close(1008, 'Cannot specify both communityId and matchId'); return;
     }
 
@@ -155,74 +145,93 @@ wss.on('connection', async (ws, req) => {
     targetId = communityId || matchId;
 
     try {
+        console.log(`★★★ WS: Verifying token for ${connectionType} ${targetId}`);
         const decoded = jwt.verify(token, config.jwtSecret);
         userId = decoded.id;
-        const user = await User.findById(userId).select('name googleId picture'); // googleIdとpictureも取得
-        if (!user) throw new Error('User not found for token');
+        const user = await User.findById(userId).select('name googleId picture');
+        if (!user) {
+            console.log(`★★★ WS Close: User not found for token. UserId: ${userId}`);
+            throw new Error('User not found for token');
+        }
         userName = user.name;
         userGoogleId = user.googleId;
         userPicture = user.picture;
+        console.log(`★★★ WS: Token verified. User: ${userName} (ID: ${userId})`);
 
         let connectionsMap;
         let canConnect = false;
 
         if (connectionType === 'community') {
             connectionsMap = communityConnections;
+            console.log(`★★★ WS Community: Checking membership for ${userName} in ${communityId}`);
             const community = await Community.findById(communityId).select('participants organizer');
             if (community && (community.participants.some(id => id.equals(userId)) || community.organizer.equals(userId))) {
                 canConnect = true;
+                console.log(`★★★ WS Community: ${userName} is member/organizer of ${communityId}. Can connect.`);
             } else {
-                const reason = community ? `User ${userName} not a member of community ${communityId}` : `Community ${communityId} not found`;
-                ws.close(1008, community ? 'Not a member of this community' : 'Community not found');
+                const reason = community ? `Not a member of this community` : `Community not found`;
+                console.log(`★★★ WS Close: ${userName} ${reason} for community ${communityId}`);
+                ws.close(1008, reason);
                 return;
             }
-            console.log(`WebSocket authenticated for COMMUNITY: ${userName} (ID: ${userId}, GoogleID: ${userGoogleId}), Community: ${targetId}`);
         } else { // connectionType === 'match'
             connectionsMap = matchConnections;
-            // マッチング相手として有効か確認 (Matchドキュメントをチェックするのが理想)
+            console.log(`★★★ WS Match: Checking participation for ${userName} in ${matchId}`);
             const match = await Match.findById(targetId).select('players status');
             if (match && match.players.some(id => id.equals(userId)) && match.status === 'matched') {
                  canConnect = true;
+                 console.log(`★★★ WS Match: ${userName} is part of active match ${matchId}. Can connect.`);
             } else {
-                 const reason = match ? `User ${userName} not part of active match ${targetId} or match not in 'matched' state` : `Match ${targetId} not found`;
-                 console.log(`WebSocket connection rejected: ${reason}`);
-                 ws.close(1008, match ? 'Not part of this match or match not active' : 'Match not found');
+                 const reason = match ? `Not part of this match or match not active` : `Match not found`;
+                 console.log(`★★★ WS Close: ${userName} ${reason} for match ${matchId}`);
+                 ws.close(1008, reason);
                  return;
             }
-            console.log(`WebSocket authenticated for MATCH: ${userName} (ID: ${userId}, GoogleID: ${userGoogleId}), Match: ${targetId}`);
         }
 
-        if (!canConnect) { // 通常ここには到達しないはず
+        if (!canConnect) { // Should not be reached if logic above is correct
+             console.log(`★★★ WS Close: Connection not allowed (should not happen here) for ${userName} to ${connectionType} ${targetId}`);
              ws.close(1008, 'Connection not allowed');
              return;
         }
+        
+        // ★★★ 接続確立直後のログ ★★★ (ここに来たらハンドシェイクは成功)
+        console.log(`★★★ WebSocket client connected and authenticated: ${userName} (ID: ${userId}), Type: ${connectionType}, Target: ${targetId}`);
+
 
         const clientInfo = { ws, userId, userName, userGoogleId, userPicture, connectionType, targetId };
         if (!connectionsMap.has(targetId)) {
             connectionsMap.set(targetId, new Set());
+            console.log(`★★★ WS: New connection set created for ${connectionType} ${targetId}`);
         }
         const connectionSet = connectionsMap.get(targetId);
 
-        // 同じユーザーの重複接続チェック (オプション)
+        // ★★★ 重複接続チェックと処理 (修正版) ★★★
         for (const client of connectionSet) {
             if (client.userId === userId && client.ws !== ws) { // 既存の接続が自分自身でない場合
-                console.log(`User ${userName} attempting to connect again to ${connectionType} ${targetId}. Closing older connection or new one.`);
-                // client.ws.close(1011, 'Another connection was made by this user.'); // 古い接続を切る場合
-                ws.close(1008, 'User already connected from another client.'); return; // 新しい接続を切る場合
+                console.log(`★★★ DUPLICATE DETECTED! User: ${userName}, Old WS state: ${client.ws.readyState}, New WS state: ${ws.readyState}`);
+                console.log(`★★★ Closing OLD connection (1011) for ${userName}.`);
+                client.ws.close(1011, 'Another connection was made for this user.');
+                console.log(`★★★ Explicitly DELETING old client from set. Current set size BEFORE delete: ${connectionSet.size}`);
+                connectionSet.delete(client); // ★★★ ここで明示的に削除 ★★★
+                console.log(`★★★ Old client removed. Set size AFTER delete: ${connectionSet.size}`);
+                // return; // return はしないので、新しい接続が追加される
             }
         }
+        console.log(`★★★ Adding NEW connection for ${userName} to ${connectionType} ${targetId}. Current set size before add: ${connectionSet.size}`);
         connectionSet.add(clientInfo);
-        console.log(`Total connections for ${connectionType} ${targetId}: ${connectionSet.size}`);
+        console.log(`★★★ New connection added for ${userName}. New set size after add: ${connectionSet.size}`);
+
 
         if (connectionType === 'community') {
             broadcastToCommunity(targetId, {
                 type: WebSocketMessageTypes.SYSTEM_MESSAGE,
                 text: `${userName} が入室しました。`
-            }, ws); // 自分以外の参加者に入室を通知
+            }, ws);
         }
 
     } catch (error) {
-        console.log(`WebSocket connection rejected: Invalid token or validation failed`, error.message);
+        console.log(`★★★ WS Close: Error during connection setup for ${userName || 'Unknown user'}: ${error.message}`);
         ws.close(1008, 'Invalid token or connection failed');
         return;
     }
@@ -230,94 +239,107 @@ wss.on('connection', async (ws, req) => {
     ws.on('message', async (message) => {
         try {
             const messageData = JSON.parse(message);
-            console.log(`Received message for ${connectionType} ${targetId} from ${userName}:`, messageData);
+            console.log(`★★★ WS Message: Received for ${connectionType} ${targetId} from ${userName}:`, messageData);
 
             if (connectionType === 'community' && messageData.type === WebSocketMessageTypes.COMMUNITY_CHAT_MESSAGE && messageData.text) {
+                // ... (変更なし) ...
                 const text = messageData.text.trim();
                 if (text.length === 0 || text.length > 500) return;
 
                 const chatMessage = new CommunityChatMessage({
                     communityId: targetId,
-                    sender: userId, // MongoDB ObjectId
+                    sender: userId,
                     text: sanitizeText(text)
                 });
                 await chatMessage.save();
 
                 const broadcastPayload = {
                     type: WebSocketMessageTypes.COMMUNITY_CHAT_MESSAGE,
-                    senderId: userGoogleId, // Google ID を使用
+                    senderId: userGoogleId,
                     senderName: userName,
                     senderPicture: userPicture,
                     text: chatMessage.text,
                     timestamp: chatMessage.timestamp
                 };
-                broadcastToCommunity(targetId, broadcastPayload, null); // 自分自身にも送信
-
+                broadcastToCommunity(targetId, broadcastPayload, null);
             } else if (connectionType === 'match' && messageData.type === WebSocketMessageTypes.MATCH_CHAT_MESSAGE && messageData.text) {
+                // ... (変更なし) ...
                 const text = messageData.text.trim();
                 if (text.length === 0 || text.length > 500) return;
 
                 const broadcastPayload = {
                     type: WebSocketMessageTypes.MATCH_CHAT_MESSAGE,
                     text: sanitizeText(text),
-                    senderId: userGoogleId, // Google ID を使用
+                    senderId: userGoogleId,
                     senderName: userName,
                     senderPicture: userPicture
                 };
-                broadcastToMatch(targetId, broadcastPayload, ws); // 自分以外の相手に送信
+                broadcastToMatch(targetId, broadcastPayload, ws);
             }
         } catch (e) {
-            console.error('Failed to parse message or process:', e);
+            console.error('★★★ WS Error: Failed to parse message or process:', e);
         }
     });
 
     ws.on('close', (code, reason) => {
-        console.log(`WebSocket client disconnected: ${userName} (ID: ${userId}), ${connectionType}: ${targetId}, Code: ${code}, Reason: ${String(reason)}`);
-        const connectionsMap = connectionType === 'community' ? communityConnections : matchConnections;
-        if (connectionsMap.has(targetId)) {
-            const connectionSet = connectionsMap.get(targetId);
+        const logUserName = userName || 'Unknown User (closed before auth)'; // userNameが未設定の場合のフォールバック
+        const logConnectionType = connectionType || 'N/A';
+        const logTargetId = targetId || 'N/A';
+        console.log(`★★★ ON_CLOSE triggered for ${logUserName}. Code: ${code}, Reason: ${String(reason)}, Type: ${logConnectionType}, Target: ${logTargetId}`);
+        
+        const connectionsMap = logConnectionType === 'community' ? communityConnections : matchConnections;
+        if (logTargetId !== 'N/A' && connectionsMap.has(logTargetId)) {
+            const connectionSet = connectionsMap.get(logTargetId);
             let disconnectedClientInfo = null;
             for (const client of connectionSet) {
                 if (client.ws === ws) {
                     disconnectedClientInfo = client;
+                    console.log(`★★★ ON_CLOSE: Found client to remove: ${client.userName}. Current set size BEFORE delete: ${connectionSet.size}`);
                     connectionSet.delete(client);
+                    console.log(`★★★ ON_CLOSE: Client removed. New set size AFTER delete: ${connectionSet.size}`);
                     break;
                 }
             }
             if (disconnectedClientInfo) {
-                 console.log(`Total connections remaining for ${connectionType} ${targetId}: ${connectionSet.size}`);
+                 console.log(`Total connections remaining for ${logConnectionType} ${logTargetId}: ${connectionSet.size}`);
                  if (connectionSet.size === 0) {
-                     connectionsMap.delete(targetId);
-                     console.log(`${connectionType} ${targetId} removed from connections map.`);
+                     connectionsMap.delete(logTargetId);
+                     console.log(`${logConnectionType} ${logTargetId} removed from connections map.`);
                  } else {
-                     if (connectionType === 'community') {
-                         broadcastToCommunity(targetId, {
+                     if (logConnectionType === 'community') {
+                         broadcastToCommunity(logTargetId, {
                              type: WebSocketMessageTypes.SYSTEM_MESSAGE,
                              text: `${disconnectedClientInfo.userName} が退室しました。`
-                         }, null); // 退室した本人以外に通知する場合、nullではなくwsを渡すか、フィルタリングする
+                         }, null);
                      } else { // match
-                         broadcastToMatch(targetId, {
+                         broadcastToMatch(logTargetId, {
                              type: WebSocketMessageTypes.OPPONENT_DISCONNECTED,
                              text: `${disconnectedClientInfo.userName} が切断しました。`
-                         }, null); // こちらも同様
+                         }, null);
                      }
                  }
+            } else {
+                 console.log(`★★★ ON_CLOSE: Client not found in set for ${logUserName}. Target: ${logTargetId}, Set size: ${connectionSet.size}`);
             }
+        } else {
+             console.log(`★★★ ON_CLOSE: No connectionSet for targetId ${logTargetId} or targetId not set for ${logUserName}.`);
         }
     });
 
     ws.on('error', (error) => {
-        console.error(`WebSocket error for user ${userName} (ID: ${userId}), ${connectionType}: ${targetId}:`, error);
+        const logUserName = userName || 'Unknown User (error before auth)';
+        const logConnectionType = connectionType || 'N/A';
+        const logTargetId = targetId || 'N/A';
+        console.error(`★★★ WebSocket ERROR for user ${logUserName}, Type: ${logConnectionType}, Target: ${logTargetId}:`, error);
     });
 });
 
 function broadcastGeneric(connectionsMap, targetId, messagePayload, excludeWs) {
+    // ... (変更なし) ...
     if (connectionsMap.has(targetId)) {
         const connectionSet = connectionsMap.get(targetId);
         const messageString = JSON.stringify(messagePayload);
         const connectionType = connectionsMap === communityConnections ? 'community' : 'match';
-        // console.log(`Broadcasting to ${connectionType} ${targetId} (excluding sender: ${!!excludeWs}):`, messagePayload);
-
         connectionSet.forEach(client => {
             if (client.ws !== excludeWs && client.ws.readyState === WebSocket.OPEN) {
                 client.ws.send(messageString, (err) => {

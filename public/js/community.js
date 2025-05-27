@@ -511,7 +511,7 @@
         }
     }
 
-    // --- WebSocket Management ---
+   // --- WebSocket Management ---
     function connectCommunityWebSocket(communityId) {
         if (communityWebSocket && (communityWebSocket.readyState === WebSocket.OPEN || communityWebSocket.readyState === WebSocket.CONNECTING) && currentCommunityChatId === communityId) {
             updateDetailViewUI(); return;
@@ -522,11 +522,20 @@
             appendSystemMessage("チャット接続に必要な情報がありません。", 'error'); return;
         }
         currentCommunityChatId = communityId;
-        // ★★★ エラー箇所 ★★★ WEBSOCKET_URL を window.MyApp.WEBSOCKET_URL に変更
-        const wsUrl = `${window.MyApp.WEBSOCKET_URL}?token=${token}&communityId=${communityId}`;
+
+        // ▼▼▼ ★★★ この行を以下のように正確に修正してください ★★★ ▼▼▼
+        const wsUrl = `${window.MyApp.WEBSOCKET_URL}ws/?token=${token}&communityId=${communityId}`;
+        // ▲▲▲ ★★★ 修正箇所ここまで ★★★ ▲▲▲
+
+        console.log("LOCAL_WS_DEBUG: Attempting to connect to (local):", wsUrl); // これはデバッグ用に残しておいてください
+        console.log("LOCAL_WS_DEBUG: window.MyApp.WEBSOCKET_URL type:", typeof window.MyApp.WEBSOCKET_URL, "value:", window.MyApp.WEBSOCKET_URL);
+        console.log("LOCAL_WS_DEBUG: token type:", typeof token, "value:", token ? token.substring(0,10)+"..." : token);
+        console.log("LOCAL_WS_DEBUG: communityId type:", typeof communityId, "value:", communityId);
+        
         appendSystemMessage("チャットサーバーに接続中...", 'info');
         try {
             communityWebSocket = new WebSocket(wsUrl);
+            // ... (以降の WebSocket イベントハンドラは変更なし) ...
             communityWebSocket.onopen = () => {
                 appendSystemMessage("接続しました。", 'info'); updateDetailViewUI();
             };
