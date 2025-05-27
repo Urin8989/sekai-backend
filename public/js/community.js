@@ -511,7 +511,7 @@
         }
     }
 
-   // --- WebSocket Management ---
+    // --- WebSocket Management ---
     function connectCommunityWebSocket(communityId) {
         if (communityWebSocket && (communityWebSocket.readyState === WebSocket.OPEN || communityWebSocket.readyState === WebSocket.CONNECTING) && currentCommunityChatId === communityId) {
             updateDetailViewUI(); return;
@@ -523,19 +523,33 @@
         }
         currentCommunityChatId = communityId;
 
-        // ▼▼▼ ★★★ この行を以下のように正確に修正してください ★★★ ▼▼▼
-        const wsUrl = `${window.MyApp.WEBSOCKET_URL}ws/?token=${token}&communityId=${communityId}`;
-        // ▲▲▲ ★★★ 修正箇所ここまで ★★★ ▲▲▲
+        // ▼▼▼ ★★★ ここから修正 ★★★ ▼▼▼
+        let baseUrl = window.MyApp.WEBSOCKET_URL; // 例: "wss://www.mariokartbestrivals.com" または "ws://localhost:5000"
+        let path = ""; // デフォルトのパスはルート
 
-        console.log("LOCAL_WS_DEBUG: Attempting to connect to (local):", wsUrl); // これはデバッグ用に残しておいてください
-        console.log("LOCAL_WS_DEBUG: window.MyApp.WEBSOCKET_URL type:", typeof window.MyApp.WEBSOCKET_URL, "value:", window.MyApp.WEBSOCKET_URL);
-        console.log("LOCAL_WS_DEBUG: token type:", typeof token, "value:", token ? token.substring(0,10)+"..." : token);
-        console.log("LOCAL_WS_DEBUG: communityId type:", typeof communityId, "value:", communityId);
+        // ベースURLの末尾にスラッシュがない場合は追加する (一貫性のため)
+        if (baseUrl && !baseUrl.endsWith('/')) {
+            baseUrl += '/';
+        }
+
+        // 本番環境かどうかを判定し、パスを設定
+        if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
+            path = "ws/"; // 本番環境では /ws/ をパスとして使用
+        }
+        // ▲▲▲ ★★★ ここまで修正 ★★★ ▲▲▲
+        
+        const wsUrl = `${baseUrl}${path}?token=${token}&communityId=${communityId}`; // 修正されたURL結合
+
+        // デバッグログ (本番/ローカルで確認できるように調整)
+        const environment = (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') ? 'production' : 'local';
+        console.log(`WS_DEBUG (${environment}): Attempting to connect to:`, wsUrl);
+        console.log(`WS_DEBUG (${environment}): window.MyApp.WEBSOCKET_URL type:`, typeof window.MyApp.WEBSOCKET_URL, "value:", window.MyApp.WEBSOCKET_URL);
+        console.log(`WS_DEBUG (${environment}): token type:`, typeof token, "value:", token ? token.substring(0,10)+"..." : token);
+        console.log(`WS_DEBUG (${environment}): communityId type:`, typeof communityId, "value:", communityId);
         
         appendSystemMessage("チャットサーバーに接続中...", 'info');
         try {
             communityWebSocket = new WebSocket(wsUrl);
-            // ... (以降の WebSocket イベントハンドラは変更なし) ...
             communityWebSocket.onopen = () => {
                 appendSystemMessage("接続しました。", 'info'); updateDetailViewUI();
             };

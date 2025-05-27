@@ -14,11 +14,7 @@ let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton
 let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, battleStatusText;
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
 
-// ★★★ 環境に応じたデフォルト画像パスを script.js から取得する想定 ★★★
 const getDefaultAvatarPath = () => {
-    // script.jsのgetBadgeImagePathと同様のロジックで環境判定するか、
-    // script.jsで MyApp.DEFAULT_AVATAR_PATH のようなグローバル変数を設定してそれを使う。
-    // ここでは、サーバーのルートからの絶対パスとして解決されることを期待。
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return '/public/images/default_avatar.svg';
     } else {
@@ -40,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     myProfilePic = document.getElementById('my-profile-pic');
     myProfileName = document.getElementById('my-profile-name');
     myProfileRate = document.getElementById('my-profile-rate');
-    myProfilePointsElement = document.getElementById('my-profile-points'); // ★ IDで取得
+    myProfilePointsElement = document.getElementById('my-profile-points');
     myProfileCourseElement = document.querySelector('#my-profile .profile-home-course-display .detail-value');
     myProfileCommentElement = document.querySelector('#my-profile .profile-comment-display .detail-comment');
     myProfileBadgesContainer = document.querySelector('#my-profile .profile-badges');
@@ -136,16 +132,13 @@ function displayMyProfileInfo(userData) {
         if (myProfileCourseElement) myProfileCourseElement.textContent = profile.favCourse || '未設定';
         if (myProfileCommentElement) myProfileCommentElement.textContent = profile.comment || '未設定';
 
-        // ★★★ script.js の displayBadges を使用 ★★★
         if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
             const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
-            // 表示バッジがあればそれを、なければ所持バッジから表示
             const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
                                   ? userData.displayBadges
                                   : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
             window.displayBadges(badgeSlots, badgesToDisplay);
         } else if (myProfileBadgesContainer) {
-            // フォールバック的な簡易表示 (getBadgeImagePathは必須)
             const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
             const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
                                   ? userData.displayBadges
@@ -197,7 +190,7 @@ function displayOpponentInfo(opponentData) {
     if (typeof window.getBadgeImagePath === 'function') {
         badgesHtml = opponentBadgesToDisplay.map(badgeId => {
             const imgPath = window.getBadgeImagePath(badgeId);
-            const badgeName = badgeId; // 本来はallBadgesDataから名前を引くが、match.jsにはない
+            const badgeName = badgeId;
             return `
                 <div class="badge-slot filled" style="opacity: 1;">
                     <img src="${imgPath}" alt="${badgeName}" onerror="this.onerror=null; this.src='${defaultBadgeImg}';">
@@ -283,7 +276,7 @@ function updateMatchUI() {
             if(matchButton) matchButton.style.display = 'inline-block';
             if(matchButton) matchButton.disabled = false;
             if(cancelButton) cancelButton.style.display = 'none';
-            if (matchStatusText) matchStatusText.textContent = ''; // 初期状態のテキストを空に
+            if (matchStatusText) matchStatusText.textContent = ''; 
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             if (opponentInfoArea) opponentInfoArea.innerHTML = '';
             if (opponentInfoArea) opponentInfoArea.style.display = 'none';
@@ -359,7 +352,7 @@ function startPollingMatchStatus() {
             }
             const result = await response.json();
             switch (result.status) {
-                case 'waiting': break; // console.log("[match.js] Matchmaking status: waiting...");
+                case 'waiting': break;
                 case 'matched': handleMatchFound(result.opponent, result.matchId); stopPollingMatchStatus(); break;
                 case 'timeout':
                     if (matchStatusText) matchStatusText.textContent = '時間内に相手が見つかりませんでした。';
@@ -403,7 +396,7 @@ async function cancelMatchmakingRequest() {
     } finally {
         isMatching = false; currentMatchId = null; currentOpponentData = null;
         if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        if (opponentInfoArea) opponentInfoArea.innerHTML = ''; // ★ 内容をクリア
+        if (opponentInfoArea) opponentInfoArea.innerHTML = '';
         if (opponentInfoArea) opponentInfoArea.style.display = 'none';
         if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
         updateMatchUI(); disconnectWebSocket();
@@ -465,7 +458,7 @@ function showResultModal(didWin, resultData, originalRate) {
 function closeResultModal() {
     if (resultModal) resultModal.style.display = 'none';
     if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-    if (opponentInfoArea) opponentInfoArea.innerHTML = ''; // ★ 内容をクリア
+    if (opponentInfoArea) opponentInfoArea.innerHTML = '';
     if (opponentInfoArea) opponentInfoArea.style.display = 'none';
     if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
     updateMatchUI();
@@ -491,7 +484,7 @@ function sendChatMessage() {
     }
     const messageText = matchChatInput.value.trim();
     if (messageText && currentMatchId) {
-        const messagePayload = { type: 'chat_message', matchId: currentMatchId, text: messageText };
+        const messagePayload = { type: 'MATCH_CHAT_MESSAGE', matchId: currentMatchId, text: messageText }; // サーバーの WebSocketMessageTypes.MATCH_CHAT_MESSAGE に合わせる
         matchWebSocket.send(JSON.stringify(messagePayload));
         appendChatMessage(messageText, true);
         matchChatInput.value = '';
@@ -504,7 +497,28 @@ function connectWebSocket() {
     if (!currentMatchId || !token) {
         appendChatMessage("チャット接続情報が不足しています。", false, "システム"); return;
     }
-    const wsUrl = `${window.MyApp.WEBSOCKET_URL}ws/?token=${token}&communityId=${communityId}`;
+
+    // ▼▼▼ ★★★ ここから修正 ★★★ ▼▼▼
+    let baseUrl = window.MyApp.WEBSOCKET_URL; 
+    let path = ""; 
+
+    if (baseUrl && !baseUrl.endsWith('/')) {
+        baseUrl += '/';
+    }
+
+    if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
+        path = "ws/"; 
+    }
+    // ▲▲▲ ★★★ ここまで修正 ★★★ ▲▲▲
+    
+    const wsUrl = `${baseUrl}${path}?token=${token}&matchId=${currentMatchId}`; 
+
+    const environment = (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') ? 'production' : 'local';
+    console.log(`MATCH_WS_DEBUG (${environment}): Attempting to connect to:`, wsUrl);
+    console.log(`MATCH_WS_DEBUG (${environment}): window.MyApp.WEBSOCKET_URL type:`, typeof window.MyApp.WEBSOCKET_URL, "value:", window.MyApp.WEBSOCKET_URL);
+    console.log(`MATCH_WS_DEBUG (${environment}): token type:`, typeof token, "value:", token ? token.substring(0,10)+"..." : token);
+    console.log(`MATCH_WS_DEBUG (${environment}): currentMatchId type:`, typeof currentMatchId, "value:", currentMatchId);
+
     appendChatMessage("チャットサーバーに接続中...", false, "システム");
     try {
         matchWebSocket = new WebSocket(wsUrl);
@@ -512,28 +526,29 @@ function connectWebSocket() {
         matchWebSocket.onmessage = (event) => {
             try {
                 const messageData = JSON.parse(event.data);
-                if (messageData.type === 'chat_message' && messageData.text) {
+                // server.js の WebSocketMessageTypes.MATCH_CHAT_MESSAGE と WebSocketMessageTypes.SYSTEM_MESSAGE に合わせる
+                if (messageData.type === 'MATCH_CHAT_MESSAGE' && messageData.text) { 
                     const senderName = messageData.senderName || '相手';
-                    if (messageData.senderId !== window.MyApp?.currentUserData?.sub) { // 自分自身のメッセージは表示しない
+                    if (messageData.senderId !== window.MyApp?.currentUserData?.sub) { 
                          appendChatMessage(messageData.text, false, senderName);
                     }
-                } else if (messageData.type === 'system_message') {
+                } else if (messageData.type === 'SYSTEM_MESSAGE') { 
                     appendChatMessage(messageData.text, false, "システム");
-                } else if (messageData.type === 'opponent_disconnected') {
+                } else if (messageData.type === 'OPPONENT_DISCONNECTED') { // server.js の WebSocketMessageTypes.OPPONENT_DISCONNECTED
                     appendChatMessage("相手が切断しました。", false, "システム");
                 }
-            } catch (e) { console.error("WebSocket message parse error:", e); }
+            } catch (e) { console.error("Match WebSocket message parse error:", e); }
         };
-        matchWebSocket.onerror = (error) => { console.error("WebSocket error:", error); appendChatMessage("チャット接続エラーが発生しました。", false, "システム");};
+        matchWebSocket.onerror = (error) => { console.error("Match WebSocket error:", error); appendChatMessage("チャット接続エラーが発生しました。", false, "システム");};
         matchWebSocket.onclose = (event) => {
-            if (event.code !== 1000) { // 1000は正常なクローズ
+            if (event.code !== 1000) { 
                  appendChatMessage(`チャット接続が切れました (Code: ${event.code})`, false, "システム");
             } else {
                  appendChatMessage("チャットから切断しました。", false, "システム");
             }
             matchWebSocket = null;
         };
-    } catch (error) { console.error("WebSocket creation error:", error); appendChatMessage("チャット接続に失敗しました。", false, "システム");}
+    } catch (error) { console.error("Match WebSocket creation error:", error); appendChatMessage("チャット接続に失敗しました。", false, "システム");}
 }
 
 function disconnectWebSocket() {
@@ -542,6 +557,3 @@ function disconnectWebSocket() {
         matchWebSocket = null;
     }
 }
-
-// ★★★ match.js から window.getBadgeImagePath と window.displayBadges のフォールバック定義を削除 ★★★
-// (script.js にあるグローバルな定義を使用するため)
