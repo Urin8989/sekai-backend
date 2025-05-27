@@ -7,14 +7,17 @@ let currentMatchId = null;
 let currentOpponentData = null;
 let matchWebSocket = null;
 let heartbeatInterval = null;
-let matchResultPollingInterval = null; // ★ 結果確認ポーリング用
+let matchResultPollingInterval = null;
+let isSubmittingResult = false; // ★ API送信中の二重送信防止フラグ
 
-// DOM要素
+// DOM要素 (変更なし)
+// ... (DOM要素の定義は前回のコードと同じなので省略します) ...
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
 let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
-let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, cancelBattleButton, battleStatusText; // ★ cancelBattleButton 追加
+let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, cancelBattleButton, battleStatusText;
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
+
 
 const getDefaultAvatarPath = () => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reportResultButtons = document.getElementById('report-result-buttons');
     reportWinButton = document.getElementById('report-win-button');
     reportLoseButton = document.getElementById('report-lose-button');
-    cancelBattleButton = document.getElementById('cancel-battle-button'); // ★ 追加
+    cancelBattleButton = document.getElementById('cancel-battle-button');
     battleStatusText = document.getElementById('battle-status-text');
 
     resultModal = document.getElementById('result-modal');
@@ -75,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typeof window.registerUserDataReadyCallback === 'function') {
-        window.registerUserDataReadyCallback(() => updateMatchUI(false)); // ★ 初回はリセットしない
+        window.registerUserDataReadyCallback(() => updateMatchUI(false));
     } else {
         console.error("[match.js] registerUserDataReadyCallback function not found.");
         updateMatchUI(false);
@@ -83,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((user) => {
-            updateMatchUI(!window.MyApp?.isUserLoggedIn); // ★ ログアウト時はリセット
+            updateMatchUI(!window.MyApp?.isUserLoggedIn);
         });
     } else {
         console.error("[match.js] onLoginStatusChange function not found.");
@@ -96,9 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startBattleButton) startBattleButton.style.display = 'none';
         if (battleStatusText) battleStatusText.textContent = '対戦結果を選択してください。';
     });
-    reportWinButton?.addEventListener('click', () => submitReport('win')); // ★ 変更
-    reportLoseButton?.addEventListener('click', () => submitReport('lose')); // ★ 変更
-    cancelBattleButton?.addEventListener('click', cancelBattle); // ★ 追加
+    reportWinButton?.addEventListener('click', () => submitReport('win'));
+    reportLoseButton?.addEventListener('click', () => submitReport('lose'));
+    cancelBattleButton?.addEventListener('click', cancelBattle);
     closeResultModalButton?.addEventListener('click', closeResultModal);
     matchChatSendButton?.addEventListener('click', sendChatMessage);
     matchChatInput?.addEventListener('keypress', (event) => {
@@ -114,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function displayMyProfileInfo(userData) {
+    // ... (変更なし)
     if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) {
         console.error("[match.js] プロフィール表示に必要な主要要素が見つかりません。");
         return;
@@ -175,6 +179,7 @@ function displayMyProfileInfo(userData) {
 }
 
 function displayOpponentInfo(opponentData) {
+    // ... (変更なし)
     if (!opponentInfoArea) {
         console.warn("[match.js] displayOpponentInfo: opponentInfoArea element not found.");
         return;
@@ -239,6 +244,7 @@ function displayOpponentInfo(opponentData) {
 
 
 function updateMatchUI(resetState = false) {
+    // ... (変更なし、resetStateのロジックは維持)
     const user = window.MyApp?.currentUserData;
     const loggedIn = !!window.MyApp?.isUserLoggedIn;
     displayMyProfileInfo(user);
@@ -247,6 +253,7 @@ function updateMatchUI(resetState = false) {
         currentMatchId = null;
         currentOpponentData = null;
         isMatching = false;
+        isSubmittingResult = false; // ★ フラグもリセット
         stopPollingMatchStatus();
         stopPollingMatchResult();
         stopHeartbeat();
@@ -259,7 +266,7 @@ function updateMatchUI(resetState = false) {
         if (resultReportingArea) resultReportingArea.style.display = 'none';
     }
 
-    if (resultReportingArea && !resetState) resultReportingArea.style.display = 'none'; // 通常は隠す
+    if (resultReportingArea && !resetState) resultReportingArea.style.display = 'none';
     if (reportResultButtons) reportResultButtons.style.display = 'none';
     if (startBattleButton) startBattleButton.style.display = 'none';
     if (battleStatusText) battleStatusText.textContent = '';
@@ -296,9 +303,10 @@ function updateMatchUI(resetState = false) {
             if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) {
                 connectWebSocket();
             }
-            // ポーリング中ならボタン無効化
-            if (matchResultPollingInterval) {
-                 if (battleStatusText) battleStatusText.textContent = '相手の報告を待っています...';
+            if (matchResultPollingInterval || isSubmittingResult) { // ★ isSubmittingResult も考慮
+                 if (battleStatusText && !isSubmittingResult) battleStatusText.textContent = '相手の報告を待っています...';
+                 else if (battleStatusText && isSubmittingResult) battleStatusText.textContent = '結果送信中...';
+
                  if (startBattleButton) startBattleButton.style.display = 'none';
                  if (reportResultButtons) reportResultButtons.style.display = 'flex';
                  if (reportWinButton) reportWinButton.disabled = true;
@@ -324,6 +332,7 @@ function updateMatchUI(resetState = false) {
         isMatching = false;
         stopPollingMatchStatus();
         stopPollingMatchResult();
+        isSubmittingResult = false; // ★
         currentMatchId = null;
         currentOpponentData = null;
         if(matchButton) matchButton.textContent = 'ログインが必要です';
@@ -343,6 +352,7 @@ function updateMatchUI(resetState = false) {
 }
 
 async function startMatchmaking() {
+    // ... (変更なし)
     if (isMatching) return;
     if (!window.MyApp?.isUserLoggedIn) {
         alert("マッチングを開始するにはログインしてください。"); updateMatchUI(); return;
@@ -370,6 +380,7 @@ async function startMatchmaking() {
 }
 
 function startPollingMatchStatus() {
+    // ... (変更なし)
     if (matchmakingStatusInterval) clearInterval(matchmakingStatusInterval);
     matchmakingStatusInterval = setInterval(async () => {
         if (!isMatching) { stopPollingMatchStatus(); return; }
@@ -404,18 +415,50 @@ function startPollingMatchStatus() {
 }
 
 function stopPollingMatchStatus() {
+    // ... (変更なし)
     if (matchmakingStatusInterval) { clearInterval(matchmakingStatusInterval); matchmakingStatusInterval = null; }
 }
 
-function handleMatchFound(opponentData, matchId) {
-    currentOpponentData = opponentData; currentMatchId = matchId; isMatching = false;
+// ★★★ handleMatchFound にキュー離脱処理を追加 ★★★
+async function handleMatchFound(opponentData, matchId) {
+    currentOpponentData = opponentData;
+    currentMatchId = matchId;
+    isMatching = false;
+
     displayOpponentInfo(opponentData);
-    updateMatchUI();
-    if (matchChatMessagesArea) matchChatMessagesArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
-    connectWebSocket();
+    updateMatchUI(); // isMatching が false になったので、UIがマッチング待機中でない状態に更新される
+
+    if (matchChatMessagesArea) {
+        matchChatMessagesArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
+    }
+    connectWebSocket(); // チャット接続
+
+    // マッチング成功後、現在の検索セッションを終了するためにキューから自身を削除
+    try {
+        const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
+        if (token && window.MyApp?.BACKEND_URL) {
+            console.log("[match.js] Match found. Attempting to leave matchmaking queue...");
+            const response = await fetch(`${window.MyApp.BACKEND_URL}/api/matchmaking/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            if (response.ok) {
+                console.log("[match.js] Successfully left matchmaking queue after match was found.");
+            } else {
+                const errorData = await response.json().catch(() => ({ message: `Failed to leave queue, status: ${response.status}` }));
+                console.error("[match.js] Failed to leave matchmaking queue after match found:", errorData.message);
+            }
+        }
+    } catch (error) {
+        console.error("[match.js] Error leaving matchmaking queue after match found:", error);
+    }
 }
 
 async function cancelMatchmakingRequest() {
+    // ... (変更なし、finallyで updateMatchUI(true) を呼ぶ)
     if (!isMatching) return;
     stopPollingMatchStatus(); if (matchStatusText) matchStatusText.textContent = 'キャンセル処理中...'; if (cancelButton) cancelButton.disabled = true;
     try {
@@ -431,20 +474,20 @@ async function cancelMatchmakingRequest() {
         } else { if (matchStatusText) matchStatusText.textContent = 'マッチングをキャンセルしました。'; }
     } catch (error) { if (matchStatusText) matchStatusText.textContent = `キャンセルエラー: ${error.message}`;
     } finally {
-        updateMatchUI(true); // ★ UIリセット
+        updateMatchUI(true);
     }
 }
 
-async function submitReport(result) { // 'win' or 'lose'
+// ★ isSubmittingResult フラグを使用
+async function submitReport(result) {
+    if (isSubmittingResult) return;
     if (!currentMatchId) {
         if (battleStatusText) battleStatusText.textContent = '結果報告エラー: 情報不足'; return;
     }
-
     const confirmMessage = `対戦結果を「${result === 'win' ? '勝利' : '敗北'}」として申告します。よろしいですか？`;
-    if (!confirm(confirmMessage)) {
-        return;
-    }
+    if (!confirm(confirmMessage)) return;
 
+    isSubmittingResult = true;
     if (battleStatusText) battleStatusText.textContent = '結果送信中...';
     if (reportWinButton) reportWinButton.disabled = true;
     if (reportLoseButton) reportLoseButton.disabled = true;
@@ -465,24 +508,26 @@ async function submitReport(result) { // 'win' or 'lose'
         }
         const responseData = await response.json();
         handleReportResponse(responseData);
-
     } catch (error) {
         if (battleStatusText) battleStatusText.textContent = `結果報告エラー: ${error.message}`;
         if (reportWinButton) reportWinButton.disabled = false;
         if (reportLoseButton) reportLoseButton.disabled = false;
         if (cancelBattleButton) cancelBattleButton.disabled = false;
+    } finally {
+        isSubmittingResult = false;
+        // ボタンの最終的な状態は handleReportResponse または updateMatchUI で制御される
     }
 }
 
+// ★ isSubmittingResult フラグを使用
 async function cancelBattle() {
+    if (isSubmittingResult) return;
     if (!currentMatchId) {
         if (battleStatusText) battleStatusText.textContent = 'キャンセルエラー: 情報不足'; return;
     }
+    if (!confirm("この対戦をキャンセルしますか？\nレートは変動しません。")) return;
 
-    if (!confirm("この対戦をキャンセルしますか？\nレートは変動しません。")) {
-        return;
-    }
-
+    isSubmittingResult = true;
     if (battleStatusText) battleStatusText.textContent = 'キャンセル処理中...';
     if (reportWinButton) reportWinButton.disabled = true;
     if (reportLoseButton) reportLoseButton.disabled = true;
@@ -497,25 +542,26 @@ async function cancelBattle() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ matchId: currentMatchId })
         });
-
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'キャンセル失敗' }));
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
         const responseData = await response.json();
         handleReportResponse(responseData);
-
     } catch (error) {
         if (battleStatusText) battleStatusText.textContent = `キャンセルエラー: ${error.message}`;
         if (reportWinButton) reportWinButton.disabled = false;
         if (reportLoseButton) reportLoseButton.disabled = false;
         if (cancelBattleButton) cancelBattleButton.disabled = false;
+    } finally {
+        isSubmittingResult = false;
     }
 }
 
 function handleReportResponse(responseData) {
-    stopPollingMatchResult(); // まずポーリングを止める
-    disconnectWebSocket(); // チャットも終了
+    // ★ isSubmittingResult は API 呼び出し側で finally で false にするのでここでは不要
+    stopPollingMatchResult();
+    disconnectWebSocket();
     stopHeartbeat();
 
     switch (responseData.status) {
@@ -526,12 +572,15 @@ function handleReportResponse(responseData) {
             if (reportWinButton) reportWinButton.disabled = true;
             if (reportLoseButton) reportLoseButton.disabled = true;
             if (cancelBattleButton) cancelBattleButton.disabled = true;
-            startPollingMatchResult(); // ポーリング開始
+            startPollingMatchResult();
             break;
         case 'finished':
             if (battleStatusText) battleStatusText.textContent = '対戦結果が確定しました！';
-            updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints, responseData.resultData.originalRate);
-            showResultModal(responseData.resultData.didWin, responseData.resultData, responseData.resultData.originalRate);
+            // resultData.originalRate はサーバー側で計算して含める想定
+            const originalRate = responseData.resultData?.originalRate ?? window.MyApp?.currentUserData?.rate;
+            updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints);
+            showResultModal(responseData.resultData.didWin, responseData.resultData, originalRate);
+            // currentMatchId などは closeResultModal -> updateMatchUI(true) でクリアされる
             break;
         case 'disputed':
             if (battleStatusText) battleStatusText.textContent = '報告が一致しませんでした。この対戦は無効(レート変動なし)になります。';
@@ -550,12 +599,17 @@ function handleReportResponse(responseData) {
             }, 3000);
             break;
         default:
-             if (battleStatusText) battleStatusText.textContent = '不明な応答を受信しました。';
+             if (battleStatusText) battleStatusText.textContent = `不明な応答 (${responseData.status}) を受信。`;
+             // 予期せぬ応答の場合もUIをリセットした方が安全かもしれない
+             setTimeout(() => {
+                updateMatchUI(true);
+            }, 3000);
              break;
     }
 }
 
 function updateGlobalUserData(newRate, newPoints) {
+    // ... (変更なし)
     if (window.MyApp?.currentUserData) {
         window.MyApp.currentUserData.rate = newRate;
         window.MyApp.currentUserData.points = newPoints;
@@ -566,22 +620,27 @@ function updateGlobalUserData(newRate, newPoints) {
 }
 
 function startPollingMatchResult() {
+    // ... (変更なし)
     stopPollingMatchResult();
     matchResultPollingInterval = setInterval(async () => {
-        if (!currentMatchId) {
+        if (!currentMatchId) { // currentMatchId がクリアされたら確実に停止
             stopPollingMatchResult();
             return;
         }
         try {
             const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/match-status/${currentMatchId}`;
             const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
-            if (!token) { stopPollingMatchResult(); return; }
+            if (!token) { stopPollingMatchResult(); return; } // トークンがなければ停止
+
             const response = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+
+            if (!currentMatchId || matchResultPollingInterval === null) return; // fetch中に状態が変わった場合
 
             if (response.ok) {
                 const result = await response.json();
+                // サーバーから返されたステータスが 'matched' や 'reported_one' で"ない"場合 (つまり最終結果が出た場合)
                 if (result.status !== 'matched' && result.status !== 'reported_one') {
-                    stopPollingMatchResult();
+                    stopPollingMatchResult(); // 重要: handleReportResponse を呼ぶ前に止める
                     handleReportResponse(result);
                 }
             } else if (response.status === 404) {
@@ -589,18 +648,19 @@ function startPollingMatchResult() {
                  stopPollingMatchResult();
                  setTimeout(() => updateMatchUI(true), 3000);
             } else {
-                console.warn("Match status poll failed:", response.status);
-                // エラーが続いたら停止するなどの処理を検討
-                // stopPollingMatchResult();
+                // サーバーエラーが続く場合はポーリングを止めるなどの考慮も必要
+                console.warn("Match status poll failed with status:", response.status);
+                // stopPollingMatchResult(); // 一時的なエラーかもしれないので、止めない方が良い場合も
             }
         } catch (error) {
             console.error("Error polling match status:", error);
-            stopPollingMatchResult();
+            stopPollingMatchResult(); // ネットワークエラーなどでも停止
         }
     }, 5000);
 }
 
 function stopPollingMatchResult() {
+    // ... (変更なし)
     if (matchResultPollingInterval) {
         clearInterval(matchResultPollingInterval);
         matchResultPollingInterval = null;
@@ -608,6 +668,7 @@ function stopPollingMatchResult() {
 }
 
 function showResultModal(didWin, resultData, originalRate) {
+    // ... (変更なし)
     if (!resultModal) return;
     if (resultTitle) resultTitle.textContent = didWin ? '勝利！' : '敗北...';
     if (resultMyRateBefore) resultMyRateBefore.textContent = originalRate ?? '----';
@@ -623,11 +684,13 @@ function showResultModal(didWin, resultData, originalRate) {
 }
 
 function closeResultModal() {
+    // ... (変更なし、updateMatchUI(true) を呼ぶ)
     if (resultModal) resultModal.style.display = 'none';
     updateMatchUI(true);
 }
 
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
+    // ... (変更なし)
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('match-chat-message');
@@ -641,6 +704,7 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
 }
 
 function sendChatMessage() {
+    // ... (変更なし)
     if (!matchChatInput || !matchWebSocket || matchWebSocket.readyState !== WebSocket.OPEN) {
         if (!matchWebSocket || matchWebSocket.readyState !== WebSocket.OPEN) alert("チャットサーバーに接続されていません。");
         return;
@@ -655,6 +719,7 @@ function sendChatMessage() {
 }
 
 function startHeartbeat() {
+    // ... (変更なし)
     stopHeartbeat();
     heartbeatInterval = setInterval(() => {
         if (matchWebSocket && matchWebSocket.readyState === WebSocket.OPEN) {
@@ -671,6 +736,7 @@ function startHeartbeat() {
 }
 
 function stopHeartbeat() {
+    // ... (変更なし)
     if (heartbeatInterval) {
         clearInterval(heartbeatInterval);
         heartbeatInterval = null;
@@ -678,6 +744,7 @@ function stopHeartbeat() {
 }
 
 function connectWebSocket() {
+    // ... (変更なし)
     if (matchWebSocket && (matchWebSocket.readyState === WebSocket.OPEN || matchWebSocket.readyState === WebSocket.CONNECTING)) return;
     const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
     if (!currentMatchId || !token) {
@@ -724,7 +791,7 @@ function connectWebSocket() {
         matchWebSocket.onmessage = (event) => {
             try {
                 const messageData = JSON.parse(event.data);
-                if (messageData.type === 'PONG') { return; } // PONGは無視
+                if (messageData.type === 'PONG') { return; } 
 
                 if (messageData.type === 'MATCH_CHAT_MESSAGE' && messageData.text) {
                     const senderName = messageData.senderName || '相手';
@@ -741,12 +808,12 @@ function connectWebSocket() {
         matchWebSocket.onerror = (error) => { console.error("Match WebSocket error:", error); appendChatMessage("チャット接続エラーが発生しました。", false, "システム");};
         matchWebSocket.onclose = (event) => {
             stopHeartbeat();
-            const wasConnected = !!matchWebSocket;
+            const wasConnected = !!matchWebSocket; // ★ エラーや切断前に接続があったかどうかの記録は有効
             matchWebSocket = null;
-            // 結果確定前ならメッセージ表示 (確定後は不要)
-            if (event.code !== 1000 && currentMatchId && !matchResultPollingInterval) {
+            // 結果確定前 (ポーリング中または結果送信前) ならメッセージ表示
+            if (event.code !== 1000 && currentMatchId && (!matchResultPollingInterval && !isSubmittingResult) ) {
                  appendChatMessage(`チャット接続が切れました (Code: ${event.code})`, false, "システム");
-            } else if (currentMatchId && !matchResultPollingInterval) {
+            } else if (currentMatchId && (!matchResultPollingInterval && !isSubmittingResult) ) {
                  appendChatMessage("チャットから切断しました。", false, "システム");
             }
         };
@@ -754,6 +821,7 @@ function connectWebSocket() {
 }
 
 function disconnectWebSocket() {
+    // ... (変更なし)
     stopHeartbeat();
     if (matchWebSocket) {
         matchWebSocket.close(1000, "Client requested disconnect");
