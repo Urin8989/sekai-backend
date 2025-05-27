@@ -85,7 +85,7 @@
                             <span id="my-profile-points" class="stat-value">---- P</span>
                         </div>
                     </div>
-                    </section>
+                </section>
 
                 <section id="battle-controls" class="match-controls-center">
                     <p id="match-status" class="match-status-text">ライバルを探しましょう！</p>
@@ -109,9 +109,10 @@
                     </section>
                     <div class="result-reporting" style="margin-top: 2em; display: none;">
                          <button id="start-battle-button" class="button button-primary">結果を報告</button>
-                         <div id="report-result-buttons" style="display: none; margin-top: 15px; gap: 10px;">
+                         <div id="report-result-buttons" style="display: none; margin-top: 15px; gap: 10px; flex-wrap: wrap; justify-content: center;">
                              <button id="report-win-button" class="button button-primary">勝利を申告</button>
                              <button id="report-lose-button" class="button button-cancel">敗北を申告</button>
+                             <button id="cancel-battle-button" class="button button-secondary" style="margin-top: 10px; width: calc(100% - 10px);">対戦をキャンセル</button>
                          </div>
                          <p id="battle-status-text" style="margin-top: 10px; color: var(--color-text-secondary); min-height: 1.2em;"></p>
                     </div>
@@ -145,7 +146,7 @@
         <div class="container">
             <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
             <nav class="footer-nav">
-                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a>
             </nav>
         </div>
     </footer>

@@ -6,12 +6,14 @@ let matchmakingStatusInterval = null;
 let currentMatchId = null;
 let currentOpponentData = null;
 let matchWebSocket = null;
+let heartbeatInterval = null;
+let matchResultPollingInterval = null; // ★ 結果確認ポーリング用
 
 // DOM要素
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
 let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
-let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, battleStatusText;
+let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, cancelBattleButton, battleStatusText; // ★ cancelBattleButton 追加
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
 
 const getDefaultAvatarPath = () => {
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reportResultButtons = document.getElementById('report-result-buttons');
     reportWinButton = document.getElementById('report-win-button');
     reportLoseButton = document.getElementById('report-lose-button');
+    cancelBattleButton = document.getElementById('cancel-battle-button'); // ★ 追加
     battleStatusText = document.getElementById('battle-status-text');
 
     resultModal = document.getElementById('result-modal');
@@ -72,22 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typeof window.registerUserDataReadyCallback === 'function') {
-        window.registerUserDataReadyCallback(updateMatchUI);
+        window.registerUserDataReadyCallback(() => updateMatchUI(false)); // ★ 初回はリセットしない
     } else {
         console.error("[match.js] registerUserDataReadyCallback function not found.");
-        updateMatchUI();
+        updateMatchUI(false);
     }
 
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((user) => {
-            updateMatchUI();
-            if (!window.MyApp?.isUserLoggedIn) {
-                isMatching = false;
-                stopPollingMatchStatus();
-                currentMatchId = null;
-                currentOpponentData = null;
-                disconnectWebSocket();
-            }
+            updateMatchUI(!window.MyApp?.isUserLoggedIn); // ★ ログアウト時はリセット
         });
     } else {
         console.error("[match.js] onLoginStatusChange function not found.");
@@ -100,8 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (startBattleButton) startBattleButton.style.display = 'none';
         if (battleStatusText) battleStatusText.textContent = '対戦結果を選択してください。';
     });
-    reportWinButton?.addEventListener('click', () => reportMatchResult(true));
-    reportLoseButton?.addEventListener('click', () => reportMatchResult(false));
+    reportWinButton?.addEventListener('click', () => submitReport('win')); // ★ 変更
+    reportLoseButton?.addEventListener('click', () => submitReport('lose')); // ★ 変更
+    cancelBattleButton?.addEventListener('click', cancelBattle); // ★ 追加
     closeResultModalButton?.addEventListener('click', closeResultModal);
     matchChatSendButton?.addEventListener('click', sendChatMessage);
     matchChatInput?.addEventListener('keypress', (event) => {
@@ -110,7 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
             sendChatMessage();
         }
     });
-    window.addEventListener('beforeunload', disconnectWebSocket);
+    window.addEventListener('beforeunload', () => {
+        stopHeartbeat();
+        disconnectWebSocket();
+    });
 });
 
 function displayMyProfileInfo(userData) {
@@ -182,9 +182,13 @@ function displayOpponentInfo(opponentData) {
     const defaultAvatar = getDefaultAvatarPath();
     const defaultBadgeImg = getDefaultBadgePath();
 
-    const opponentBadgesToDisplay = opponentData.displayBadges && opponentData.displayBadges.length > 0
-                                  ? opponentData.displayBadges
-                                  : (opponentData.badges ? [...new Set(opponentData.badges)].slice(0, 3) : []);
+    const opponentProfile = opponentData.profile || {};
+    const opponentBadges = opponentData.badges || [];
+    const opponentDisplayBadges = opponentData.displayBadges || [];
+
+    const opponentBadgesToDisplay = opponentDisplayBadges.length > 0
+                                  ? opponentDisplayBadges
+                                  : [...new Set(opponentBadges)].slice(0, 3);
 
     let badgesHtml = '';
     if (typeof window.getBadgeImagePath === 'function') {
@@ -216,14 +220,14 @@ function displayOpponentInfo(opponentData) {
         </div>
         <div class="profile-comment-display">
             <span class="detail-label">対戦コメント:</span>
-            <p class="detail-comment">${opponentData.profile?.comment || '---'}</p>
+            <p class="detail-comment">${opponentProfile.comment || '---'}</p>
         </div>
         <div class="profile-badges">
             ${badgesHtml}
         </div>
         <div class="profile-home-course-display">
             <span class="detail-label">ホームコース:</span>
-            <span class="detail-value">${opponentData.profile?.favCourse || '---'}</span>
+            <span class="detail-value">${opponentProfile.favCourse || '---'}</span>
         </div>
         <div class="profile-stats" style="display: none !important;"></div>
     `;
@@ -233,17 +237,36 @@ function displayOpponentInfo(opponentData) {
     if (opponentSpinner) opponentSpinner.style.display = 'none';
 }
 
-function updateMatchUI() {
+
+function updateMatchUI(resetState = false) {
     const user = window.MyApp?.currentUserData;
     const loggedIn = !!window.MyApp?.isUserLoggedIn;
     displayMyProfileInfo(user);
 
-    if (resultReportingArea) resultReportingArea.style.display = 'none';
+    if (resetState) {
+        currentMatchId = null;
+        currentOpponentData = null;
+        isMatching = false;
+        stopPollingMatchStatus();
+        stopPollingMatchResult();
+        stopHeartbeat();
+        disconnectWebSocket();
+        if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
+        if (opponentInfoArea) opponentInfoArea.innerHTML = '';
+        if (opponentInfoArea) opponentInfoArea.style.display = 'none';
+        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
+        if (matchChatSection) matchChatSection.style.display = 'none';
+        if (resultReportingArea) resultReportingArea.style.display = 'none';
+    }
+
+    if (resultReportingArea && !resetState) resultReportingArea.style.display = 'none'; // 通常は隠す
     if (reportResultButtons) reportResultButtons.style.display = 'none';
     if (startBattleButton) startBattleButton.style.display = 'none';
     if (battleStatusText) battleStatusText.textContent = '';
     if (reportWinButton) reportWinButton.disabled = false;
     if (reportLoseButton) reportLoseButton.disabled = false;
+    if (cancelBattleButton) cancelBattleButton.disabled = false;
+
 
     if (loggedIn) {
         if (isMatching) {
@@ -257,37 +280,50 @@ function updateMatchUI() {
             if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
             if (opponentSpinner) opponentSpinner.style.display = 'block';
             if (matchChatSection) matchChatSection.style.display = 'none';
+            stopHeartbeat();
             disconnectWebSocket();
         } else if (currentMatchId && currentOpponentData) {
             if(matchButton) matchButton.style.display = 'none';
             if(cancelButton) cancelButton.style.display = 'none';
-            if (matchStatusText) matchStatusText.textContent = '対戦相手が見つかりました！結果を報告してください。';
+            if (matchStatusText) matchStatusText.textContent = '対戦相手が見つかりました！';
             if (resultReportingArea) resultReportingArea.style.display = 'block';
             if (startBattleButton) startBattleButton.style.display = 'inline-block';
+            if (battleStatusText) battleStatusText.textContent = '対戦が終了したら結果を報告してください。';
             if (opponentSpinner) opponentSpinner.style.display = 'none';
             if (opponentPlaceholder) opponentPlaceholder.style.display = 'none';
-            if (opponentInfoArea) opponentInfoArea.style.display = 'grid';
+            if (opponentInfoArea) opponentInfoArea.style.display = 'contents';
             if (matchChatSection) matchChatSection.style.display = 'flex';
             if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) {
                 connectWebSocket();
+            }
+            // ポーリング中ならボタン無効化
+            if (matchResultPollingInterval) {
+                 if (battleStatusText) battleStatusText.textContent = '相手の報告を待っています...';
+                 if (startBattleButton) startBattleButton.style.display = 'none';
+                 if (reportResultButtons) reportResultButtons.style.display = 'flex';
+                 if (reportWinButton) reportWinButton.disabled = true;
+                 if (reportLoseButton) reportLoseButton.disabled = true;
+                 if (cancelBattleButton) cancelBattleButton.disabled = true;
             }
         } else {
             if(matchButton) matchButton.textContent = 'ライバルを探す';
             if(matchButton) matchButton.style.display = 'inline-block';
             if(matchButton) matchButton.disabled = false;
             if(cancelButton) cancelButton.style.display = 'none';
-            if (matchStatusText) matchStatusText.textContent = ''; 
+            if (matchStatusText) matchStatusText.textContent = 'ライバルを探しましょう！';
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             if (opponentInfoArea) opponentInfoArea.innerHTML = '';
             if (opponentInfoArea) opponentInfoArea.style.display = 'none';
             if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
             if (opponentSpinner) opponentSpinner.style.display = 'none';
             if (matchChatSection) matchChatSection.style.display = 'none';
+            stopHeartbeat();
             disconnectWebSocket();
         }
     } else {
         isMatching = false;
         stopPollingMatchStatus();
+        stopPollingMatchResult();
         currentMatchId = null;
         currentOpponentData = null;
         if(matchButton) matchButton.textContent = 'ログインが必要です';
@@ -301,6 +337,7 @@ function updateMatchUI() {
         if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
         if (opponentSpinner) opponentSpinner.style.display = 'none';
         if (matchChatSection) matchChatSection.style.display = 'none';
+        stopHeartbeat();
         disconnectWebSocket();
     }
 }
@@ -394,49 +431,179 @@ async function cancelMatchmakingRequest() {
         } else { if (matchStatusText) matchStatusText.textContent = 'マッチングをキャンセルしました。'; }
     } catch (error) { if (matchStatusText) matchStatusText.textContent = `キャンセルエラー: ${error.message}`;
     } finally {
-        isMatching = false; currentMatchId = null; currentOpponentData = null;
-        if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        if (opponentInfoArea) opponentInfoArea.innerHTML = '';
-        if (opponentInfoArea) opponentInfoArea.style.display = 'none';
-        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
-        updateMatchUI(); disconnectWebSocket();
+        updateMatchUI(true); // ★ UIリセット
     }
 }
 
-async function reportMatchResult(didWin) {
-    if (!currentMatchId || !window.MyApp?.currentUserData) {
+async function submitReport(result) { // 'win' or 'lose'
+    if (!currentMatchId) {
         if (battleStatusText) battleStatusText.textContent = '結果報告エラー: 情報不足'; return;
     }
+
+    const confirmMessage = `対戦結果を「${result === 'win' ? '勝利' : '敗北'}」として申告します。よろしいですか？`;
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
     if (battleStatusText) battleStatusText.textContent = '結果送信中...';
-    if (reportWinButton) reportWinButton.disabled = true; if (reportLoseButton) reportLoseButton.disabled = true;
-    disconnectWebSocket();
+    if (reportWinButton) reportWinButton.disabled = true;
+    if (reportLoseButton) reportLoseButton.disabled = true;
+    if (cancelBattleButton) cancelBattleButton.disabled = true;
+
     try {
-        const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/result`;
+        const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/report`;
         const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
         if (!token) throw new Error("認証トークンなし");
         const response = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ matchId: currentMatchId, didWin: didWin })
+            body: JSON.stringify({ matchId: currentMatchId, result: result })
         });
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: '結果報告失敗' }));
-            if (response.status === 401 && typeof window.handleLogout === 'function') { window.handleLogout(); return; }
             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-        const resultData = await response.json();
-        const originalRate = window.MyApp?.currentUserData?.rate;
-        if (window.MyApp?.currentUserData) {
-            window.MyApp.currentUserData.rate = resultData.newRate;
-            window.MyApp.currentUserData.points = resultData.newPoints;
-            if (typeof window.saveCurrentUserData === 'function') window.saveCurrentUserData();
-            if (typeof window.updateUserPoints === 'function') window.updateUserPoints(resultData.newPoints);
-        }
-        showResultModal(didWin, resultData, originalRate);
-        currentMatchId = null; currentOpponentData = null;
+        const responseData = await response.json();
+        handleReportResponse(responseData);
+
     } catch (error) {
         if (battleStatusText) battleStatusText.textContent = `結果報告エラー: ${error.message}`;
-        if (reportWinButton) reportWinButton.disabled = false; if (reportLoseButton) reportLoseButton.disabled = false;
+        if (reportWinButton) reportWinButton.disabled = false;
+        if (reportLoseButton) reportLoseButton.disabled = false;
+        if (cancelBattleButton) cancelBattleButton.disabled = false;
+    }
+}
+
+async function cancelBattle() {
+    if (!currentMatchId) {
+        if (battleStatusText) battleStatusText.textContent = 'キャンセルエラー: 情報不足'; return;
+    }
+
+    if (!confirm("この対戦をキャンセルしますか？\nレートは変動しません。")) {
+        return;
+    }
+
+    if (battleStatusText) battleStatusText.textContent = 'キャンセル処理中...';
+    if (reportWinButton) reportWinButton.disabled = true;
+    if (reportLoseButton) reportLoseButton.disabled = true;
+    if (cancelBattleButton) cancelBattleButton.disabled = true;
+
+    try {
+        const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/cancel-match`;
+        const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
+        if (!token) throw new Error("認証トークンなし");
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ matchId: currentMatchId })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'キャンセル失敗' }));
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        }
+        const responseData = await response.json();
+        handleReportResponse(responseData);
+
+    } catch (error) {
+        if (battleStatusText) battleStatusText.textContent = `キャンセルエラー: ${error.message}`;
+        if (reportWinButton) reportWinButton.disabled = false;
+        if (reportLoseButton) reportLoseButton.disabled = false;
+        if (cancelBattleButton) cancelBattleButton.disabled = false;
+    }
+}
+
+function handleReportResponse(responseData) {
+    stopPollingMatchResult(); // まずポーリングを止める
+    disconnectWebSocket(); // チャットも終了
+    stopHeartbeat();
+
+    switch (responseData.status) {
+        case 'waiting':
+            if (battleStatusText) battleStatusText.textContent = '相手の報告を待っています...';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportResultButtons) reportResultButtons.style.display = 'flex';
+            if (reportWinButton) reportWinButton.disabled = true;
+            if (reportLoseButton) reportLoseButton.disabled = true;
+            if (cancelBattleButton) cancelBattleButton.disabled = true;
+            startPollingMatchResult(); // ポーリング開始
+            break;
+        case 'finished':
+            if (battleStatusText) battleStatusText.textContent = '対戦結果が確定しました！';
+            updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints, responseData.resultData.originalRate);
+            showResultModal(responseData.resultData.didWin, responseData.resultData, responseData.resultData.originalRate);
+            break;
+        case 'disputed':
+            if (battleStatusText) battleStatusText.textContent = '報告が一致しませんでした。この対戦は無効(レート変動なし)になります。';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportResultButtons) reportResultButtons.style.display = 'none';
+            setTimeout(() => {
+                updateMatchUI(true);
+            }, 3000);
+            break;
+        case 'cancelled':
+            if (battleStatusText) battleStatusText.textContent = '対戦がキャンセルされました。レート変動はありません。';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportResultButtons) reportResultButtons.style.display = 'none';
+            setTimeout(() => {
+                updateMatchUI(true);
+            }, 3000);
+            break;
+        default:
+             if (battleStatusText) battleStatusText.textContent = '不明な応答を受信しました。';
+             break;
+    }
+}
+
+function updateGlobalUserData(newRate, newPoints) {
+    if (window.MyApp?.currentUserData) {
+        window.MyApp.currentUserData.rate = newRate;
+        window.MyApp.currentUserData.points = newPoints;
+        if (typeof window.saveCurrentUserData === 'function') window.saveCurrentUserData();
+        if (typeof window.updateUserPoints === 'function') window.updateUserPoints(newPoints);
+        displayMyProfileInfo(window.MyApp.currentUserData);
+    }
+}
+
+function startPollingMatchResult() {
+    stopPollingMatchResult();
+    matchResultPollingInterval = setInterval(async () => {
+        if (!currentMatchId) {
+            stopPollingMatchResult();
+            return;
+        }
+        try {
+            const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/match-status/${currentMatchId}`;
+            const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
+            if (!token) { stopPollingMatchResult(); return; }
+            const response = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${token}` } });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.status !== 'matched' && result.status !== 'reported_one') {
+                    stopPollingMatchResult();
+                    handleReportResponse(result);
+                }
+            } else if (response.status === 404) {
+                 if (battleStatusText) battleStatusText.textContent = 'マッチが見つかりません。';
+                 stopPollingMatchResult();
+                 setTimeout(() => updateMatchUI(true), 3000);
+            } else {
+                console.warn("Match status poll failed:", response.status);
+                // エラーが続いたら停止するなどの処理を検討
+                // stopPollingMatchResult();
+            }
+        } catch (error) {
+            console.error("Error polling match status:", error);
+            stopPollingMatchResult();
+        }
+    }, 5000);
+}
+
+function stopPollingMatchResult() {
+    if (matchResultPollingInterval) {
+        clearInterval(matchResultPollingInterval);
+        matchResultPollingInterval = null;
     }
 }
 
@@ -457,11 +624,7 @@ function showResultModal(didWin, resultData, originalRate) {
 
 function closeResultModal() {
     if (resultModal) resultModal.style.display = 'none';
-    if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-    if (opponentInfoArea) opponentInfoArea.innerHTML = '';
-    if (opponentInfoArea) opponentInfoArea.style.display = 'none';
-    if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex';
-    updateMatchUI();
+    updateMatchUI(true);
 }
 
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
@@ -484,10 +647,33 @@ function sendChatMessage() {
     }
     const messageText = matchChatInput.value.trim();
     if (messageText && currentMatchId) {
-        const messagePayload = { type: 'MATCH_CHAT_MESSAGE', matchId: currentMatchId, text: messageText }; // サーバーの WebSocketMessageTypes.MATCH_CHAT_MESSAGE に合わせる
+        const messagePayload = { type: 'MATCH_CHAT_MESSAGE', matchId: currentMatchId, text: messageText };
         matchWebSocket.send(JSON.stringify(messagePayload));
         appendChatMessage(messageText, true);
         matchChatInput.value = '';
+    }
+}
+
+function startHeartbeat() {
+    stopHeartbeat();
+    heartbeatInterval = setInterval(() => {
+        if (matchWebSocket && matchWebSocket.readyState === WebSocket.OPEN) {
+            try {
+                matchWebSocket.send(JSON.stringify({ type: 'PING' }));
+            } catch (e) {
+                console.error("Failed to send PING:", e);
+                stopHeartbeat();
+            }
+        } else {
+            stopHeartbeat();
+        }
+    }, 30000);
+}
+
+function stopHeartbeat() {
+    if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = null;
     }
 }
 
@@ -498,60 +684,77 @@ function connectWebSocket() {
         appendChatMessage("チャット接続情報が不足しています。", false, "システム"); return;
     }
 
-    // ▼▼▼ ★★★ ここから修正 ★★★ ▼▼▼
-    let baseUrl = window.MyApp.WEBSOCKET_URL; 
-    let path = ""; 
+    let baseUrl = window.MyApp.WEBSOCKET_URL;
+    let path = "";
 
-    if (baseUrl && !baseUrl.endsWith('/')) {
+    if (!baseUrl) {
+        console.error("WebSocket URL is not defined in window.MyApp.WEBSOCKET_URL");
+        appendChatMessage("チャット接続URL設定エラー。", false, "システム");
+        return;
+    }
+
+    if (!baseUrl.endsWith('/')) {
         baseUrl += '/';
     }
 
-    if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
-        path = "ws/"; 
+    const isProduction = !(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isProduction && (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com')) {
+         path = "ws/";
     }
-    // ▲▲▲ ★★★ ここまで修正 ★★★ ▲▲▲
-    
-    const wsUrl = `${baseUrl}${path}?token=${token}&matchId=${currentMatchId}`; 
 
-    const environment = (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') ? 'production' : 'local';
+    if (!baseUrl.startsWith('ws://') && !baseUrl.startsWith('wss://')) {
+        console.error("WebSocket URL must start with ws:// or wss://", baseUrl);
+        appendChatMessage("チャット接続URL設定エラー。", false, "システム");
+        return;
+    }
+
+    const wsUrl = `${baseUrl}${path}?token=${token}&matchId=${currentMatchId}`;
+
+    const environment = isProduction ? 'production' : 'local';
     console.log(`MATCH_WS_DEBUG (${environment}): Attempting to connect to:`, wsUrl);
-    console.log(`MATCH_WS_DEBUG (${environment}): window.MyApp.WEBSOCKET_URL type:`, typeof window.MyApp.WEBSOCKET_URL, "value:", window.MyApp.WEBSOCKET_URL);
-    console.log(`MATCH_WS_DEBUG (${environment}): token type:`, typeof token, "value:", token ? token.substring(0,10)+"..." : token);
-    console.log(`MATCH_WS_DEBUG (${environment}): currentMatchId type:`, typeof currentMatchId, "value:", currentMatchId);
+    // ... (デバッグログ) ...
 
     appendChatMessage("チャットサーバーに接続中...", false, "システム");
     try {
         matchWebSocket = new WebSocket(wsUrl);
-        matchWebSocket.onopen = () => appendChatMessage("チャットに接続しました。", false, "システム");
+        matchWebSocket.onopen = () => {
+            appendChatMessage("チャットに接続しました。", false, "システム");
+            startHeartbeat();
+        };
         matchWebSocket.onmessage = (event) => {
             try {
                 const messageData = JSON.parse(event.data);
-                // server.js の WebSocketMessageTypes.MATCH_CHAT_MESSAGE と WebSocketMessageTypes.SYSTEM_MESSAGE に合わせる
-                if (messageData.type === 'MATCH_CHAT_MESSAGE' && messageData.text) { 
+                if (messageData.type === 'PONG') { return; } // PONGは無視
+
+                if (messageData.type === 'MATCH_CHAT_MESSAGE' && messageData.text) {
                     const senderName = messageData.senderName || '相手';
-                    if (messageData.senderId !== window.MyApp?.currentUserData?.sub) { 
+                    if (messageData.senderId !== window.MyApp?.currentUserData?.sub) {
                          appendChatMessage(messageData.text, false, senderName);
                     }
-                } else if (messageData.type === 'SYSTEM_MESSAGE') { 
+                } else if (messageData.type === 'SYSTEM_MESSAGE') {
                     appendChatMessage(messageData.text, false, "システム");
-                } else if (messageData.type === 'OPPONENT_DISCONNECTED') { // server.js の WebSocketMessageTypes.OPPONENT_DISCONNECTED
+                } else if (messageData.type === 'OPPONENT_DISCONNECTED') {
                     appendChatMessage("相手が切断しました。", false, "システム");
                 }
             } catch (e) { console.error("Match WebSocket message parse error:", e); }
         };
         matchWebSocket.onerror = (error) => { console.error("Match WebSocket error:", error); appendChatMessage("チャット接続エラーが発生しました。", false, "システム");};
         matchWebSocket.onclose = (event) => {
-            if (event.code !== 1000) { 
+            stopHeartbeat();
+            const wasConnected = !!matchWebSocket;
+            matchWebSocket = null;
+            // 結果確定前ならメッセージ表示 (確定後は不要)
+            if (event.code !== 1000 && currentMatchId && !matchResultPollingInterval) {
                  appendChatMessage(`チャット接続が切れました (Code: ${event.code})`, false, "システム");
-            } else {
+            } else if (currentMatchId && !matchResultPollingInterval) {
                  appendChatMessage("チャットから切断しました。", false, "システム");
             }
-            matchWebSocket = null;
         };
     } catch (error) { console.error("Match WebSocket creation error:", error); appendChatMessage("チャット接続に失敗しました。", false, "システム");}
 }
 
 function disconnectWebSocket() {
+    stopHeartbeat();
     if (matchWebSocket) {
         matchWebSocket.close(1000, "Client requested disconnect");
         matchWebSocket = null;
