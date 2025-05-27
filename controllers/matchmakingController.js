@@ -1,15 +1,15 @@
 // controllers/matchmakingController.js
 const User = require('../models/User');
 const mongoose = require('mongoose');
-const Match = require('../models/Match'); // ★ Matchモデルをインポート
+const Match = require('../models/Match');
 
 // --- マッチングキュー (インメモリ) ---
 const matchmakingQueue = [];
 const MATCHMAKING_INTERVAL = 5000;
-const MATCHMAKING_TIMEOUT = 74999;
+const MATCHMAKING_TIMEOUT = 74999; // 75秒弱
 const INITIAL_RATE_RANGE = 20;
 const RATE_RANGE_INCREASE = 20;
-const RATE_RANGE_INCREASE_INTERVAL = 15000;
+const RATE_RANGE_INCREASE_INTERVAL = 15000; // 15秒ごと
 
 // --- Eloレーティング計算 ---
 const K_FACTOR = 30;
@@ -38,20 +38,22 @@ function calculateRateChange(currentRate, opponentRate, didWin, kFactor = K_FACT
 async function processMatchmakingQueue() {
     const now = new Date();
     const waitingUsers = matchmakingQueue.filter(user => user.status === 'waiting');
-    waitingUsers.sort((a, b) => a.rate - b.rate);
-    const matchedUserIds = new Set();
+    waitingUsers.sort((a, b) => a.rate - b.rate); // レート順にソート
+    const matchedUserIds = new Set(); // マッチング済みのユーザーIDを管理
 
     for (let i = 0; i < waitingUsers.length; i++) {
         const userA = waitingUsers[i];
         if (matchedUserIds.has(userA.userId) || userA.status !== 'waiting') {
-            continue;
+            continue; // 既にマッチング済みか、待機中でない場合はスキップ
         }
+
         const waitingTime = now.getTime() - userA.requestedAt.getTime();
         if (waitingTime > MATCHMAKING_TIMEOUT) {
             userA.status = 'timeout';
             console.log(`Matchmaking timeout for user: ${userA.name}`);
             continue;
         }
+
         const increaseSteps = Math.floor(waitingTime / RATE_RANGE_INCREASE_INTERVAL);
         const currentRateRange = INITIAL_RATE_RANGE + (increaseSteps * RATE_RANGE_INCREASE);
 
@@ -60,13 +62,13 @@ async function processMatchmakingQueue() {
             if (matchedUserIds.has(userB.userId) || userB.status !== 'waiting') {
                 continue;
             }
+
             const rateDiff = Math.abs(userA.rate - userB.rate);
             if (rateDiff <= currentRateRange) {
                 try {
-                    // ★★★ Matchモデルを使ってドキュメント作成 ★★★
                     const newMatch = new Match({
                         players: [userA.userId, userB.userId],
-                        status: 'matched', // デフォルトが 'matched' なので明示不要かも
+                        status: 'matched',
                     });
                     const savedMatch = await newMatch.save();
                     const matchId = savedMatch._id.toString();
@@ -77,21 +79,25 @@ async function processMatchmakingQueue() {
                         profile: userB.profile, badges: userB.badges, displayBadges: userB.displayBadges
                     };
                     userA.matchId = matchId;
+
                     userB.status = 'matched';
                     userB.opponent = {
                         googleId: userA.googleId, name: userA.name, picture: userA.picture, rate: userA.rate,
                         profile: userA.profile, badges: userA.badges, displayBadges: userA.displayBadges
                     };
                     userB.matchId = matchId;
+
                     matchedUserIds.add(userA.userId);
                     matchedUserIds.add(userB.userId);
-                    console.log(`Match found: ${userA.name} vs ${userB.name} MatchID: ${matchId}`);
-                    break;
+                    console.log(`Match found: ${userA.name} (Rate: ${userA.rate}) vs ${userB.name} (Rate: ${userB.rate}) MatchID: ${matchId}`);
+                    break; // userA の相手が見つかったので内側のループを抜ける
                 } catch (error) {
                     console.error("Error creating Match document:", error);
+                    // エラーが発生しても処理を続行（次のペアを探す）
                     continue;
                 }
             }
+            // レート差が許容範囲を超えたら、userAにとってはこれ以上探す意味がない (userB以降はさらにレート差が開くため)
             if (userB.rate - userA.rate > currentRateRange) {
                 break;
             }
@@ -104,14 +110,24 @@ setInterval(processMatchmakingQueue, MATCHMAKING_INTERVAL);
 exports.requestMatchmaking = async (req, res) => {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
     const currentUser = req.user;
+
+    // 既にキューにいるか、マッチング済みか確認
     const existingEntry = matchmakingQueue.find(user => user.userId === currentUser._id.toString());
     if (existingEntry && (existingEntry.status === 'waiting' || existingEntry.status === 'matched')) {
-        return res.status(200).json({ status: existingEntry.status, opponent: existingEntry.opponent, matchId: existingEntry.matchId });
+        // 既存のエントリ情報を返す（クライアント側で状態をハンドリングできるように）
+        return res.status(200).json({
+            status: existingEntry.status,
+            opponent: existingEntry.opponent,
+            matchId: existingEntry.matchId
+        });
     }
+
+    // 以前の古いエントリがあれば削除（例:タイムアウト後やキャンセル後に再度リクエストした場合など）
     const indexToRemove = matchmakingQueue.findIndex(user => user.userId === currentUser._id.toString());
     if (indexToRemove > -1) {
         matchmakingQueue.splice(indexToRemove, 1);
     }
+
     const newEntry = {
         userId: currentUser._id.toString(),
         googleId: currentUser.googleId,
@@ -122,13 +138,13 @@ exports.requestMatchmaking = async (req, res) => {
         badges: currentUser.badges,
         displayBadges: currentUser.displayBadges,
         requestedAt: new Date(),
-        status: 'waiting',
+        status: 'waiting', // 初期ステータスは待機中
         opponent: null,
         matchId: null,
     };
     matchmakingQueue.push(newEntry);
-    console.log(`User ${currentUser.name} added to matchmaking queue.`);
-    res.status(202).json({ status: 'waiting' });
+    console.log(`User ${currentUser.name} added to matchmaking queue. Queue size: ${matchmakingQueue.length}`);
+    res.status(202).json({ status: 'waiting' }); // 202 Accepted: リクエストは受け付けられたが処理は完了していない
 };
 
 // マッチングキュー状況確認API
@@ -138,9 +154,11 @@ exports.getMatchmakingStatus = async (req, res) => {
     const userEntry = matchmakingQueue.find(user => user.userId === currentUser._id.toString());
 
     if (!userEntry) {
+        // キューにいない場合は、not_found を返す
         return res.status(404).json({ status: 'not_found', message: 'Not currently in matchmaking queue.' });
     }
-    let index;
+
+    // ★★★ 修正点: ステータス確認だけではキューから削除しない ★★★
     switch (userEntry.status) {
         case 'waiting':
             res.status(200).json({ status: 'waiting' });
@@ -151,18 +169,19 @@ exports.getMatchmakingStatus = async (req, res) => {
                 opponent: userEntry.opponent,
                 matchId: userEntry.matchId
             });
-            index = matchmakingQueue.findIndex(u => u.userId === userEntry.userId);
-            if (index > -1) matchmakingQueue.splice(index, 1);
+            //  ユーザーが 'matched' 状態を確認した後、クライアント側で
+            //  マッチングキューから抜けるためのAPI (例: /api/matchmaking/leave-queue や /api/matchmaking/cancel)
+            //  を呼び出すことを想定します。
             break;
         case 'timeout':
             res.status(200).json({ status: 'timeout' });
-            index = matchmakingQueue.findIndex(u => u.userId === userEntry.userId);
-            if (index > -1) matchmakingQueue.splice(index, 1);
+            // タイムアウトしたユーザーは processMatchmakingQueue で status が 'timeout' になり、
+            // waitingUsers のフィルターで次のマッチング対象からは外れます。
+            // 明示的な削除はキャンセルAPIや、フロントエンドからのタイムアウト確認後のアクションに任せます。
             break;
         default:
-            res.status(500).json({ status: 'error', message: 'Unknown matchmaking status.' });
-            index = matchmakingQueue.findIndex(u => u.userId === userEntry.userId);
-            if (index > -1) matchmakingQueue.splice(index, 1);
+            console.warn(`Unknown status for user ${currentUser.name}: ${userEntry.status}`);
+            res.status(500).json({ status: 'error', message: 'Unknown matchmaking status in queue.' });
             break;
     }
 };
@@ -171,20 +190,19 @@ exports.getMatchmakingStatus = async (req, res) => {
 exports.cancelMatchmaking = async (req, res) => {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
     const currentUser = req.user;
-    const index = matchmakingQueue.findIndex(user => user.userId === currentUser._id.toString() && user.status === 'waiting');
+    const index = matchmakingQueue.findIndex(user => user.userId === currentUser._id.toString());
 
     if (index > -1) {
+        const userStatus = matchmakingQueue[index].status;
         matchmakingQueue.splice(index, 1);
-        console.log(`User ${currentUser.name} cancelled matchmaking.`);
-        res.status(200).json({ message: 'Matchmaking cancelled.' });
+        console.log(`User ${currentUser.name} (status: ${userStatus}) removed from matchmaking queue. Queue size: ${matchmakingQueue.length}`);
+        res.status(200).json({ message: 'Matchmaking cancelled or left successfully.' });
     } else {
-        const userEntry = matchmakingQueue.find(user => user.userId === currentUser._id.toString());
-        const currentStatus = userEntry ? userEntry.status : 'not found';
-        res.status(400).json({ message: `Cannot cancel. Current status: ${currentStatus}` });
+        // キューにいない場合は、既に処理されたか、最初からいなかった
+        res.status(404).json({ message: 'User not found in matchmaking queue to cancel.' });
     }
 };
 
-// ★★★ ここから新しいAPI / 修正API ★★★
 
 /**
  * 対戦結果を報告するAPI
@@ -221,10 +239,8 @@ exports.submitMatchReport = async (req, res) => {
             throw new Error('You have already reported the result.');
         }
 
-        // 報告を追加
-        match.reports.push({ player: currentUser._id, report: result });
+        match.reports.push({ player: currentUser._id, report: result, reportedAt: new Date() });
 
-        // 両者が報告したかチェック
         if (match.reports.length === 2) {
             const report1 = match.reports[0];
             const report2 = match.reports[1];
@@ -232,16 +248,22 @@ exports.submitMatchReport = async (req, res) => {
             const player1 = match.players.find(p => p._id.equals(report1.player));
             const player2 = match.players.find(p => p._id.equals(report2.player));
 
-            // 結果が一致するかチェック (片方がwin, もう片方がlose)
+            if(!player1 || !player2) { // 念のため
+                throw new Error('One of the reporting players not found in match.players.');
+            }
+
             const isConsistent = (report1.report === 'win' && report2.report === 'lose') ||
                                  (report1.report === 'lose' && report2.report === 'win');
 
             if (isConsistent) {
-                // --- 結果一致: レート計算と更新 ---
                 const winnerReport = report1.report === 'win' ? report1 : report2;
                 const loserReport = report1.report === 'lose' ? report1 : report2;
                 const winner = match.players.find(p => p._id.equals(winnerReport.player));
                 const loser = match.players.find(p => p._id.equals(loserReport.player));
+
+                if(!winner || !loser) { // 念のため
+                     throw new Error('Winner or loser not found among players.');
+                }
 
                 const originalWinnerRate = winner.rate;
                 const originalLoserRate = loser.rate;
@@ -261,12 +283,12 @@ exports.submitMatchReport = async (req, res) => {
                     rate: winnerNewRate,
                     points: winnerNewPoints,
                     $inc: { matchCount: 1 }
-                }, { session });
+                }, { session, new: true }); // new:true は不要だが害はない
                 await User.findByIdAndUpdate(loser._id, {
                     rate: loserNewRate,
                     points: loserNewPoints,
                     $inc: { matchCount: 1 }
-                }, { session });
+                }, { session, new: true });
 
                 match.winner = winner._id;
                 match.rateChange = [
@@ -280,8 +302,6 @@ exports.submitMatchReport = async (req, res) => {
                 session.endSession();
 
                 console.log(`Match ${matchId} finished. Winner: ${winner.name}`);
-
-                // 報告者に応じたレスポンスを返す
                 const isCurrentUserWinner = winner._id.equals(currentUser._id);
                 return res.status(200).json({
                     status: 'finished',
@@ -296,23 +316,21 @@ exports.submitMatchReport = async (req, res) => {
                 });
 
             } else {
-                // --- 結果不一致: disputed に設定 ---
                 match.status = 'disputed';
                 match.finishedAt = new Date();
                 await match.save({ session });
                 await session.commitTransaction();
                 session.endSession();
-                 console.log(`Match ${matchId} disputed.`);
+                console.log(`Match ${matchId} disputed.`);
                 return res.status(200).json({ status: 'disputed' });
             }
 
         } else {
-            // --- 片方のみ報告: reported_one に設定 ---
             match.status = 'reported_one';
             await match.save({ session });
             await session.commitTransaction();
             session.endSession();
-            console.log(`Match ${matchId} reported by one player.`);
+            console.log(`Match ${matchId} reported by one player (${currentUser.name}).`);
             return res.status(200).json({ status: 'waiting' });
         }
 
@@ -320,7 +338,8 @@ exports.submitMatchReport = async (req, res) => {
         await session.abortTransaction();
         session.endSession();
         console.error('Error submitting match report:', error);
-        return res.status(500).json({ message: 'Error submitting report', error: error.message });
+        // エラーオブジェクトのメッセージをそのまま返すか、汎用的なメッセージにするか選択
+        return res.status(500).json({ message: error.message || 'Error submitting report' });
     }
 };
 
@@ -343,15 +362,18 @@ exports.cancelMatch = async (req, res) => {
         if (!match) {
             return res.status(404).json({ message: 'Match not found.' });
         }
+        // プレイヤーでなくても、フロントエンドのボタン操作で呼ばれる可能性があるため、チェックは維持
         if (!match.players.some(p => p._id.equals(currentUser._id))) {
             return res.status(403).json({ message: 'You are not a player in this match.' });
         }
         if (['finished', 'disputed', 'cancelled'].includes(match.status)) {
-            return res.status(400).json({ message: 'Match is already concluded or cancelled.' });
+            // 既に終了している場合は、成功として返すか、エラーとして返すか選べる
+            // ここではクライアントが混乱しないように、現在のステータスを返す
+            return res.status(200).json({ status: match.status, message: 'Match is already concluded or cancelled.' });
         }
 
         match.status = 'cancelled';
-        match.finishedAt = new Date();
+        match.finishedAt = new Date(); // キャンセル日時を記録
         await match.save();
 
         console.log(`Match ${matchId} cancelled by ${currentUser.name}`);
@@ -380,39 +402,41 @@ exports.getMatchStatus = async (req, res) => {
         const match = await Match.findById(matchId).populate('players', 'name rate points');
 
         if (!match) {
-            return res.status(404).json({ message: 'Match not found.' });
+            return res.status(404).json({ status: 'not_found', message: 'Match not found.' });
         }
-         if (!match.players.some(p => p._id.equals(currentUser._id))) {
+        if (!match.players.some(p => p._id.equals(currentUser._id))) {
+            // マッチのプレイヤーでなくても、マッチが存在すればステータスは返せるようにするかどうか。
+            // セキュリティ上、プレイヤーのみが確認できるようにする。
             return res.status(403).json({ message: 'You are not a player in this match.' });
         }
 
         let responseData = { status: match.status };
 
-        // 'finished' の場合、報告者に応じた結果データを付与
         if (match.status === 'finished' && match.winner && match.rateChange.length === 2) {
             const winnerData = match.players.find(p => p._id.equals(match.winner));
             const loserData = match.players.find(p => !p._id.equals(match.winner));
-            const winnerRateData = match.rateChange.find(rc => rc.player.equals(winnerData._id));
-            const loserRateData = match.rateChange.find(rc => rc.player.equals(loserData._id));
 
-            // Populate がないと rateChange は見つからない可能性があるので、チェック
-            if (!winnerData || !loserData || !winnerRateData || !loserRateData) {
-                 return res.status(500).json({ message: 'Internal error: Could not process finished match data.' });
+            // レート変更情報を特定
+            const winnerRateChangeEntry = match.rateChange.find(rc => rc.player.equals(winnerData._id));
+            const loserRateChangeEntry = match.rateChange.find(rc => rc.player.equals(loserData._id));
+
+
+            if (!winnerData || !loserData || !winnerRateChangeEntry || !loserRateChangeEntry) {
+                 console.error(`Error processing finished match data for match ${matchId}: Missing player or rateChange data.`);
+                 return res.status(500).json({ message: 'Internal error: Could not fully process finished match data.' });
             }
 
-
             const isCurrentUserWinner = winnerData._id.equals(currentUser._id);
-            // 元のレートを計算 (現在のレート - 変動値)
-            const originalWinnerRate = winnerData.rate - winnerRateData.change;
-            const originalLoserRate = loserData.rate - loserRateData.change;
-            const pointsEarned = isCurrentUserWinner ? 100 : 50;
-
+            // 元のレートは、現在のレートから変動値を引いて計算
+            const originalWinnerRate = winnerData.rate - winnerRateChangeEntry.change;
+            const originalLoserRate = loserData.rate - loserRateChangeEntry.change;
+            const pointsEarned = isCurrentUserWinner ? 100 : 50; // ポイントは固定
 
             responseData.resultData = {
                 didWin: isCurrentUserWinner,
                 originalRate: isCurrentUserWinner ? originalWinnerRate : originalLoserRate,
                 newRate: isCurrentUserWinner ? winnerData.rate : loserData.rate,
-                rateChange: isCurrentUserWinner ? winnerRateData.change : loserRateData.change,
+                rateChange: isCurrentUserWinner ? winnerRateChangeEntry.change : loserRateChangeEntry.change,
                 pointsEarned: pointsEarned,
                 newPoints: isCurrentUserWinner ? winnerData.points : loserData.points,
             };
@@ -421,7 +445,7 @@ exports.getMatchStatus = async (req, res) => {
         return res.status(200).json(responseData);
 
     } catch (error) {
-         console.error('Error getting match status:', error);
+         console.error(`Error getting match status for ${matchId}:`, error);
          return res.status(500).json({ message: 'Error getting match status', error: error.message });
     }
 };
