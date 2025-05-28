@@ -328,7 +328,11 @@ function renderRateHistoryChart(historyData) {
     const data = historyData.map(item => item.rate);
     rateHistoryChart = new Chart(rateHistoryCtx, {
         type: 'line', data: { labels, datasets: [{ label: 'レート', data, borderColor: 'rgb(75, 192, 192)', tension: 0.1, fill: false }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.7)' } }, x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.7)' } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false }, datalabels: { display: false } } }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.7)' } },x: {
+                    grid: { display: false },
+                    ticks: {
+                        display: false // ★★★ この行でX軸ラベルを非表示にします ★★★
+                    } } }, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false }, datalabels: { display: false } } }
     });
 }
 
