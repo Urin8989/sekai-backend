@@ -17,9 +17,9 @@ let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfil
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
 let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton, reportLoseButton, cancelBattleButton, battleStatusText;
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
-let lobbyInstructionElement; // ★ ロビー指示要素をグローバルに追加
+let lobbyInstructionElement;
 
-const MATCH_STATE_KEY = 'mkbrMatchState_v4'; // 状態保存キー (バージョンアップ)
+const MATCH_STATE_KEY = 'mkbrMatchState_v4';
 
 // --- ヘルパー関数 ---
 
@@ -94,43 +94,43 @@ document.addEventListener('DOMContentLoaded', () => {
     resultPointsEarned = document.getElementById('result-points-earned');
     resultNewPoints = document.getElementById('result-new-points');
     closeResultModalButton = document.getElementById('close-result-modal');
-    lobbyInstructionElement = document.getElementById('lobby-creation-instruction'); // ★ ロビー指示要素を取得
+    lobbyInstructionElement = document.getElementById('lobby-creation-instruction');
 
     loadStateFromSessionStorage();
 
     if (typeof window.registerUserDataReadyCallback === 'function') {
         window.registerUserDataReadyCallback((loggedInUserData) => {
-            console.log("[match.js] User data ready. Updating UI.");
+            console.log("[match_ui.js] User data ready. Updating UI.");
             updateMatchUI();
             resumePollingBasedOnState();
         });
     } else {
-        console.error("[match.js] registerUserDataReadyCallback function not found.");
+        console.error("[match_ui.js] registerUserDataReadyCallback function not found.");
         updateMatchUI();
     }
 
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((user) => {
             if (!window.MyApp?.isUserLoggedIn) {
-                console.log("[match.js] User logged out. Clearing state.");
+                console.log("[match_ui.js] User logged out. Clearing state.");
                 clearMatchStateAndUI(true);
             } else {
-                console.log("[match.js] User logged in. Updating UI and maybe resuming poll.");
+                console.log("[match_ui.js] User logged in. Updating UI and maybe resuming poll.");
                 updateMatchUI();
                 resumePollingBasedOnState();
             }
         });
     } else {
-        console.error("[match.js] onLoginStatusChange function not found.");
+        console.error("[match_ui.js] onLoginStatusChange function not found.");
     }
 
-    // イベントリスナーの設定 (match_actions.js の関数を呼び出す)
     matchButton?.addEventListener('click', startMatchmaking);
     cancelButton?.addEventListener('click', cancelMatchmakingRequest);
     startBattleButton?.addEventListener('click', () => {
         if (reportResultButtons) reportResultButtons.style.display = 'flex';
         if (startBattleButton) startBattleButton.style.display = 'none';
-        if (battleStatusText) battleStatusText.textContent = '対戦結果を選択してください。';
+        // ★★★ 「対戦結果を選択してください。」テキストを削除 ★★★
+        if (battleStatusText) battleStatusText.textContent = ''; 
     });
     reportWinButton?.addEventListener('click', () => submitReport('win'));
     reportLoseButton?.addEventListener('click', () => submitReport('lose'));
@@ -166,7 +166,6 @@ function saveStateToSessionStorage() {
     };
     try {
         sessionStorage.setItem(MATCH_STATE_KEY, JSON.stringify(state));
-        console.log("[match.js] State saved:", state);
     } catch (e) {
         console.error("Error saving state to sessionStorage:", e);
     }
@@ -177,27 +176,29 @@ function loadStateFromSessionStorage() {
         const savedStateString = sessionStorage.getItem(MATCH_STATE_KEY);
         if (savedStateString) {
             const savedState = JSON.parse(savedStateString);
-            console.log("[match.js] Loading state:", savedState);
-
             currentMatchId = savedState.currentMatchId || null;
             currentOpponentData = savedState.currentOpponentData || null;
             isMatching = savedState.isMatching || false;
             isPollingForResult = savedState.isPollingForResult || false;
-            isSubmittingResult = false; // リロード時は送信中状態をリセット
+            isSubmittingResult = false;
 
-            if (currentMatchId && currentOpponentData) {
-                isMatching = false;
-            } else if (isMatching) {
-                currentMatchId = null; currentOpponentData = null; isPollingForResult = false;
-            } else {
-                isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false;
-            }
+            if (currentMatchId && currentOpponentData) isMatching = false;
+            else if (isMatching) { currentMatchId = null; currentOpponentData = null; isPollingForResult = false; }
+            else { isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; }
+
             if (battleStatusText && savedState.battleStatusTextContent) {
-                battleStatusText.textContent = savedState.battleStatusTextContent;
+                // ★★★ 保存されたテキストが削除対象のテキストの場合、復元しない ★★★
+                const textsToRemove = [
+                    '対戦が終了したら結果を報告してください。',
+                    '対戦結果を選択してください。'
+                ];
+                if (!textsToRemove.includes(savedState.battleStatusTextContent)) {
+                    battleStatusText.textContent = savedState.battleStatusTextContent;
+                } else {
+                    battleStatusText.textContent = ''; // 削除対象なら空にする
+                }
             }
-
         } else {
-            console.log("[match.js] No state found.");
             isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; isSubmittingResult = false;
         }
     } catch (e) {
@@ -210,25 +211,18 @@ function loadStateFromSessionStorage() {
 function resumePollingBasedOnState() {
     if (window.MyApp?.isUserLoggedIn && typeof window.getAuthToken === 'function' && window.getAuthToken()) {
         if (isMatching && !matchmakingStatusInterval) {
-            console.log("[match.js] Resuming matchmaking polling.");
             startPollingMatchStatus();
         } else if (currentMatchId && isPollingForResult && !matchResultPollingInterval) {
-            console.log("[match.js] Resuming match result polling.");
             startPollingMatchResult();
         } else if (currentMatchId && currentOpponentData && !isPollingForResult) {
             displayLobbyInstructionWithRandomPlayer(currentOpponentData);
         }
-    } else {
-        console.log("[match.js] Not logged in or no token, cannot resume polling.");
-        if (!window.MyApp?.isUserLoggedIn && (isMatching || currentMatchId)) {
-            console.warn("[match.js] Clearing state: User not logged in on resume attempt.");
-            clearMatchStateAndUI(true);
-        }
+    } else if (!window.MyApp?.isUserLoggedIn && (isMatching || currentMatchId)) {
+        clearMatchStateAndUI(true);
     }
 }
 
 function clearMatchStateAndUI(updateUIFlag = true) {
-    console.log("[match.js] Clearing match state.");
     sessionStorage.removeItem(MATCH_STATE_KEY);
     isMatching = false;
     currentMatchId = null;
@@ -253,11 +247,8 @@ function clearMatchStateAndUI(updateUIFlag = true) {
 // --- UI表示関数 ---
 
 function displayMyProfileInfo(userData) {
-    if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) {
-        return;
-    }
+    if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) return;
     const defaultAvatar = getDefaultAvatarPath();
-    const defaultBadgeImg = getDefaultBadgePath();
 
     if (userData) {
         myProfilePic.src = userData.picture || defaultAvatar;
@@ -271,7 +262,7 @@ function displayMyProfileInfo(userData) {
 
         if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
             const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
-            const badgesToDisplay = userData.displayBadges && userData.displayBadges.length > 0
+            const badgesToDisplay = userData.displayBadges?.length > 0
                 ? userData.displayBadges
                 : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
             window.displayBadges(badgeSlots, badgesToDisplay);
@@ -295,9 +286,7 @@ function displayOpponentInfo(opponentData) {
     const defaultAvatar = getDefaultAvatarPath();
     const defaultBadgeImg = getDefaultBadgePath();
     const opponentProfile = opponentData.profile || {};
-    const opponentBadges = opponentData.badges || [];
-    const opponentDisplayBadges = opponentData.displayBadges || [];
-    const opponentBadgesToDisplay = opponentDisplayBadges.length > 0 ? opponentDisplayBadges : [...new Set(opponentBadges)].slice(0, 3);
+    const opponentBadgesToDisplay = (opponentData.displayBadges?.length > 0 ? opponentData.displayBadges : [...new Set(opponentData.badges || [])].slice(0, 3));
 
     let badgesHtml = opponentBadgesToDisplay.map(badgeId => {
         const imgPath = typeof window.getBadgeImagePath === 'function' ? window.getBadgeImagePath(badgeId) : defaultBadgeImg;
@@ -334,27 +323,27 @@ function displayLobbyInstructionWithRandomPlayer(opponentData) {
     }
     const opponentName = opponentData ? opponentData.name : null;
     const myName = myProfileNameElement ? myProfileNameElement.textContent : null;
+
     if (!opponentName || !myName || myName === '---' || opponentName === '---') {
-        lobbyInstructionElement.innerHTML = "マッチングしました！<br>ロビーを作成してください。";
+        lobbyInstructionElement.innerHTML = "マッチングしました！<br>ロビーを作成してください。"; // このフォールバックは残す
         lobbyInstructionElement.style.display = 'block';
         return;
     }
     const players = [myName, opponentName];
     const selectedPlayerIndex = Math.floor(Math.random() * players.length);
     const lobbyCreatorName = escapeHTML(players[selectedPlayerIndex]);
-    const lobbyNamePlayer = escapeHTML(players[1 - selectedPlayerIndex]);
-    lobbyInstructionElement.innerHTML = `マッチングしました！<br><b>${lobbyCreatorName}</b> さんが、<b>${lobbyNamePlayer}</b> さんの名前をロビー名にしてプライベートロビーを作成してください。`;
+
+    // ★★★ ロビー作成指示テキストを変更 ★★★
+    lobbyInstructionElement.innerHTML = `マッチングしました！<br><b>${lobbyCreatorName}</b> さん、ロビーを作成してください。`;
     lobbyInstructionElement.style.display = 'block';
 }
 
 function hideLobbyInstruction() {
-    if (lobbyInstructionElement) {
-        lobbyInstructionElement.style.display = 'none';
-    }
+    if (lobbyInstructionElement) lobbyInstructionElement.style.display = 'none';
 }
 
 function updateMatchUI() {
-    console.log("[match.js] Updating UI. State:", { isMatching, currentMatchId, isPollingForResult, isSubmittingResult });
+    console.log("[match_ui.js] Updating UI. State:", { isMatching, currentMatchId, isPollingForResult, isSubmittingResult });
     const user = window.MyApp?.currentUserData;
     const loggedIn = !!window.MyApp?.isUserLoggedIn;
     displayMyProfileInfo(user);
@@ -393,10 +382,18 @@ function updateMatchUI() {
             if (isSubmittingResult || isPollingForResult) {
                 hide(startBattleButton); show(reportResultButtons);
                 disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
-                setText(battleStatusText, isSubmittingResult ? '結果送信中...' : '相手の報告を待っています...');
+                // ★★★ battleStatusText の表示を制御 ★★★
+                if (isSubmittingResult) {
+                    setText(battleStatusText, '結果送信中...');
+                } else if (isPollingForResult) {
+                    setText(battleStatusText, '相手の報告を待っています...');
+                } else {
+                    setText(battleStatusText, ''); // それ以外（報告済みで相手待ちなど）は空欄か、別の適切なテキスト
+                }
             } else {
                 show(startBattleButton); hide(reportResultButtons);
-                setText(battleStatusText, '対戦が終了したら結果を報告してください。');
+                // ★★★ 「対戦が終了したら結果を報告してください。」テキストを削除 ★★★
+                setText(battleStatusText, ''); 
             }
             if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) connectWebSocket();
         } else {

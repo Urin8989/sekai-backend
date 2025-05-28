@@ -233,16 +233,18 @@ async function cancelBattle() {
  * @param {object} responseData - サーバーからのレスポンスデータ
  */
 function handleReportResponse(responseData) {
-    stopPollingMatchResult();
-    disconnectWebSocket();
-    stopHeartbeat();
+    stopPollingMatchResult(); // 結果ポーリングはここで停止
+    // WebSocketの切断とハートビート停止は、clearMatchStateAndUI に任せる
+    // disconnectWebSocket(); // ★★★ 削除 ★★★
+    // stopHeartbeat(); // ★★★ 削除 ★★★
+    
     isSubmittingResult = false;
     hideLobbyInstruction();
 
     switch (responseData.status) {
         case 'waiting':
             isPollingForResult = true;
-            startPollingMatchResult();
+            startPollingMatchResult(); // 相手の報告を待つために再度ポーリング開始
             updateMatchUI(); // UIを更新して「相手の報告を待っています...」などを表示
             break;
         case 'finished':
@@ -250,17 +252,18 @@ function handleReportResponse(responseData) {
             const originalRate = responseData.resultData?.originalRate ?? window.MyApp?.currentUserData?.rate;
             updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints);
             showResultModal(responseData.resultData.didWin, responseData.resultData, originalRate);
-            // ここでは updateMatchUI() を呼び出さない。モーダルクローズ時に clearMatchStateAndUI が呼ばれる。
+            // チャットはこのモーダルが表示されている間もアクティブ
+            // モーダルが閉じられると clearMatchStateAndUI が呼ばれ、そこでWebSocketが切断される
             break;
         case 'disputed':
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = '報告が一致しませんでした。この対戦は無効になります。';
-            // ボタンを無効化して、メッセージ表示後にUIがリセットされるようにする
             if (reportResultButtons) reportResultButtons.style.display = 'flex';
             if (startBattleButton) startBattleButton.style.display = 'none';
             if (reportWinButton) reportWinButton.disabled = true;
             if (reportLoseButton) reportLoseButton.disabled = true;
             if (cancelBattleButton) cancelBattleButton.disabled = true;
+            // チャットはこのメッセージが表示されている間もアクティブ
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
         case 'cancelled':
@@ -271,6 +274,7 @@ function handleReportResponse(responseData) {
             if (reportWinButton) reportWinButton.disabled = true;
             if (reportLoseButton) reportLoseButton.disabled = true;
             if (cancelBattleButton) cancelBattleButton.disabled = true;
+            // チャットはこのメッセージが表示されている間もアクティブ
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
         default: // 不明なステータス
@@ -281,6 +285,7 @@ function handleReportResponse(responseData) {
             if (reportWinButton) reportWinButton.disabled = true;
             if (reportLoseButton) reportLoseButton.disabled = true;
             if (cancelBattleButton) cancelBattleButton.disabled = true;
+            // チャットはこのメッセージが表示されている間もアクティブ
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
     }
@@ -384,7 +389,7 @@ function stopHeartbeat() {
 function connectWebSocket() {
     if (matchWebSocket && (matchWebSocket.readyState === WebSocket.OPEN || matchWebSocket.readyState === WebSocket.CONNECTING)) return;
     const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
-    let wsUrl = window.MyApp?.WEBSOCKET_URL; // let に変更
+    let wsUrl = window.MyApp?.WEBSOCKET_URL; 
 
     if (!currentMatchId || !token || !wsUrl) {
         appendChatMessage("チャット接続情報が不足またはURL未設定です。", false, "システム"); return;
