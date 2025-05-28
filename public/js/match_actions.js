@@ -138,7 +138,7 @@ async function handleMatchFound(opponentData, matchId) {
     if (matchChatMessagesArea) {
         matchChatMessagesArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
     }
-    connectWebSocket(); // ★★★ ここで修正された connectWebSocket が呼ばれる ★★★
+    connectWebSocket();
 
     try {
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/cancel`;
@@ -243,30 +243,47 @@ function handleReportResponse(responseData) {
         case 'waiting':
             isPollingForResult = true;
             startPollingMatchResult();
+            updateMatchUI(); // UIを更新して「相手の報告を待っています...」などを表示
             break;
         case 'finished':
             isPollingForResult = false;
             const originalRate = responseData.resultData?.originalRate ?? window.MyApp?.currentUserData?.rate;
             updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints);
             showResultModal(responseData.resultData.didWin, responseData.resultData, originalRate);
+            // ここでは updateMatchUI() を呼び出さない。モーダルクローズ時に clearMatchStateAndUI が呼ばれる。
             break;
         case 'disputed':
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = '報告が一致しませんでした。この対戦は無効になります。';
+            // ボタンを無効化して、メッセージ表示後にUIがリセットされるようにする
+            if (reportResultButtons) reportResultButtons.style.display = 'flex';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportWinButton) reportWinButton.disabled = true;
+            if (reportLoseButton) reportLoseButton.disabled = true;
+            if (cancelBattleButton) cancelBattleButton.disabled = true;
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
         case 'cancelled':
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = '対戦がキャンセルされました。';
+            if (reportResultButtons) reportResultButtons.style.display = 'flex';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportWinButton) reportWinButton.disabled = true;
+            if (reportLoseButton) reportLoseButton.disabled = true;
+            if (cancelBattleButton) cancelBattleButton.disabled = true;
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
-        default:
+        default: // 不明なステータス
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = `不明な応答 (${responseData.status}) を受信。`;
+            if (reportResultButtons) reportResultButtons.style.display = 'flex';
+            if (startBattleButton) startBattleButton.style.display = 'none';
+            if (reportWinButton) reportWinButton.disabled = true;
+            if (reportLoseButton) reportLoseButton.disabled = true;
+            if (cancelBattleButton) cancelBattleButton.disabled = true;
             setTimeout(() => clearMatchStateAndUI(true), 2000);
             break;
     }
-    updateMatchUI();
     saveStateToSessionStorage();
 }
 
@@ -373,24 +390,18 @@ function connectWebSocket() {
         appendChatMessage("チャット接続情報が不足またはURL未設定です。", false, "システム"); return;
     }
 
-    // ★★★ community.js からのロジックを適用 ★★★
     let path = "";
-    // ベースURLの末尾に / がなければ追加
     if (wsUrl && !wsUrl.endsWith('/')) wsUrl += '/'; 
-    // 本番環境なら ws/ パスを追加
     if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
         path = "ws/";
     }
-    // URL形式チェック
     if (!wsUrl || (!wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://'))) {
         appendChatMessage('無効なWebSocket URLです。 ws:// または wss:// で始まる必要があります。', false, "システム");
         return;
     }
-    // ★★★ 適用ここまで ★★★
 
-    // ★★★ URL構築を修正 ★★★
     const fullWsUrl = `${wsUrl}${path}?token=${token}&matchId=${currentMatchId}`;
-    console.log(`[match_actions.js] Connecting to WebSocket: ${fullWsUrl}`); // ログを修正
+    console.log(`[match_actions.js] Connecting to WebSocket: ${fullWsUrl}`);
     appendChatMessage("チャットサーバーに接続中...", false, "システム");
 
     try {
@@ -413,7 +424,6 @@ function connectWebSocket() {
         matchWebSocket.onclose = (event) => {
             stopHeartbeat();
             if (event.code !== 1000 && currentMatchId) {
-                // ★★★ 1006エラーの場合にメッセージを追加 ★★★
                 const codeMsg = event.code === 1006 ? ' (接続が異常終了しました)' : '';
                 appendChatMessage(`チャット接続が切れました (Code: ${event.code}${codeMsg})`, false, "システム");
             }
