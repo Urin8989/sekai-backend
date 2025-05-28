@@ -98,7 +98,7 @@ function startPollingMatchStatus() {
                     if (matchStatusText) matchStatusText.textContent = result.status === 'timeout' ? '時間内に相手が見つかりませんでした。' : 'マッチングが終了しました。';
                     break;
                 default:
-                    console.warn("[match.js] Unknown status:", result.status);
+                    console.warn("[match_actions.js] Unknown status:", result.status);
                     stopPollingMatchStatus();
                     clearMatchStateAndUI(true);
                     break;
@@ -138,14 +138,14 @@ async function handleMatchFound(opponentData, matchId) {
     if (matchChatMessagesArea) {
         matchChatMessagesArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
     }
-    connectWebSocket();
+    connectWebSocket(); // ★★★ ここで修正された connectWebSocket が呼ばれる ★★★
 
     try {
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/cancel`;
         await authenticatedFetch(apiUrl, { method: 'POST' });
-        console.log("[match.js] Left matchmaking queue after match found.");
+        console.log("[match_actions.js] Left matchmaking queue after match found.");
     } catch (error) {
-        console.error("[match.js] Error leaving matchmaking queue:", error);
+        console.error("[match_actions.js] Error leaving matchmaking queue:", error);
     }
 }
 
@@ -367,14 +367,30 @@ function stopHeartbeat() {
 function connectWebSocket() {
     if (matchWebSocket && (matchWebSocket.readyState === WebSocket.OPEN || matchWebSocket.readyState === WebSocket.CONNECTING)) return;
     const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : null;
-    const wsUrl = window.MyApp?.WEBSOCKET_URL;
+    let wsUrl = window.MyApp?.WEBSOCKET_URL; // let に変更
 
     if (!currentMatchId || !token || !wsUrl) {
         appendChatMessage("チャット接続情報が不足またはURL未設定です。", false, "システム"); return;
     }
 
-    const fullWsUrl = `${wsUrl.replace(/\/$/, '')}/?token=${token}&matchId=${currentMatchId}`;
-    console.log(`[match.js] Connecting to WebSocket: ${fullWsUrl}`);
+    // ★★★ community.js からのロジックを適用 ★★★
+    let path = "";
+    // ベースURLの末尾に / がなければ追加
+    if (wsUrl && !wsUrl.endsWith('/')) wsUrl += '/'; 
+    // 本番環境なら ws/ パスを追加
+    if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
+        path = "ws/";
+    }
+    // URL形式チェック
+    if (!wsUrl || (!wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://'))) {
+        appendChatMessage('無効なWebSocket URLです。 ws:// または wss:// で始まる必要があります。', false, "システム");
+        return;
+    }
+    // ★★★ 適用ここまで ★★★
+
+    // ★★★ URL構築を修正 ★★★
+    const fullWsUrl = `${wsUrl}${path}?token=${token}&matchId=${currentMatchId}`;
+    console.log(`[match_actions.js] Connecting to WebSocket: ${fullWsUrl}`); // ログを修正
     appendChatMessage("チャットサーバーに接続中...", false, "システム");
 
     try {
@@ -397,7 +413,9 @@ function connectWebSocket() {
         matchWebSocket.onclose = (event) => {
             stopHeartbeat();
             if (event.code !== 1000 && currentMatchId) {
-                appendChatMessage(`チャット接続が切れました (Code: ${event.code})`, false, "システム");
+                // ★★★ 1006エラーの場合にメッセージを追加 ★★★
+                const codeMsg = event.code === 1006 ? ' (接続が異常終了しました)' : '';
+                appendChatMessage(`チャット接続が切れました (Code: ${event.code}${codeMsg})`, false, "システム");
             }
             matchWebSocket = null;
         };

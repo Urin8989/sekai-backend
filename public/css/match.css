@@ -218,18 +218,27 @@
 .button-group { display: flex; flex-direction: column; align-items: stretch; gap: 18px; width: 100%; max-width: 300px; }
 #match-button, #cancel-match-button { width: 100%; box-sizing: border-box; font-size: 1.1rem; padding: 12px 10px;}
 
-/* --- 対戦チャット (community.css のスタイルを参考に大幅変更) --- */
+/* --- 対戦チャット --- */
 .match-chat-container {
     width: 100%;
     max-width: 600px;
-    margin-top: 30px;
+    margin-top: 20px; /* 少しマージン調整 */
     background-color: var(--color-surface-alpha);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-medium);
     padding: 15px;
     box-shadow: var(--shadow-light);
+    /* ★★★ Flexboxを使用して縦並びレイアウトにする ★★★ */
+    display: flex;
+    flex-direction: column;
+    /* ★★★ チャットコンテナの高さを設定（この高さはレイアウトに合わせて調整してください） ★★★ */
+    height: 450px; /* 例: 高さを450pxに設定 */
 }
+
 .match-chat-title {
+    /* ★★★ タイトルを非表示にする ★★★ */
+    display: none; 
+    /*
     margin-top: 0;
     margin-bottom: 15px;
     text-align: center;
@@ -237,47 +246,51 @@
     font-size: 1.1rem;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 10px;
+    */
 }
 
 .match-chat-messages-area {
-    height: 250px;
+    /* height: 250px; /* ★★★ 固定の高さを削除 ★★★ */
     background-color: rgba(10,10,15,0.85);
     border: 1px solid rgba(255,255,255,0.1);
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.4);
     border-radius: var(--border-radius-medium);
-    padding: 1.2rem;
+    padding: 1rem; /* 少しパディング調整 */
     overflow-y: auto;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem; /* 入力エリアとのスペースを少し調整 */
+    /* ★★★ Flexboxの子要素として、利用可能なスペースを埋めるように成長させる ★★★ */
+    flex-grow: 1;
+    
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem; /* メッセージ間のスペースを少し調整 */
 }
 .match-chat-messages-area::-webkit-scrollbar { width: 8px; }
 .match-chat-messages-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.08); border-radius: 4px;}
 .match-chat-messages-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 4px; border: 1px solid rgba(0,0,0,0.15);}
 .match-chat-messages-area::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.6); }
 
-.match-chat-messages-area .chat-message {
+.match-chat-messages-area .match-chat-message { /* .chat-message でも可 */
     max-width: 85%;
-    padding: 0.8rem 1.3rem;
+    padding: 0.7rem 1.1rem; /* 少しパディング調整 */
     border-radius: 10px;
     line-height: 1.5;
     font-size: 0.9rem;
     word-wrap: break-word;
     display: flex;
-    gap: 0.8rem;
+    gap: 0.6rem; /* アバターと内容の間のスペースを少し調整 */
     border: none;
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
-.match-chat-messages-area .opponent-message { /* JSで opponent-message クラスが付与される想定 */
+.match-chat-messages-area .opponent-message {
     background: linear-gradient(145deg, rgba(70,70,80,0.9), rgba(55,55,65,0.95));
     color: var(--color-text-primary);
     align-self: flex-start;
     border-top-left-radius: 0;
 }
 
-.match-chat-messages-area .own-message { /* JSで own-message クラスが付与される想定 (旧 my-message) */
+.match-chat-messages-area .own-message {
     background: linear-gradient(145deg, rgba(var(--color-primary-rgb,255,215,0),0.5), rgba(var(--color-primary-rgb,255,215,0),0.35));
     color: #fff;
     align-self: flex-end;
@@ -286,7 +299,7 @@
     box-shadow: 0 3px 8px rgba(0,0,0,0.4), 0 0 5px rgba(var(--color-primary-rgb,255,215,0),0.3);
 }
 
-.match-chat-messages-area .system-message { /* JSで chat-system-message クラスが付与される想定 */
+.match-chat-messages-area .system-message {
     font-size: 0.8rem;
     color: var(--color-text-secondary);
     text-align: center;
@@ -300,10 +313,10 @@
     display: block;
 }
 
-.match-chat-messages-area .chat-message .message-sender {
+.match-chat-messages-area .match-chat-message .message-sender {
     flex-shrink: 0;
 }
-.match-chat-messages-area .chat-message .chat-avatar {
+.match-chat-messages-area .match-chat-message .chat-avatar {
     width: 38px;
     height: 38px;
     border-radius: 50%;
@@ -312,7 +325,7 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-.match-chat-messages-area .chat-message .message-content-wrapper {
+.match-chat-messages-area .match-chat-message .message-content-wrapper {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -321,7 +334,7 @@
     align-items: flex-end;
 }
 
-.match-chat-messages-area .chat-message .message-meta {
+.match-chat-messages-area .match-chat-message .message-meta {
     display: flex;
     align-items: baseline;
     margin-bottom: 0.4rem;
@@ -334,34 +347,37 @@
     justify-content: flex-end;
 }
 
-.match-chat-messages-area .chat-message .message-sender-name {
+.match-chat-messages-area .match-chat-message .message-sender-name {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--gold-light-color);
 }
 .match-chat-messages-area .own-message .message-sender-name {
-    display: none; /* 自分の名前は表示しない */
+    display: none; 
 }
 .match-chat-messages-area .opponent-message .message-sender-name {
     margin-right: 0.5em;
 }
 
-.match-chat-messages-area .chat-message .message-timestamp {
+.match-chat-messages-area .match-chat-message .message-timestamp {
     font-size: 0.7rem;
     color: var(--color-text-secondary);
     opacity: 0.8;
 }
 
-.match-chat-messages-area .chat-message .message-text {
+.match-chat-messages-area .match-chat-message .message-text {
     margin: 0;
     order: 1;
     background-color: transparent !important;
     padding: 0 !important;
     border: none !important;
-    text-align: left;
-    color: inherit; /* own-message, opponent-message の色を継承 */
+    text-align: left; 
+    color: inherit; 
 }
-/* システムメッセージ内のspanにも適用 */
+/* ★★★ 自分のメッセージのテキストは右寄せに ★★★ */
+.match-chat-messages-area .own-message .message-text {
+    text-align: right;
+}
 .match-chat-messages-area .system-message .message-text {
     text-align: center;
     color: var(--color-text-secondary);
@@ -372,8 +388,10 @@
     display: flex;
     gap: 0.8rem;
     align-items: center;
-    padding: 0.8rem 0;
+    padding-top: 0.8rem; /* 上のボーダーとの間のスペース */
     border-top: 1px solid rgba(255,255,255,0.1);
+    /* ★★★ Flexboxの子要素として、縮まないようにする ★★★ */
+    flex-shrink: 0;
 }
 .match-chat-input {
     flex-grow: 1;
@@ -444,16 +462,14 @@
         gap: 20px;
         padding: 15px;
         max-width: 900px;
-        /* 2カラムは維持 */
     }
 
     #my-profile, #opponent-profile {
         padding: 18px;
         gap: 12px 18px;
-        min-height: 0; /* min-height をリセット */
-
+        min-height: 0; 
         display: grid;
-        grid-template-columns: auto 1fr; /* アバターとそれ以外 */
+        grid-template-columns: auto 1fr; 
         grid-template-rows: auto auto auto auto;
         grid-template-areas:
             "avatar name-rate"
@@ -466,10 +482,10 @@
     #my-profile .profile-avatar,
     #opponent-profile .profile-avatar,
     #opponent-profile #opponent-info > img {
-        width: 65px; /* サイズ調整 */
-        height: 65px; /* サイズ調整 */
+        width: 65px; 
+        height: 65px; 
         grid-area: avatar;
-        grid-row: 1 / 2; /* 最初の行のみに配置 */
+        grid-row: 1 / 2; 
         align-self: flex-start;
         margin-right: 12px;
     }
@@ -478,38 +494,32 @@
     #opponent-profile .profile-name-rate {
         grid-area: name-rate;
         gap: 8px;
-        margin-left: 0; /* margin-left リセット */
+        margin-left: 0; 
         align-items: flex-start;
     }
 
-    #my-profile h3, #opponent-profile h3 {
-        font-size: 1.1rem; /* 少し小さく */
-        line-height: 1.2;
-    }
-
+    #my-profile h3, #opponent-profile h3 { font-size: 1.1rem; line-height: 1.2; }
     #my-profile .profile-rate-display .stat-value,
-    #opponent-profile .profile-rate-display .stat-value {
-        font-size: 1.8rem; /* 少し小さく */
-    }
+    #opponent-profile .profile-rate-display .stat-value { font-size: 1.8rem; }
 
     #my-profile .profile-comment-display,
     #opponent-profile .profile-comment-display {
         grid-area: comment;
-        text-align: center; /* 中央揃え */
-        width: 100%; /* 横幅100% */
-        font-size: 0.8rem; /* サイズ調整 */
-        padding: calc(var(--spacing-unit) * 0.9); /* パディング調整 */
-        max-height: 5em; /* 高さ調整 */
+        text-align: center; 
+        width: 100%; 
+        font-size: 0.8rem; 
+        padding: calc(var(--spacing-unit) * 0.9); 
+        max-height: 5em; 
         box-sizing: border-box;
     }
 
     #my-profile .profile-home-course-display,
     #opponent-profile .profile-home-course-display {
         grid-area: home-course;
-        text-align: center; /* 中央揃え */
-        width: 100%; /* 横幅100% */
-        font-size: 0.8rem; /* サイズ調整 */
-        padding: calc(var(--spacing-unit) * 0.9); /* パディング調整 */
+        text-align: center; 
+        width: 100%; 
+        font-size: 0.8rem; 
+        padding: calc(var(--spacing-unit) * 0.9); 
         box-sizing: border-box;
     }
 
@@ -517,23 +527,21 @@
     #opponent-profile .profile-comment-display .detail-label,
     #my-profile .profile-home-course-display .detail-label,
     #opponent-profile .profile-home-course-display .detail-label {
-        font-size: 0.75rem; /* ラベルサイズ調整 */
+        font-size: 0.75rem; 
         margin-bottom: 3px;
         display: block;
     }
      #my-profile .profile-comment-display .detail-comment,
      #opponent-profile .profile-comment-display .detail-comment,
      #my-profile .profile-home-course-display .detail-value,
-     #opponent-profile .profile-home-course-display .detail-value {
-        margin: 0;
-     }
+     #opponent-profile .profile-home-course-display .detail-value { margin: 0; }
 
     #my-profile .profile-badges,
     #opponent-profile .profile-badges {
         grid-area: badges;
-        gap: 25px; /* gap調整 */
-        margin-top: 12px; /* margin調整 */
-        justify-content: center; /* 中央揃え */
+        gap: 25px; 
+        margin-top: 12px; 
+        justify-content: center; 
         width: 100%;
         min-height: auto;
         display: flex;
@@ -541,13 +549,10 @@
     }
 
     #my-profile .badge-slot,
-    #opponent-profile .badge-slot {
-        width: 45px; /* サイズ調整 */
-        height: 45px; /* サイズ調整 */
-    }
+    #opponent-profile .badge-slot { width: 45px; height: 45px; }
 
     #battle-controls { max-width: 500px; }
-    .match-chat-messages-area { height: 220px; }
+    /* .match-chat-messages-area { height: 220px; } /* ★★★ Flexbox化に伴いコンテナの高さで制御するため削除 */
 }
 
 /* ==========================
@@ -555,26 +560,23 @@
    ========================== */
 @media (max-width: 768px) {
     .match-layout {
-        /* ★ 変更: 2カラムレイアウトに */
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-template-rows: auto auto;
         grid-template-areas:
             "my-profile opponent-profile"
             "battle-controls battle-controls";
-        gap: 15px; /* gapを少し調整 */
+        gap: 15px; 
         padding: 15px;
-        max-width: 100%; /* 最大幅を100%に */
+        max-width: 100%; 
     }
 
     #my-profile, #opponent-profile {
-        /* ★ 変更: grid-column/row を auto にし、grid-area を使用 */
         grid-column: auto;
         grid-row: auto;
-        padding: 12px; /* パディングを少し調整 */
-        gap: 8px 12px; /* gapを少し調整 */
+        padding: 12px; 
+        gap: 8px 12px; 
         min-height: 0;
-
         display: grid;
         grid-template-columns: auto 1fr;
         grid-template-rows: auto auto auto auto;
@@ -585,11 +587,8 @@
             "badges badges";
         align-items: start;
     }
-    /* ★ 追加: grid-area を指定 */
     #my-profile { grid-area: my-profile; }
     #opponent-profile { grid-area: opponent-profile; }
-
-    /* ★ 変更: grid-area を指定 */
     #battle-controls {
         grid-area: battle-controls;
         max-width: 100%;
@@ -599,8 +598,8 @@
     #my-profile .profile-avatar,
     #opponent-profile .profile-avatar,
     #opponent-profile #opponent-info > img {
-        width: 55px; /* 少しサイズ調整 */
-        height: 55px; /* 少しサイズ調整 */
+        width: 55px; 
+        height: 55px; 
         grid-area: avatar;
         grid-row: 1 / 2;
         align-self: flex-start;
@@ -610,27 +609,22 @@
     #my-profile .profile-name-rate,
     #opponent-profile .profile-name-rate {
         grid-area: name-rate;
-        gap: 5px; /* gap調整 */
+        gap: 5px; 
         margin-left: 0;
         align-items: flex-start;
     }
 
-    #my-profile h3, #opponent-profile h3 {
-        font-size: 0.9rem; /* サイズ調整 */
-        line-height: 1.2;
-    }
+    #my-profile h3, #opponent-profile h3 { font-size: 0.9rem; line-height: 1.2; }
     #my-profile .profile-rate-display .stat-value,
-    #opponent-profile .profile-rate-display .stat-value {
-        font-size: 1.5rem; /* サイズ調整 */
-    }
+    #opponent-profile .profile-rate-display .stat-value { font-size: 1.5rem; }
 
     #my-profile .profile-comment-display,
     #opponent-profile .profile-comment-display {
         grid-area: comment;
         text-align: center;
         width: 100%;
-        font-size: 0.7rem; /* サイズ調整 */
-        padding: 7px; /* パディング調整 */
+        font-size: 0.7rem; 
+        padding: 7px; 
         max-height: 4.5em;
         box-sizing: border-box;
     }
@@ -640,8 +634,8 @@
         grid-area: home-course;
         text-align: center;
         width: 100%;
-        font-size: 0.7rem; /* サイズ調整 */
-        padding: 7px; /* パディング調整 */
+        font-size: 0.7rem; 
+        padding: 7px; 
         box-sizing: border-box;
     }
 
@@ -649,7 +643,7 @@
     #opponent-profile .profile-comment-display .detail-label,
     #my-profile .profile-home-course-display .detail-label,
     #opponent-profile .profile-home-course-display .detail-label {
-        font-size: 0.65rem; /* ラベルサイズ調整 */
+        font-size: 0.65rem; 
         margin-bottom: 2px;
         display: block;
     }
@@ -657,8 +651,8 @@
     #my-profile .profile-badges,
     #opponent-profile .profile-badges {
         grid-area: badges;
-        gap: 10px; /* gap調整 */
-        margin-top: 8px; /* margin調整 */
+        gap: 10px; 
+        margin-top: 8px; 
         justify-content: center;
         width: 100%;
         min-height: auto;
@@ -667,13 +661,10 @@
     }
 
     #my-profile .badge-slot,
-    #opponent-profile .badge-slot {
-        width: 40px; /* サイズ調整 */
-        height: 40px; /* サイズ調整 */
-    }
+    #opponent-profile .badge-slot { width: 40px; height: 40px; }
 
-    .match-chat-container { margin-top: 20px; }
-    .match-chat-messages-area { height: 200px; }
+    .match-chat-container { margin-top: 20px; /* height: auto; を指定するか、Flexboxコンテナとしての高さを調整 */ }
+    /* .match-chat-messages-area { height: 200px; } /* ★★★ Flexbox化に伴いコンテナの高さで制御するため削除 */
 }
 /* ==========================
    match.html レスポンシブ (480px以下)
@@ -697,22 +688,19 @@
         grid-row: auto;
         min-height: 0;
         padding: calc(var(--spacing-unit) * 1);
-        gap: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1); /* ★ 縦のgapも少し調整 */
-
+        gap: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1); 
         display: grid;
-        grid-template-columns: auto 1fr; /* アバターとそれ以外 */
-        /* ★ 変更: グリッドエリア定義と行の順番を変更 */
+        grid-template-columns: auto 1fr; 
         grid-template-rows: auto auto auto auto;
         grid-template-areas:
             "avatar name-rate"
-            "comment comment"         /* ← コメントをフル幅に */
-            "home-course home-course" /* ← ホームコースをフル幅に (バッジと入れ替え) */
-            "badges badges";        /* ← バッジを一番下に (ホームコースと入れ替え) */
+            "comment comment"        
+            "home-course home-course" 
+            "badges badges";       
         align-items: start;
     }
     #my-profile { grid-area: my-profile; }
     #opponent-profile { grid-area: opponent-profile; }
-
     #battle-controls {
         grid-area: battle-controls;
         max-width: 100%;
@@ -727,14 +715,13 @@
         border-width: 2px;
         align-self: flex-start;
         margin-right: calc(var(--spacing-unit) * 1);
-        /* ★ 変更: アバターが下に伸びないようにする */
-        grid-area: avatar; /* アバターエリアを指定 */
-        grid-row: 1 / 2;    /* 最初の行のみに配置 */
+        grid-area: avatar; 
+        grid-row: 1 / 2;   
     }
 
     #my-profile .profile-name-rate,
     #opponent-profile .profile-name-rate {
-        grid-area: name-rate; /* エリア指定 */
+        grid-area: name-rate; 
         gap: calc(var(--spacing-unit) * 0.25);
         margin-left: 0;
         align-items: flex-start;
@@ -746,54 +733,46 @@
         margin-bottom: calc(var(--spacing-unit) * 0.25);
     }
     #my-profile .profile-rate-display .stat-value,
-    #opponent-profile .profile-rate-display .stat-value {
-        font-size: 1.3rem;
-    }
+    #opponent-profile .profile-rate-display .stat-value { font-size: 1.3rem; }
 
     #my-profile .profile-comment-display,
     #opponent-profile .profile-comment-display {
-        /* ★ 変更: グリッドエリア指定と中央揃え */
         grid-area: comment;
         text-align: center;
-        width: 100%; /* 横幅100% */
+        width: 100%; 
         font-size: 0.7rem;
         line-height: 1.3;
-        padding: calc(var(--spacing-unit) * 0.75); /* パディング調整 */
+        padding: calc(var(--spacing-unit) * 0.75); 
         max-height: 4.5em;
         box-sizing: border-box;
     }
 
     #my-profile .profile-home-course-display,
     #opponent-profile .profile-home-course-display {
-        /* ★ 変更: グリッドエリア指定と中央揃え */
         grid-area: home-course;
         text-align: center;
-        width: 100%; /* 横幅100% */
+        width: 100%; 
         font-size: 0.7rem;
         line-height: 1.3;
-        padding: calc(var(--spacing-unit) * 0.75); /* パディング調整 */
+        padding: calc(var(--spacing-unit) * 0.75); 
         box-sizing: border-box;
     }
 
-    /* ★ 変更: ラベルも中央になるように */
     #my-profile .profile-comment-display .detail-label,
     #opponent-profile .profile-comment-display .detail-label,
     #my-profile .profile-home-course-display .detail-label,
     #opponent-profile .profile-home-course-display .detail-label {
         font-size: 0.65rem;
         margin-bottom: 3px;
-        display: block; /* ブロック要素にして中央揃え */
+        display: block; 
     }
      #my-profile .profile-comment-display .detail-comment,
      #opponent-profile .profile-comment-display .detail-comment,
      #my-profile .profile-home-course-display .detail-value,
-     #opponent-profile .profile-home-course-display .detail-value {
-        margin: 0;
-     }
+     #opponent-profile .profile-home-course-display .detail-value { margin: 0; }
 
     #my-profile .profile-badges,
     #opponent-profile .profile-badges {
-        /* ★ 変更: グリッドエリア指定と前回の修正 */
         grid-area: badges;
         gap: 14px;
         margin-top: 12px;
@@ -806,19 +785,27 @@
     #my-profile .badge-slot,
     #opponent-profile .badge-slot {
         width: 40px;
-        height: 40px; /* ★ 'px' から '40px' に修正 */
+        height: 40px; 
     }
 
-    /* --- (チャットやボタンなどのスタイルはそのまま) --- */
     #match-status { font-size: 0.85rem; margin-bottom: calc(var(--spacing-unit) * 1.5); }
     #match-button, #cancel-match-button { font-size: 0.8rem; padding: 10px 8px;}
-    .match-chat-container { margin-top: calc(var(--spacing-unit) * 2); padding: calc(var(--spacing-unit) * 1.5); }
-    .match-chat-title { font-size: 1rem; margin-bottom: var(--spacing-unit); padding-bottom: calc(var(--spacing-unit) * 0.5); }
-    .match-chat-messages-area { height: 150px; font-size: 0.8rem; padding: calc(var(--spacing-unit) * 1); gap: calc(var(--spacing-unit) * 0.75); }
-    .match-chat-messages-area .chat-message { max-width: 90%; padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); font-size: 0.8rem; gap: calc(var(--spacing-unit) * 0.5); }
-    .match-chat-messages-area .chat-message .chat-avatar { width: 28px; height: 28px; }
-    .match-chat-messages-area .chat-message .message-sender-name { font-size: 0.7rem; }
-    .match-chat-messages-area .chat-message .message-timestamp { font-size: 0.65rem; }
+    .match-chat-container { 
+        margin-top: calc(var(--spacing-unit) * 2); 
+        padding: calc(var(--spacing-unit) * 1.5); 
+        height: 350px; /* 480px以下では高さを少し調整 */
+    }
+    /* .match-chat-title { font-size: 1rem; margin-bottom: var(--spacing-unit); padding-bottom: calc(var(--spacing-unit) * 0.5); } /* 非表示のため不要 */
+    .match-chat-messages-area { 
+        /* height: 150px; /* ★★★ Flexbox化に伴いコンテナの高さで制御するため削除 */
+        font-size: 0.8rem; 
+        padding: calc(var(--spacing-unit) * 1); 
+        gap: calc(var(--spacing-unit) * 0.75); 
+    }
+    .match-chat-messages-area .match-chat-message { max-width: 90%; padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); font-size: 0.8rem; gap: calc(var(--spacing-unit) * 0.5); }
+    .match-chat-messages-area .match-chat-message .chat-avatar { width: 28px; height: 28px; }
+    .match-chat-messages-area .match-chat-message .message-sender-name { font-size: 0.7rem; }
+    .match-chat-messages-area .match-chat-message .message-timestamp { font-size: 0.65rem; }
     .match-chat-input-area { flex-direction: row; gap: calc(var(--spacing-unit) * 0.5); padding-top: calc(var(--spacing-unit) * 0.5); }
     .match-chat-input { padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit); font-size: 0.85rem; }
     .match-chat-send-button { padding: calc(var(--spacing-unit) * 0.75); font-size: 0.8rem; }
