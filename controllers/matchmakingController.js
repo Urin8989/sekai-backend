@@ -6,10 +6,10 @@ const Match = require('../models/Match');
 // --- マッチングキュー (インメモリ) ---
 const matchmakingQueue = [];
 const MATCHMAKING_INTERVAL = 5000;
-const MATCHMAKING_TIMEOUT = 74999; // 75秒弱
+const MATCHMAKING_TIMEOUT = 59999; // 60秒弱
 const INITIAL_RATE_RANGE = 20;
 const RATE_RANGE_INCREASE = 20;
-const RATE_RANGE_INCREASE_INTERVAL = 15000; // 15秒ごと
+const RATE_RANGE_INCREASE_INTERVAL = 3000; // 3秒ごと
 
 // --- Eloレーティング計算 ---
 const K_FACTOR = 30;
