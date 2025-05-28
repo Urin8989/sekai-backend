@@ -61,15 +61,14 @@
             padding-left: calc(var(--spacing-unit, 15px) * 3);
         }
         .rules-content-wrapper strong {
-            color: var(--color-primary, #DAA520); 
+            color: var(--color-primary, #DAA520);
             font-weight: 600;
         }
         .rules-content-wrapper em { /* 注釈 (※ ホームコースは...) のスタイル */
              font-size: 0.9rem;
-             /* ★★★ 文字色を赤色に変更 ★★★ */
-             color: var(--color-danger, red); /* common.css に --color-danger があればそれを使用、なければ直接 red */
-             font-style: normal; /* emタグの斜体を解除する場合は指定 */
-             display: block; 
+             color: var(--color-danger, red);
+             font-style: normal;
+             display: block;
              margin-top: calc(var(--spacing-unit, 15px) * 0.5);
         }
         .rules-content-wrapper a {
@@ -79,10 +78,10 @@
             text-decoration: none;
         }
 
-        .rules-section { 
+        .rules-section {
              margin-bottom: calc(var(--spacing-unit, 15px) * 2.5);
         }
-        .rules-section ul { 
+        .rules-section ul {
             background-color: rgba(0,0,0,0.02);
             padding: calc(var(--spacing-unit, 15px) * 1.5);
             border-radius: var(--border-radius-medium, 4px);
@@ -145,16 +144,15 @@
 
                 <section class="rules-section">
                     <h2>対戦準備 (ロビー作成と参加)</h2>
-                    <p>対戦相手が決定した後、以下の手順でゲーム内のプライベートロビー（部屋）を作成・参加してください。</p>
+                    <p>対戦相手が決定した後、本サイトの<strong>対戦ページに表示される指示に従って</strong>、ゲーム内のプライベートロビー（部屋）を作成・参加してください。</p>
                     <ul>
-                        <li><strong>レートが高い方</strong>のプレイヤーが、ゲーム内でプライベートロビーを作成します。</li>
-                        <li>レートが同じ場合は、自身のフレンドコードの<strong>下4桁の数字が大きい方</strong>のプレイヤーがロビーを作成します。</li>
+                        <li>対戦ページに、<strong>どちらのプレイヤーがロビーを作成するか</strong>が表示されます。</li>
+                        <li>指示されたプレイヤー（ロビー作成者）は、ゲーム内でプライベートロビーを作成してください。</li>
                         <li>ロビーを作成したプレイヤーは、発行された<strong>ロビーID</strong>を、本サイトの対戦ページ内にある<strong>チャット機能</strong>を使用して相手に伝えます。</li>
                         <li>ロビーIDを受け取ったプレイヤーは、ゲーム内でそのIDを検索または入力してロビーに参加してください。</li>
                     </ul>
-                    <p><em>※ ホームコースは、マイページで設定されているコースとします。未設定の場合は、任意の得意なコースを1つ選択してください。</em></p>
+                    <p><em>※ ロビー作成指示はランダムに決定されます。必ずサイトの指示を確認してください。</em></p>
                 </section>
-
                 <section class="rules-section">
                     <h2>コース選択</h2>
                     <ul>
@@ -162,6 +160,7 @@
                         <li><strong>2レース目:</strong> 1レース目で選ばれなかった方のプレイヤーのホームコースを、両プレイヤーともゲーム内で選択して対戦します。</li>
                         <li><strong>3レース目 (1勝1敗の場合):</strong> 両プレイヤーともゲーム内で「おまかせ（ランダム）」を選択します。</li>
                     </ul>
+                     <p><em>※ ホームコースは、マイページで設定されているコースとします。未設定の場合は、任意の得意なコースを1つ選択してください。</em></p>
                 </section>
 
                 <section class="rules-section">
@@ -187,7 +186,7 @@
                     </ul>
                     <p>楽しくフェアな対戦を心がけましょう！</p>
                 </section>
-            </div> 
+            </div>
         </div>
     </main>
 
@@ -195,7 +194,7 @@
         <div class="container">
             <p>&copy; 2025 Mario Kart Best Rivals. All Rights Reserved.</p>
             <nav class="footer-nav">
-                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> 
+                <a href="terms.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a>
             </nav>
         </div>
     </footer>

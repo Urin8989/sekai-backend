@@ -11,20 +11,19 @@ exports.getCommunities = async (req, res) => {
             .populate('organizer', 'name googleId picture') // 主催者情報を取得
             .sort({ createdAt: -1 }); // 例: 作成日時の降順
 
-        // フロントエンドが期待する形式に整形
         const communitiesWithDetails = communities.map(community => {
-            const communityObj = community.toObject({ virtuals: true }); // 仮想プロパティを含める
+            const communityObj = community.toObject({ virtuals: true });
 
             return {
-                id: communityObj._id, // MongoDBの_idをidとして返す
+                id: communityObj._id,
                 name: communityObj.name,
                 description: communityObj.description,
-                organizerId: communityObj.organizer?._id, // ObjectId (必要なら)
-                organizerGoogleId: communityObj.organizer?.googleId, // ★ フロントエンドが利用
-                organizerName: communityObj.organizer?.name || '不明', // ★ フロントエンドが利用
-                organizerPicture: communityObj.organizer?.picture, // ★ フロントエンドが利用
+                organizerId: communityObj.organizer?._id,
+                organizerGoogleId: communityObj.organizer?.googleId,
+                organizerName: communityObj.organizer?.name || '不明',
+                organizerPicture: communityObj.organizer?.picture,
                 participantsLimit: communityObj.participantsLimit,
-                currentParticipants: communityObj.currentParticipantsCount, // ★ 仮想プロパティを使用
+                currentParticipants: communityObj.currentParticipantsCount,
                 joinPoints: communityObj.joinPoints,
                 createdAt: communityObj.createdAt,
             };
@@ -39,44 +38,33 @@ exports.getCommunities = async (req, res) => {
 
 // --- コミュニティ作成 ---
 exports.createCommunity = async (req, res) => {
-    // protectミドルウェアにより req.user は存在する想定
     try {
-        // ▼▼▼ フロントエンドからのフィールド名に合わせる ▼▼▼
         const { name, description, participantsLimit } = req.body;
-        // ▲▲▲ 修正 ▲▲▲
-        const organizerId = req.user._id; // 認証ユーザーのMongoDB ID
+        const organizerId = req.user._id;
 
-        // バリデーション (基本的なもの)
-        // ★ サニタイズ (簡易版: HTMLタグ除去)
         const sanitize = (str) => typeof str === 'string' ? str.replace(/<[^>]*>?/gm, '') : str;
-        // ▼▼▼ フロントエンドからのフィールド名に合わせる ▼▼▼
         if (!name || !participantsLimit) {
             return res.status(400).json({ message: 'Community name and participants limit are required.' });
         }
         if (name.length > 50) return res.status(400).json({ message: 'コミュニティ名は50文字以内で入力してください。' });
         if (description && description.length > 200) return res.status(400).json({ message: 'コミュニティ説明は200文字以内で入力してください。' });
         const limit = parseInt(participantsLimit, 10);
-        // ▲▲▲ 修正 ▲▲▲
         if (isNaN(limit) || limit < 2 || limit > 24) {
             return res.status(400).json({ message: 'Participants limit must be between 2 and 24.' });
         }
 
         const newCommunity = new Community({
-            name: sanitize(name), // ★ サニタイズ
-            description: sanitize(description), // ★ サニタイズ
+            name: sanitize(name),
+            description: sanitize(description),
             organizer: organizerId,
             participantsLimit: limit,
-            participants: [organizerId], // 作成者を最初の参加者として追加
-            // joinPoints: 0, // 必要なら設定
+            participants: [organizerId],
         });
 
         const savedCommunity = await newCommunity.save();
-
-        // populateして返す (フロントエンドが必要な情報を付与)
         const populatedCommunity = await Community.findById(savedCommunity._id)
                                             .populate('organizer', 'name googleId picture');
 
-        // フロントエンドが期待する形式に整形
         const responseCommunity = {
             id: populatedCommunity._id,
             name: populatedCommunity.name,
@@ -91,9 +79,8 @@ exports.createCommunity = async (req, res) => {
             createdAt: populatedCommunity.createdAt,
         };
 
-
         console.log(`Community created: ${savedCommunity.name} by ${req.user.name}`);
-        res.status(201).json(responseCommunity); // 201 Created
+        res.status(201).json(responseCommunity);
 
     } catch (error) {
         console.error('Error creating community:', error);
@@ -103,7 +90,6 @@ exports.createCommunity = async (req, res) => {
 
 // --- コミュニティ参加 ---
 exports.joinCommunity = async (req, res) => {
-    // protectミドルウェアにより req.user は存在する想定
     try {
         const communityId = req.params.communityId;
         const userId = req.user._id;
@@ -113,36 +99,32 @@ exports.joinCommunity = async (req, res) => {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        // 既にメンバーかチェック
         const isAlreadyMember = community.participants.some(participantId => participantId.equals(userId));
         if (isAlreadyMember) {
             return res.status(400).json({ message: 'You are already a member of this community' });
         }
 
-        // 定員チェック
         if (community.participants.length >= community.participantsLimit) {
             return res.status(400).json({ message: 'Community is full' });
         }
 
-        // 参加処理
         community.participants.push(userId);
         await community.save();
 
-        // ポイント付与 (参加ポイントがある場合)
         let pointsEarned = community.joinPoints || 0;
         let currentUserPoints = req.user.points;
         if (pointsEarned > 0) {
             req.user.points += pointsEarned;
             await req.user.save();
-            currentUserPoints = req.user.points; // 更新後のポイント
+            currentUserPoints = req.user.points;
         }
 
         console.log(`User ${req.user.name} joined community: ${community.name}`);
         res.status(200).json({
             message: 'Successfully joined community',
-            currentParticipants: community.participants.length, // 更新後の参加者数
+            currentParticipants: community.participants.length,
             pointsEarned: pointsEarned,
-            currentUserPoints: currentUserPoints // 更新後のユーザーポイント
+            currentUserPoints: currentUserPoints
         });
 
     } catch (error) {
@@ -153,7 +135,6 @@ exports.joinCommunity = async (req, res) => {
 
 // --- コミュニティ脱退 ---
 exports.leaveCommunity = async (req, res) => {
-    // protectミドルウェアにより req.user は存在する想定
     try {
         const communityId = req.params.communityId;
         const userId = req.user._id;
@@ -163,16 +144,13 @@ exports.leaveCommunity = async (req, res) => {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        // 主催者は脱退できない（削除のみ）
         if (community.organizer.equals(userId)) {
             return res.status(400).json({ message: 'Organizer cannot leave the community. You can delete it instead.' });
         }
 
-        // 参加者リストから削除
         const initialLength = community.participants.length;
         community.participants = community.participants.filter(participantId => !participantId.equals(userId));
 
-        // 実際に削除されたか確認
         if (community.participants.length === initialLength) {
             return res.status(400).json({ message: 'You are not a member of this community' });
         }
@@ -182,7 +160,7 @@ exports.leaveCommunity = async (req, res) => {
         console.log(`User ${req.user.name} left community: ${community.name}`);
         res.status(200).json({
             message: 'Successfully left community',
-            currentParticipants: community.participants.length // 更新後の参加者数
+            currentParticipants: community.participants.length
         });
 
     } catch (error) {
@@ -193,7 +171,6 @@ exports.leaveCommunity = async (req, res) => {
 
 // --- コミュニティ削除 ---
 exports.deleteCommunity = async (req, res) => {
-    // protectミドルウェアにより req.user は存在する想定
     try {
         const communityId = req.params.communityId;
         const userId = req.user._id;
@@ -203,17 +180,12 @@ exports.deleteCommunity = async (req, res) => {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        // 主催者のみ削除可能
         if (!community.organizer.equals(userId)) {
             return res.status(403).json({ message: 'Only the organizer can delete this community' });
         }
 
-        // コミュニティに関連するチャットメッセージも削除 (オプション)
         await CommunityChatMessage.deleteMany({ communityId: communityId });
-
-        // コミュニティを削除
         await Community.findByIdAndDelete(communityId);
-
 
         console.log(`Community ${community.name} deleted by organizer ${req.user.name}`);
         res.status(200).json({ message: 'Community deleted successfully' });
@@ -228,20 +200,17 @@ exports.deleteCommunity = async (req, res) => {
 exports.getCommunityParticipants = async (req, res) => {
     try {
         const communityId = req.params.communityId;
-
         const community = await Community.findById(communityId)
-                                        .populate('participants', 'googleId name picture'); // 参加者の指定フィールドを取得
+                                        .populate('participants', 'googleId name picture');
 
         if (!community) {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        // フロントエンドが期待する形式に整形 (googleId を sub にするなど)
         const participants = community.participants.map(p => ({
-            sub: p.googleId, // ★ googleId を sub として返す
+            sub: p.googleId,
             name: p.name,
             picture: p.picture,
-            // 必要なら他のフィールドも
         }));
 
         res.status(200).json(participants);
@@ -252,47 +221,35 @@ exports.getCommunityParticipants = async (req, res) => {
     }
 };
 
-
 // --- チャットメッセージ取得 ---
 exports.getChatMessages = async (req, res) => {
-    // 認証ミドルウェア (protect) が適用されている想定
     try {
         const communityId = req.params.communityId;
-        const userId = req.user._id; // 認証ユーザーのID
+        const userId = req.user._id;
 
-        // 1. コミュニティ存在確認 & ユーザーが参加者か確認
         const community = await Community.findById(communityId).select('participants organizer');
         if (!community) {
             return res.status(404).json({ message: 'Community not found' });
         }
-        // ObjectId と ObjectId を比較
         const isMember = community.participants.some(id => id.equals(userId)) || community.organizer.equals(userId);
         if (!isMember) {
             return res.status(403).json({ message: 'You are not a member of this community' });
         }
 
-        // 2. チャットメッセージを取得 (最新の50件など、制限を設けることを推奨)
-        // ▼▼▼ .populate を追加 ▼▼▼
         const messages = await CommunityChatMessage.find({ communityId: communityId })
-            .sort({ timestamp: -1 }) // 新しい順
-            .limit(50) // 例: 最新50件
-            .populate('sender', 'googleId name picture'); // 送信者情報を取得 (googleId, name, picture を指定)
-        // ▲▲▲ .populate を追加 ▲▲▲
+            .sort({ timestamp: -1 })
+            .limit(50)
+            .populate('sender', 'googleId name picture');
 
-        // 3. フロントエンドが期待する形式に整形 (古い順に戻す)
         const formattedMessages = messages.reverse().map(msg => ({
-            id: msg._id, // メッセージID
+            id: msg._id,
             communityId: msg.communityId,
-            // ▼▼▼ sender オブジェクトから情報を取得 ▼▼▼
-            senderId: msg.sender?.googleId, // 送信者のGoogle ID (フロントは sub を期待)
-            senderName: msg.sender?.name || '不明なユーザー', // 送信者の名前
-            senderPicture: msg.sender?.picture, // 送信者の画像URL (フロントで利用)
-            // ▲▲▲ sender オブジェクトから情報を取得 ▲▲▲
+            senderId: msg.sender?.googleId,
+            senderName: msg.sender?.name || '不明なユーザー',
+            senderPicture: msg.sender?.picture,
             text: msg.text,
             timestamp: msg.timestamp,
-            // ▼▼▼ メッセージタイプを追加 (フロントエンドの appendChatMessage に合わせる) ▼▼▼
-            type: 'community_chat_message' // 固定でチャットメッセージタイプを指定
-            // ▲▲▲ メッセージタイプを追加 ▲▲▲
+            type: 'community_chat_message'
         }));
 
         res.status(200).json(formattedMessages);
@@ -303,7 +260,7 @@ exports.getChatMessages = async (req, res) => {
     }
 };
 
-// --- (任意) 単一コミュニティ取得API ---
+// --- 単一コミュニティ取得API ---
 exports.getCommunityById = async (req, res) => {
     try {
         const communityId = req.params.communityId;
@@ -314,20 +271,18 @@ exports.getCommunityById = async (req, res) => {
             return res.status(404).json({ message: 'Community not found' });
         }
 
-        // フロントエンドが期待する形式に整形
         const responseCommunity = {
             id: community._id,
             name: community.name,
             description: community.description,
             organizerId: community.organizer?._id,
-            organizerGoogleId: community.organizer?.googleId, // ★ 追加
+            organizerGoogleId: community.organizer?.googleId,
             organizerName: community.organizer?.name || '不明',
-            organizerPicture: community.organizer?.picture, // ★ 追加
+            organizerPicture: community.organizer?.picture,
             participantsLimit: community.participantsLimit,
-            currentParticipants: community.participants.length, // 参加者数を計算
+            currentParticipants: community.participants.length,
             joinPoints: community.joinPoints,
             createdAt: community.createdAt,
-            // participants: community.participants // 必要なら参加者のIDリストも返す
         };
 
         res.status(200).json(responseCommunity);
@@ -336,3 +291,61 @@ exports.getCommunityById = async (req, res) => {
         res.status(500).json({ message: 'Error fetching community details', error: error.message });
     }
 };
+
+// ★★★ 追加: 参加者キック機能 ★★★
+exports.kickParticipant = async (req, res) => {
+    try {
+        const communityId = req.params.communityId; // URLからコミュニティIDを取得
+        const { participantId: participantSubToKick } = req.body; // リクエストボディからキック対象のユーザーsub(Google ID)を取得
+        const organizerSub = req.user.googleId; // リクエストしたユーザー(主催者のはず)のGoogle ID
+
+        if (!participantSubToKick) {
+            return res.status(400).json({ message: '追放する参加者のIDを指定してください。' });
+        }
+
+        const community = await Community.findById(communityId).populate('organizer', 'googleId');
+
+        if (!community) {
+            return res.status(404).json({ message: 'コミュニティが見つかりません。' });
+        }
+
+        // 1. リクエストユーザーが主催者であることを確認
+        if (!community.organizer || community.organizer.googleId !== organizerSub) {
+            return res.status(403).json({ message: 'コミュニティの主催者のみが参加者を追放できます。' });
+        }
+
+        // 2. 主催者が自分自身をキックしようとしていないか確認
+        if (participantSubToKick === organizerSub) {
+            return res.status(400).json({ message: '主催者は自分自身を追放できません。' });
+        }
+
+        // 3. キック対象のユーザーのMongoDBの_idを取得
+        const userToKick = await User.findOne({ googleId: participantSubToKick });
+        if (!userToKick) {
+            return res.status(404).json({ message: '追放対象の参加者が見つかりません。' });
+        }
+        const participantMongoIdToKick = userToKick._id;
+
+        // 4. 参加者リストに対象ユーザーが存在するか確認
+        const participantIndex = community.participants.findIndex(pId => pId.equals(participantMongoIdToKick));
+
+        if (participantIndex === -1) {
+            return res.status(404).json({ message: '対象の参加者はこのコミュニティのメンバーではありません。' });
+        }
+
+        // 5. 参加者リストから削除
+        community.participants.splice(participantIndex, 1);
+        await community.save();
+
+        console.log(`Participant ${userToKick.name} (sub: ${participantSubToKick}) kicked from community ${community.name} by organizer ${req.user.name}`);
+        res.status(200).json({
+            message: `${userToKick.name}さんをコミュニティから追放しました。`,
+            currentParticipants: community.participants.length
+        });
+
+    } catch (error) {
+        console.error('Error kicking participant:', error);
+        res.status(500).json({ message: '参加者の追放処理中にエラーが発生しました。', error: error.message });
+    }
+};
+// ★★★ 追加ここまで ★★★

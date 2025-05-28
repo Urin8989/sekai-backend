@@ -87,13 +87,24 @@
                     </div>
                 </section>
 
+                <section id="opponent-profile" class="profile-card match-profile">
+                    <div id="opponent-placeholder" style="display: flex;"> <div id="opponent-spinner" class="spinner"></div>
+                        <p>Best Rival</p>
+                    </div>
+                    <div id="opponent-info" style="display: none;">
+                        </div>
+                </section>
+
                 <section id="battle-controls" class="match-controls-center">
                     <p id="match-status" class="match-status-text">ライバルを探しましょう！</p>
 
+                    <p id="lobby-creation-instruction" class="lobby-instruction-text" style="display: none; margin-bottom: 15px; color: var(--color-primary-light); text-align: center; font-size: 0.95rem; line-height: 1.5;">
+                        </p>
                     <div class="button-group">
                         <button id="match-button" class="button button-primary button-stylish">ライバルを探す</button>
                         <button id="cancel-match-button" class="button button-danger button-stylish" style="display: none;">キャンセル</button>
                     </div>
+
                     <section id="match-chat-section" class="match-chat-container" style="display: none;">
                         <h4 class="match-chat-title">対戦チャット</h4>
                         <div id="match-chat-messages" class="match-chat-messages-area">
@@ -107,6 +118,7 @@
                             </button>
                         </div>
                     </section>
+
                     <div class="result-reporting" style="margin-top: 2em; display: none;">
                          <button id="start-battle-button" class="button button-primary">結果を報告</button>
                          <div id="report-result-buttons" style="display: none; margin-top: 15px; gap: 10px; flex-wrap: wrap; justify-content: center;">
@@ -116,15 +128,6 @@
                          </div>
                          <p id="battle-status-text" style="margin-top: 10px; color: var(--color-text-secondary); min-height: 1.2em;"></p>
                     </div>
-                </section>
-
-                <section id="opponent-profile" class="profile-card match-profile">
-                    <div id="opponent-placeholder" style="display: block;">
-                        <div id="opponent-spinner" class="spinner"></div>
-                        <p>Best Rival</p>
-                    </div>
-                    <div id="opponent-info" style="display: none;">
-                        </div>
                 </section>
             </div>
         </div>
@@ -151,6 +154,5 @@
         </div>
     </footer>
     <script src="js/script.js"></script>
-    <script src="js/match.js"></script>
-</body>
+    <script src="js/match.js"></script> </body>
 </html>

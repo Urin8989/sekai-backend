@@ -330,3 +330,66 @@
     #chat-input { padding: 0.8rem 1rem; font-size: 0.9rem; }
     #send-chat-button { padding: 0.7rem 1rem; font-size: 0.85rem; }
 }
+/* --- キックボタン用スタイル --- */
+#participants-list li,
+.card-participants-list li {
+    /* 既存のスタイルに加えて、ボタンを右に配置するために調整 */
+    justify-content: space-between; /* 参加者名とボタンを両端に配置 */
+}
+
+.button-kick {
+    padding: 0.3em 0.8em;
+    font-size: 0.75rem;
+    background: var(--color-danger, #dc3545); /* 危険を示す色 */
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-small, 4px);
+    cursor: pointer;
+    transition: background 0.2s ease, opacity 0.2s ease;
+    margin-left: 1rem; /* 名前との間に少しマージン */
+    flex-shrink: 0; /* ボタンが縮まないように */
+    opacity: 0.8; /* 少し控えめに */
+}
+
+.button-kick:hover:not(:disabled) {
+    background: var(--color-danger-dark, #c82333); /* ホバーで濃く */
+    opacity: 1;
+}
+
+.button-kick:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button-kick .spinner-small {
+    width: 10px;
+    height: 10px;
+    border-width: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+    display: inline-block; /* インライン表示 */
+}
+
+/* 参加者名とリンクのラッパー */
+.participant-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* 名前部分が伸びるように */
+    overflow: hidden; /* 名前が長い場合に備える */
+}
+
+.participant-info img {
+    /* 既存の img スタイルを適用 or ここで定義 */
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.participant-info .user-link {
+    /* 既存の a スタイルを適用 or ここで定義 */
+    white-space: nowrap; /* 名前を折り返さない */
+    overflow: hidden;
+    text-overflow: ellipsis; /* はみ出したら ... で表示 */
+}
