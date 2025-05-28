@@ -352,17 +352,34 @@ function displayOpponentInfo(opponentData) {
     }).join('');
     badgesHtml += Array(3 - opponentBadgesToDisplay.length).fill('<div class="badge-slot"></div>').join('');
 
+    // ★★★ 自分のプロフィールと同じ構造でHTMLを生成 ★★★
     opponentInfoArea.innerHTML = `
         <img src="${opponentData.picture || defaultAvatar}" alt="${escapeHTML(opponentData.name)}" class="profile-avatar" onerror="this.onerror=null; this.src='${defaultAvatar}';">
+
         <div class="profile-name-rate">
             <h3>${escapeHTML(opponentData.name)}</h3>
-            <div class="stat-item profile-rate-display"><span class="stat-label">レート</span><span class="stat-value">${opponentData.rate ?? '----'}</span></div>
+            <div class="stat-item profile-rate-display">
+                <span class="stat-label">レート</span>
+                <span class="stat-value">${opponentData.rate ?? '----'}</span>
+            </div>
         </div>
-        <div class="profile-comment-display"><span class="detail-label">コメント:</span><p class="detail-comment">${escapeHTML(opponentProfile.comment) || '---'}</p></div>
-        <div class="profile-badges">${badgesHtml}</div>
-        <div class="profile-home-course-display"><span class="detail-label">コース:</span><span class="detail-value">${escapeHTML(opponentProfile.favCourse) || '---'}</span></div>`;
+
+        <div class="profile-comment-display">
+            <span class="detail-label">一言コメント:</span>
+            <p class="detail-comment">${escapeHTML(opponentProfile.comment) || '---'}</p>
+        </div>
+
+        <div class="profile-badges">
+            ${badgesHtml}
+        </div>
+
+        <div class="profile-home-course-display">
+            <span class="detail-label">ホームコース:</span>
+            <span class="detail-value">${escapeHTML(opponentProfile.favCourse) || '---'}</span>
+        </div>`;
     opponentInfoArea.dataset.opponentId = opponentData.googleId;
 }
+
 
 /**
  * ★★★ 追加 ★★★
@@ -442,7 +459,7 @@ function updateMatchUI() {
 
     // --- デフォルトで非表示/表示 ---
     hide(cancelButton);
-    hide(opponentInfoArea);
+    hide(opponentInfoArea); // ★ ここで hide される
     hide(opponentSpinner);
     hide(matchChatSection);
     hide(resultReportingArea);
@@ -472,7 +489,8 @@ function updateMatchUI() {
             // --- マッチ成立後の表示 ---
             hide(matchButton); hide(cancelButton);
             hide(opponentSpinner); hide(opponentPlaceholder);
-            show(opponentInfoArea);
+            // show(opponentInfoArea); // ★★★ 変更: show() を使わない ★★★
+            if (opponentInfoArea) opponentInfoArea.style.display = 'contents'; // ★★★ 変更: display: contents を設定 ★★★
             show(matchChatSection); show(resultReportingArea);
             if (opponentProfileSection) opponentProfileSection.classList.add('visible');
             setText(matchStatusText, '対戦相手が見つかりました！');
@@ -508,6 +526,7 @@ function updateMatchUI() {
         show(opponentPlaceholder);
     }
 }
+
 
 // --- マッチング API 呼び出し関数 ---
 
@@ -701,8 +720,11 @@ async function submitReport(result) {
     } catch (error) {
         if (battleStatusText) battleStatusText.textContent = `結果報告エラー: ${error.message}`;
         isSubmittingResult = false;
-        updateMatchUI();
-        saveStateToSessionStorage();
+        // ★★★ エラー時にボタンを無効化し、2秒後にUIをクリア ★★★
+        if (reportWinButton) reportWinButton.disabled = true;
+        if (reportLoseButton) reportLoseButton.disabled = true;
+        if (cancelBattleButton) cancelBattleButton.disabled = true;
+        setTimeout(() => clearMatchStateAndUI(true), 2000);
     }
 }
 
@@ -728,7 +750,11 @@ async function cancelBattle() {
     } catch (error) {
         if (battleStatusText) battleStatusText.textContent = `キャンセルエラー: ${error.message}`;
         isSubmittingResult = false;
-        clearMatchStateAndUI(true); // ★ エラー時にもクリア
+        // ★★★ エラー時にボタンを無効化し、2秒後にUIをクリア ★★★
+        if (reportWinButton) reportWinButton.disabled = true;
+        if (reportLoseButton) reportLoseButton.disabled = true;
+        if (cancelBattleButton) cancelBattleButton.disabled = true;
+        setTimeout(() => clearMatchStateAndUI(true), 2000);
     }
 }
 
@@ -757,17 +783,17 @@ function handleReportResponse(responseData) {
         case 'disputed':
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = '報告が一致しませんでした。この対戦は無効になります。';
-            setTimeout(() => clearMatchStateAndUI(true), 3000);
+            setTimeout(() => clearMatchStateAndUI(true), 2000); // ★★★ 待機時間を2秒に変更 ★★★
             break;
         case 'cancelled':
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = '対戦がキャンセルされました。';
-            setTimeout(() => clearMatchStateAndUI(true), 3000);
+            setTimeout(() => clearMatchStateAndUI(true), 2000); // ★★★ 待機時間を2秒に変更 ★★★
             break;
         default:
             isPollingForResult = false;
             if (battleStatusText) battleStatusText.textContent = `不明な応答 (${responseData.status}) を受信。`;
-            setTimeout(() => clearMatchStateAndUI(true), 3000);
+            setTimeout(() => clearMatchStateAndUI(true), 2000); // ★★★ 待機時間を2秒に変更 ★★★
             break;
     }
     updateMatchUI(); // UI更新
@@ -810,8 +836,9 @@ function startPollingMatchResult() {
         } catch (error) {
             console.error("Error polling match result:", error);
             stopPollingMatchResult();
-            clearMatchStateAndUI(true);
+            // ★★★ エラー時もUIをクリア ★★★
             if (battleStatusText) battleStatusText.textContent = `結果確認エラー: ${error.message}`;
+            setTimeout(() => clearMatchStateAndUI(true), 2000);
         }
     }, 5000);
 }
@@ -847,15 +874,25 @@ function showResultModal(didWin, resultData, originalRate) {
     if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
     resultModal.style.display = 'flex';
     saveStateToSessionStorage();
+
+    // ★★★ 4秒後に自動でモーダルを閉じる ★★★
+    setTimeout(() => {
+        if (resultModal && resultModal.style.display === 'flex') {
+            closeResultModal();
+        }
+    }, 4000);
 }
 
 /**
  * 結果表示モーダルを閉じます。
  */
 function closeResultModal() {
-    if (resultModal) resultModal.style.display = 'none';
-    clearMatchStateAndUI(true); // モーダルを閉じたら完全にクリア
+    if (resultModal && resultModal.style.display !== 'none') { // ★ 二重実行防止
+        resultModal.style.display = 'none';
+        clearMatchStateAndUI(true); // モーダルを閉じたら完全にクリア
+    }
 }
+
 
 // --- WebSocket (チャット) 関連 ---
 
