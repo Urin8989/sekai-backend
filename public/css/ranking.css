@@ -124,7 +124,7 @@
 
 /* ランキングリストセクション */
 .ranking-section {
-    background-color: transparent;
+    background-color: #333; /* Changed from transparent */
     border-radius: var(--border-radius-large);
     padding: calc(var(--spacing-unit) * 3);
     box-shadow: none;
@@ -297,7 +297,7 @@
 
 /* ランキングリストセクション */
 .ranking-section {
-    background-color: transparent;
+    background-color: #333; /* Changed from transparent */
     border-radius: var(--border-radius-large);
     padding: calc(var(--spacing-unit) * 3);
     box-shadow: none;
