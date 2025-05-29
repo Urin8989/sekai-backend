@@ -1,7 +1,6 @@
 // frontend/match_ui.js
 
 // --- グローバル変数 ---
-// UIの状態に直接関連する変数を window オブジェクトにアタッチしてグローバルにする
 window.isMatching = false;
 window.currentMatchId = null;
 window.currentOpponentData = null;
@@ -9,7 +8,7 @@ window.isSubmittingResult = false;
 window.isPollingForResult = false;
 window.currentLobbyCreatorGoogleId = null;
 
-// DOM要素 (これらはこのファイルスコープのまま)
+// DOM要素
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
 let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
@@ -17,7 +16,7 @@ let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
 let lobbyInstructionElement;
 
-const MATCH_STATE_KEY = 'mkbrMatchState_v4'; // セッションストレージのキー
+const MATCH_STATE_KEY = 'mkbrMatchState_v4';
 
 // --- ヘルパー関数 ---
 
@@ -58,7 +57,6 @@ function scrollToChatBottom(instant = false, areaElement = matchChatMessagesArea
 // --- DOM読み込み完了時の処理 ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM要素の取得
     matchButton = document.getElementById('match-button');
     cancelButton = document.getElementById('cancel-match-button');
     opponentInfoArea = document.getElementById('opponent-info');
@@ -108,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typeof window.onLoginStatusChange === 'function') {
-        window.onLoginStatusChange((isUserLoggedIn) => { // 引数名を変更して、window.MyApp.isUserLoggedIn への依存を減らす
+        window.onLoginStatusChange((isUserLoggedIn) => {
             if (!isUserLoggedIn) {
                 console.log("[match_ui.js] User logged out. Clearing state.");
                 clearMatchStateAndUI(true);
@@ -122,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("[match_ui.js] onLoginStatusChange function not found.");
     }
 
-    // イベントリスナーは match_actions.js で定義されたグローバル関数を呼び出す
     matchButton?.addEventListener('click', () => { 
         if (typeof startMatchmaking === 'function') startMatchmaking();
         else console.error("startMatchmaking is not defined");
@@ -164,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('beforeunload', () => {
         saveStateToSessionStorage();
-        if (typeof stopHeartbeat === 'function') stopHeartbeat(); // match_actions.js で定義
-        if (typeof disconnectWebSocket === 'function') disconnectWebSocket(); // match_actions.js で定義
+        if (typeof stopHeartbeat === 'function') stopHeartbeat();
+        if (typeof disconnectWebSocket === 'function') disconnectWebSocket();
     });
 
     updateMatchUI();
@@ -175,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveStateToSessionStorage() {
     const state = {
-        isMatching: window.isMatching, // window. から取得
+        isMatching: window.isMatching,
         currentMatchId: window.currentMatchId,
         currentOpponentData: window.currentOpponentData,
         battleStatusTextContent: battleStatusText ? battleStatusText.textContent : '',
@@ -199,7 +196,7 @@ function loadStateFromSessionStorage() {
             window.currentOpponentData = savedState.currentOpponentData || null;
             window.isMatching = savedState.isMatching || false;
             window.isPollingForResult = savedState.isPollingForResult || false;
-            window.isSubmittingResult = false; // リロード時は常にfalse
+            window.isSubmittingResult = false;
             window.currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null;
 
             if (window.currentMatchId && window.currentOpponentData) {
@@ -235,10 +232,9 @@ function loadStateFromSessionStorage() {
 
 function resumePollingBasedOnState() {
     if (window.MyApp?.isUserLoggedIn && typeof window.getAuthToken === 'function' && window.getAuthToken()) {
-        // startPollingMatchStatus と startPollingMatchResult は match_actions.js で定義されているグローバル関数を期待
-        if (window.isMatching && typeof window.matchmakingStatusInterval === 'undefined' && typeof startPollingMatchStatus === 'function') { // matchmakingStatusInterval は match_actions.js で管理
+        if (window.isMatching && typeof window.matchmakingStatusInterval === 'undefined' && typeof startPollingMatchStatus === 'function') {
             startPollingMatchStatus();
-        } else if (window.currentMatchId && window.isPollingForResult && typeof window.matchResultPollingInterval === 'undefined' && typeof startPollingMatchResult === 'function') { // matchResultPollingInterval は match_actions.js で管理
+        } else if (window.currentMatchId && window.isPollingForResult && typeof window.matchResultPollingInterval === 'undefined' && typeof startPollingMatchResult === 'function') {
             startPollingMatchResult();
         }
         updateMatchUI();
@@ -256,7 +252,6 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     window.isPollingForResult = false;
     window.currentLobbyCreatorGoogleId = null;
 
-    // stopPolling関数群は match_actions.js で定義されているグローバル関数を期待
     if (typeof stopPollingMatchStatus === 'function') stopPollingMatchStatus();
     if (typeof stopPollingMatchResult === 'function') stopPollingMatchResult();
     if (typeof stopHeartbeat === 'function') stopHeartbeat();
@@ -271,18 +266,18 @@ function clearMatchStateAndUI(updateUIFlag = true) {
         updateMatchUI();
     }
 }
+window.clearMatchStateAndUI = clearMatchStateAndUI; // match_actions.js から呼ばれるためグローバルに
 
-// match_actions.js から呼び出されるためグローバルに公開
 function resetCurrentLobbyCreator() {
     window.currentLobbyCreatorGoogleId = null;
     console.log("[match_ui.js] Lobby creator ID has been reset.");
 }
-window.resetCurrentLobbyCreator = resetCurrentLobbyCreator; // グローバル関数として登録
+window.resetCurrentLobbyCreator = resetCurrentLobbyCreator;
 
 // --- UI表示関数 ---
 
 function displayMyProfileInfo(userData) {
-    if (!myProfilePic || !myProfileName || !myProfileRate) return; // myProfilePointsElement はオプションに
+    if (!myProfilePic || !myProfileName || !myProfileRate) return;
     const defaultAvatar = getDefaultAvatarPath();
 
     if (userData) {
@@ -350,19 +345,16 @@ function displayOpponentInfo(opponentData) {
     opponentInfoArea.dataset.opponentId = opponentData.googleId;
 }
 
-function determineAndDisplayLobbyCreator(opponentDataToDisplay) { // 引数名変更
+function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
     if (!lobbyInstructionElement) {
         console.error("[match_ui.js determineAndDisplayLobbyCreator] lobbyInstructionElement not found.");
         return;
     }
-
-    // window.currentOpponentData を使うのではなく、引数で渡されたデータを使用
     if (!opponentDataToDisplay || !opponentDataToDisplay.googleId) {
         lobbyInstructionElement.innerHTML = "対戦相手の情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
-
     if (!window.MyApp?.currentUserData || !window.MyApp.currentUserData.googleId) {
         lobbyInstructionElement.innerHTML = "ユーザー情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
@@ -370,10 +362,9 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) { // 引数名�
     }
 
     const myGoogleId = window.MyApp.currentUserData.googleId;
-    const opponentGoogleId = opponentDataToDisplay.googleId; // 引数のデータを使用
+    const opponentGoogleId = opponentDataToDisplay.googleId;
     let lobbyCreatorName = "";
 
-    // window.currentLobbyCreatorGoogleId を使用
     if (!window.currentLobbyCreatorGoogleId || (window.currentLobbyCreatorGoogleId !== myGoogleId && window.currentLobbyCreatorGoogleId !== opponentGoogleId)) {
         if (myGoogleId < opponentGoogleId) {
             window.currentLobbyCreatorGoogleId = myGoogleId;
@@ -388,7 +379,7 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) { // 引数名�
     if (window.currentLobbyCreatorGoogleId === myGoogleId) {
         lobbyCreatorName = escapeHTML(window.MyApp.currentUserData.name) || "あなた";
     } else if (window.currentLobbyCreatorGoogleId === opponentGoogleId) {
-        lobbyCreatorName = escapeHTML(opponentDataToDisplay.name) || "相手"; // 引数のデータを使用
+        lobbyCreatorName = escapeHTML(opponentDataToDisplay.name) || "相手";
     } else {
         console.error("[match_ui.js determineAndDisplayLobbyCreator] Could not determine lobby creator name. DeterminedID:", window.currentLobbyCreatorGoogleId, "MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
         lobbyInstructionElement.innerHTML = "ロビー作成者の情報を確認できませんでした。ページを再読み込みしてみてください。";
@@ -399,11 +390,13 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) { // 引数名�
     lobbyInstructionElement.innerHTML = `マッチングしました！<br><b>${lobbyCreatorName}</b> さん、ロビーを作成してください。`;
     lobbyInstructionElement.style.display = 'block';
 }
+window.determineAndDisplayLobbyCreator = determineAndDisplayLobbyCreator; // グローバルに公開 (必要に応じて)
 
 
 function hideLobbyInstruction() {
     if (lobbyInstructionElement) lobbyInstructionElement.style.display = 'none';
 }
+window.hideLobbyInstruction = hideLobbyInstruction; // match_actions.js から呼ばれるためグローバルに
 
 function updateMatchUI() {
     console.log("[match_ui.js] updateMatchUI called. Current window.isMatching:", window.isMatching);
@@ -449,42 +442,41 @@ function updateMatchUI() {
             show(matchChatSection); show(resultReportingArea);
             if (opponentProfileSection) opponentProfileSection.classList.add('visible');
             setText(matchStatusText, '対戦相手が見つかりました！');
-            displayOpponentInfo(window.currentOpponentData); // window. から取得
-            determineAndDisplayLobbyCreator(window.currentOpponentData); // window. から取得したデータを渡す
+            displayOpponentInfo(window.currentOpponentData);
+            determineAndDisplayLobbyCreator(window.currentOpponentData);
 
-            if (window.isSubmittingResult || window.isPollingForResult) {
+            if (window.isSubmittingResult) { // 送信中を先にチェック
                 hide(startBattleButton); show(reportResultButtons);
                 disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
-                if (window.isSubmittingResult) {
-                    setText(battleStatusText, '結果送信中...');
-                } else if (window.isPollingForResult) {
-                    setText(battleStatusText, '相手の報告を待っています...');
-                } else {
-                    // このelseブロックは通常到達しないが、念のためbattleStatusTextをクリア
-                    if (battleStatusText && battleStatusText.textContent === '結果送信中...' || battleStatusText.textContent === '相手の報告を待っています...') {
-                        //setText(battleStatusText, ''); // 状態と矛盾するテキストならクリア
-                    }
-                }
-            } else {
+                setText(battleStatusText, '結果送信中...');
+            } else if (window.isPollingForResult) { // 次に相手の報告待ちをチェック
+                hide(startBattleButton); show(reportResultButtons);
+                disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
+                setText(battleStatusText, '相手の報告を待っています...');
+            } else { // それ以外（対戦中、結果報告前、またはエラーメッセージ表示中など）
                 show(startBattleButton); hide(reportResultButtons);
-                // battleStatusText は handleReportResponse でエラー等が表示される可能性があるので、ここではクリアしない方が良い場合もある。
-                // ただし、マッチ直後で報告前なら空でよい。
-                if (battleStatusText && !battleStatusText.textContent.includes("エラー") && !battleStatusText.textContent.includes("キャンセル") && !battleStatusText.textContent.includes("無効")) {
-                   setText(battleStatusText, '');
+                // battleStatusText は handleReportResponse でエラー等が設定される場合があるので、
+                // ここで無条件にクリアせず、特定の状態（例：エラーでない、キャンセルでない）の場合のみクリアする方が良い
+                if (battleStatusText && !battleStatusText.textContent.includes("エラー") && 
+                    !battleStatusText.textContent.includes("キャンセル") && 
+                    !battleStatusText.textContent.includes("無効") &&
+                    !battleStatusText.textContent.includes("待って") && // 「相手の報告を待っています」を上書きしない
+                    !battleStatusText.textContent.includes("送信中") // 「結果送信中」を上書きしない
+                ) {
+                   setText(battleStatusText, ''); // デフォルトはクリア
                 }
             }
-             // connectWebSocket は match_actions.js で定義されたグローバル関数を期待
-            if (typeof window.matchWebSocket === 'undefined' || (window.matchWebSocket && window.matchWebSocket.readyState === WebSocket.CLOSED)) { // matchWebSocket は match_actions.js で管理されるグローバル変数
+            if (typeof window.matchWebSocket === 'undefined' || (window.matchWebSocket && window.matchWebSocket.readyState === WebSocket.CLOSED)) {
                 if (typeof connectWebSocket === 'function') connectWebSocket();
             }
-        } else { // ログイン済みだが、マッチング前
+        } else {
             show(matchButton); enable(matchButton); setText(matchButton, 'ライバルを探す');
             setText(matchStatusText, 'ライバルを探しましょう！');
             hide(opponentSpinner); show(opponentPlaceholder);
             hide(lobbyInstructionElement);
-            if(battleStatusText) battleStatusText.textContent = ''; // 以前のメッセージをクリア
+            if(battleStatusText) battleStatusText.textContent = '';
         }
-    } else { // 未ログイン時
+    } else {
         show(matchButton); disable(matchButton); setText(matchButton, 'ログインが必要です');
         setText(matchStatusText, '対戦するにはログインしてください。');
         hide(opponentSpinner); show(opponentPlaceholder);
@@ -492,39 +484,95 @@ function updateMatchUI() {
         if(battleStatusText) battleStatusText.textContent = '';
     }
 }
+window.updateMatchUI = updateMatchUI; // match_actions.js から呼ばれるためグローバルに
 
 function showResultModal(didWin, resultData, originalRate) {
-    if (!resultModal) return;
-    hideLobbyInstruction();
-    if (resultTitle) resultTitle.textContent = didWin ? '勝利！' : '敗北...';
-    if (resultMyRateBefore) resultMyRateBefore.textContent = originalRate ?? '----';
-    if (resultMyRateAfter) resultMyRateAfter.textContent = resultData.newRate ?? '----';
+    console.log("[match_ui.js showResultModal] Function called. didWin:", didWin, "resultData:", JSON.parse(JSON.stringify(resultData)), "originalRate:", originalRate);
+    
+    if (!resultModal) {
+        console.error("[match_ui.js showResultModal] resultModal element not found! Cannot display modal.");
+        return;
+    }
+    
+    if (typeof hideLobbyInstruction === 'function') {
+        hideLobbyInstruction();
+    } else {
+        console.warn("[match_ui.js showResultModal] hideLobbyInstruction function is not defined.");
+    }
+
+    if (resultTitle) {
+        resultTitle.textContent = didWin ? '勝利！' : '敗北...';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultTitle element not found.");
+    }
+    if (resultMyRateBefore) {
+        resultMyRateBefore.textContent = originalRate ?? '----';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultMyRateBefore element not found.");
+    }
+    if (resultMyRateAfter) {
+        resultMyRateAfter.textContent = resultData.newRate ?? '----';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultMyRateAfter element not found.");
+    }
     if (resultRateChange) {
         const change = resultData.rateChange ?? 0;
         resultRateChange.textContent = `${change >= 0 ? '+' : ''}${change}`;
         resultRateChange.style.color = change >= 0 ? (didWin ? 'var(--color-success, green)' : 'var(--color-warning, orange)') : 'var(--color-danger, red)';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultRateChange element not found.");
     }
-    if (resultPointsEarned) resultPointsEarned.textContent = resultData.pointsEarned ?? '--';
-    if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
+    if (resultPointsEarned) {
+        resultPointsEarned.textContent = resultData.pointsEarned ?? '--';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultPointsEarned element not found.");
+    }
+    if (resultNewPoints) {
+        resultNewPoints.textContent = resultData.newPoints ?? '----';
+    } else {
+        console.warn("[match_ui.js showResultModal] resultNewPoints element not found.");
+    }
+    
+    console.log("[match_ui.js showResultModal] Setting resultModal display to 'flex'.");
     resultModal.style.display = 'flex';
-    saveStateToSessionStorage();
+    
+    if (typeof saveStateToSessionStorage === 'function') { // saveStateToSessionStorage はこのファイル内で定義
+        saveStateToSessionStorage();
+    } else {
+        console.warn("[match_ui.js showResultModal] saveStateToSessionStorage function is not defined (should be in match_ui.js).");
+    }
 
     setTimeout(() => {
+        console.log("[match_ui.js showResultModal] Timeout for auto-closing modal reached.");
         if (resultModal && resultModal.style.display === 'flex') {
+            console.log("[match_ui.js showResultModal] Modal is still open, calling closeResultModal via timeout.");
             closeResultModal();
+        } else {
+            console.log("[match_ui.js showResultModal] Modal was already closed or not displayed, not closing via timeout.");
         }
     }, 6000);
 }
+window.showResultModal = showResultModal; // match_actions.js から呼ばれるためグローバルに
 
 function closeResultModal() {
+    console.log("[match_ui.js closeResultModal] Function called.");
+    
     if (resultModal && resultModal.style.display !== 'none') {
+        console.log("[match_ui.js closeResultModal] Hiding resultModal.");
         resultModal.style.display = 'none';
-        clearMatchStateAndUI(true);
+        
+        console.log("[match_ui.js closeResultModal] Attempting to call clearMatchStateAndUI.");
+        if (typeof clearMatchStateAndUI === 'function') { // このファイル内で定義
+            clearMatchStateAndUI(true);
+            console.log("[match_ui.js closeResultModal] clearMatchStateAndUI was called.");
+        } else {
+            console.error("[match_ui.js closeResultModal] clearMatchStateAndUI function is not defined (should be in match_ui.js)!");
+        }
+    } else {
+        console.log("[match_ui.js closeResultModal] resultModal not found or already hidden.");
     }
 }
 
-// appendChatMessage は match_actions.js からも呼ばれる想定であればグローバルにするか、
-// match_ui.js内でのみ使うならこのままで良い。現状は match_actions.js からも呼ばれる想定。
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
@@ -532,7 +580,7 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
 
     const isSystem = senderName === 'システム';
     const sender = window.MyApp?.currentUserData;
-    const opponent = window.currentOpponentData; // window. から取得
+    const opponent = window.currentOpponentData;
 
     if (isSystem) {
         messageDiv.classList.add('system-message');
@@ -559,5 +607,4 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
     matchChatMessagesArea.appendChild(messageDiv);
     scrollToChatBottom(false);
 }
-// match_actions.js から使えるようにグローバルに公開
-window.appendChatMessage = appendChatMessage;
+window.appendChatMessage = appendChatMessage; // match_actions.js から呼ばれるためグローバルに

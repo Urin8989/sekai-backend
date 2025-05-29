@@ -29,7 +29,7 @@ async function authenticatedFetch(url, options = {}) {
         if (response.status === 401 || response.status === 403) {
             console.error(`Auth error (${response.status}) for ${url}. Clearing state.`);
             if (typeof window.handleLogout === 'function') window.handleLogout();
-            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義されたグローバル関数
+            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義・公開
             throw new Error('認証エラーが発生しました。再ログインしてください。');
         }
         
@@ -78,19 +78,19 @@ async function startMatchmaking() {
 
     console.log("[match_actions.js] isMatching is now:", window.isMatching);
 
-    if (typeof window.resetCurrentLobbyCreator === 'function') { // match_ui.js で定義されたグローバル関数
+    if (typeof window.resetCurrentLobbyCreator === 'function') {
         window.resetCurrentLobbyCreator();
     } else {
         console.warn("[match_actions.js] window.resetCurrentLobbyCreator is not defined.");
     }
 
-    if (typeof updateMatchUI === 'function') { // match_ui.js で定義されたグローバル関数
+    if (typeof updateMatchUI === 'function') {
         console.log("[match_actions.js] Calling updateMatchUI from startMatchmaking.");
         updateMatchUI();
     } else {
         console.error("[match_actions.js] updateMatchUI function is not defined!");
     }
-    if (typeof saveStateToSessionStorage === 'function') { // match_ui.js で定義されたグローバル関数
+    if (typeof saveStateToSessionStorage === 'function') {
         saveStateToSessionStorage();
     } else {
         console.error("[match_actions.js] saveStateToSessionStorage function is not defined!");
@@ -110,18 +110,18 @@ async function startMatchmaking() {
         }
     } catch (error) {
         console.error("[match_actions.js] Error starting matchmaking:", error);
-        const statusEl = document.getElementById('match-status'); // match_ui.js で管理されるDOM要素
+        const statusEl = document.getElementById('match-status'); // match_ui.js で管理されるDOM
         if (statusEl) statusEl.textContent = `マッチング開始エラー: ${error.message}`;
         
-        window.isMatching = false; // エラー時はフラグを戻す
-        if (typeof clearMatchStateAndUI === 'function') { // match_ui.js で定義されたグローバル関数
+        window.isMatching = false;
+        if (typeof clearMatchStateAndUI === 'function') {
             clearMatchStateAndUI(true);
         } else {
             console.error("[match_actions.js] clearMatchStateAndUI function is not defined!");
         }
     }
 }
-window.startMatchmaking = startMatchmaking; // グローバル関数として公開
+window.startMatchmaking = startMatchmaking;
 
 function startPollingMatchStatus() {
     stopPollingMatchStatus();
@@ -171,7 +171,7 @@ function startPollingMatchStatus() {
         }
     }, 3000);
 }
-// window.startPollingMatchStatus = startPollingMatchStatus; // UIから直接呼ばない想定なら不要
+window.startPollingMatchStatus = startPollingMatchStatus;
 
 function stopPollingMatchStatus() {
     if (matchmakingStatusInterval) {
@@ -179,7 +179,7 @@ function stopPollingMatchStatus() {
         matchmakingStatusInterval = null;
     }
 }
-window.stopPollingMatchStatus = stopPollingMatchStatus; // clearMatchStateAndUI から呼ばれるのでグローバルに
+window.stopPollingMatchStatus = stopPollingMatchStatus;
 
 async function handleMatchFound(opponentData, matchId) {
     window.currentOpponentData = opponentData;
@@ -187,14 +187,14 @@ async function handleMatchFound(opponentData, matchId) {
     window.isMatching = false;
     window.isPollingForResult = false;
 
-    if (typeof window.resetCurrentLobbyCreator === 'function') { // match_ui.js で定義
+    if (typeof window.resetCurrentLobbyCreator === 'function') {
         window.resetCurrentLobbyCreator();
     } else {
         console.warn("[match_actions.js] resetCurrentLobbyCreator function not found. Lobby creator display might be stale.");
     }
 
-    if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
-    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage(); // match_ui.js で定義
+    if (typeof updateMatchUI === 'function') updateMatchUI();
+    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
 
     const chatArea = document.getElementById('match-chat-messages'); // match_ui.js で管理
     if (chatArea) {
@@ -210,7 +210,7 @@ async function handleMatchFound(opponentData, matchId) {
         console.error("[match_actions.js] Error leaving matchmaking queue:", error);
     }
 }
-// window.handleMatchFound = handleMatchFound; // UIから直接呼ばない想定なら不要
+// window.handleMatchFound = handleMatchFound; // 通常UIからは直接呼ばない
 
 async function cancelMatchmakingRequest() {
     if (!window.isMatching) return;
@@ -229,10 +229,10 @@ async function cancelMatchmakingRequest() {
         console.error("Error cancelling matchmaking request:", error);
         if (statusEl) statusEl.textContent = `キャンセルエラー: ${error.message}`;
     } finally {
-        if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+        if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
     }
 }
-window.cancelMatchmakingRequest = cancelMatchmakingRequest; // グローバル関数として公開
+window.cancelMatchmakingRequest = cancelMatchmakingRequest;
 
 async function submitReport(result) {
     if (window.isSubmittingResult || !window.currentMatchId) return;
@@ -242,9 +242,9 @@ async function submitReport(result) {
     if (!confirm(`対戦結果を「${result === 'win' ? '勝利' : '敗北'}」として申告しますか？`)) return;
 
     window.isSubmittingResult = true;
-    if (typeof hideLobbyInstruction === 'function') hideLobbyInstruction(); // match_ui.js で定義
-    if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
-    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage(); // match_ui.js で定義
+    if (typeof hideLobbyInstruction === 'function') hideLobbyInstruction();
+    if (typeof updateMatchUI === 'function') updateMatchUI();
+    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
 
     try {
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/report`;
@@ -263,7 +263,6 @@ async function submitReport(result) {
         }
         window.isSubmittingResult = false;
         
-        // ボタンの状態復元は updateMatchUI に任せるのが望ましい
         const reportWinBtn = document.getElementById('report-win-button'); // match_ui.js で管理
         const reportLoseBtn = document.getElementById('report-lose-button'); // match_ui.js で管理
         const cancelBattleBtn = document.getElementById('cancel-battle-button'); // match_ui.js で管理
@@ -271,19 +270,19 @@ async function submitReport(result) {
         if (reportLoseBtn) reportLoseBtn.disabled = false;
         if (cancelBattleBtn) cancelBattleBtn.disabled = false;
         
-        if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
+        if (typeof updateMatchUI === 'function') updateMatchUI();
     }
 }
-window.submitReport = submitReport; // グローバル関数として公開
+window.submitReport = submitReport;
 
 async function cancelBattle() {
     if (window.isSubmittingResult || !window.currentMatchId) return;
     if (!confirm("この対戦をキャンセルしますか？\nレートは変動しません。")) return;
 
     window.isSubmittingResult = true;
-    if (typeof hideLobbyInstruction === 'function') hideLobbyInstruction(); // match_ui.js で定義
-    if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
-    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage(); // match_ui.js で定義
+    if (typeof hideLobbyInstruction === 'function') hideLobbyInstruction();
+    if (typeof updateMatchUI === 'function') updateMatchUI();
+    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
 
     try {
         const apiUrl = `${window.MyApp.BACKEND_URL}/api/matchmaking/cancel-match`;
@@ -298,7 +297,6 @@ async function cancelBattle() {
         if (battleStatusEl) battleStatusEl.textContent = `対戦キャンセルエラー: ${error.message}`;
         window.isSubmittingResult = false;
         
-        // ボタンの状態復元は updateMatchUI に任せるのが望ましい
         const reportWinBtn = document.getElementById('report-win-button'); // match_ui.js で管理
         const reportLoseBtn = document.getElementById('report-lose-button'); // match_ui.js で管理
         const cancelBattleBtn = document.getElementById('cancel-battle-button'); // match_ui.js で管理
@@ -306,10 +304,10 @@ async function cancelBattle() {
         if (reportLoseBtn) reportLoseBtn.disabled = true;
         if (cancelBattleBtn) cancelBattleBtn.disabled = true;
 
-        if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
+        if (typeof updateMatchUI === 'function') updateMatchUI();
     }
 }
-window.cancelBattle = cancelBattle; // グローバル関数として公開
+window.cancelBattle = cancelBattle;
 
 function handleReportResponse(responseData) {
     console.log("[handleReportResponse] Received responseData:", JSON.parse(JSON.stringify(responseData)));
@@ -317,8 +315,10 @@ function handleReportResponse(responseData) {
     stopPollingMatchResult();
     window.isSubmittingResult = false;
     
-    if (typeof hideLobbyInstruction === 'function') { // match_ui.js で定義
+    if (typeof hideLobbyInstruction === 'function') {
         hideLobbyInstruction();
+    } else {
+        console.warn("[handleReportResponse] hideLobbyInstruction function is not defined.");
     }
 
     const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
@@ -327,10 +327,10 @@ function handleReportResponse(responseData) {
         console.error("[handleReportResponse] Invalid responseData or responseData.status is undefined.", responseData);
         if (battleStatusEl) battleStatusEl.textContent = "サーバーからの応答が不正です。";
         setTimeout(() => {
-            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
         }, 3000);
-        if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
-        if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage(); // match_ui.js で定義
+        if (typeof updateMatchUI === 'function') updateMatchUI();
+        if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
         return;
     }
 
@@ -343,16 +343,27 @@ function handleReportResponse(responseData) {
             startPollingMatchResult();
             break;
         case 'finished':
-            console.log("[handleReportResponse] Status: 'finished'. Attempting to show result modal. Result data:", responseData.resultData);
+            console.log("[handleReportResponse] Status: 'finished'. Preparing to show result modal. Result data:", JSON.parse(JSON.stringify(responseData.resultData)));
             window.isPollingForResult = false;
-            const originalRate = responseData.resultData?.originalRate ?? window.MyApp?.currentUserData?.rate;
             
-            updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints); // このファイル内で定義
-
-            if (typeof showResultModal === 'function') { // match_ui.js で定義
-                showResultModal(responseData.resultData.didWin, responseData.resultData, originalRate);
+            const currentUserRateForModal = window.MyApp?.currentUserData?.rate;
+            const originalRate = responseData.resultData?.originalRate ?? currentUserRateForModal;
+            console.log(`[handleReportResponse] Original rate for modal: ${originalRate}, Current user rate from MyApp: ${currentUserRateForModal}`);
+            
+            if (typeof updateGlobalUserData === 'function') {
+                console.log("[handleReportResponse] Calling updateGlobalUserData with:", responseData.resultData.newRate, responseData.resultData.newPoints);
+                updateGlobalUserData(responseData.resultData.newRate, responseData.resultData.newPoints);
+                console.log("[handleReportResponse] updateGlobalUserData finished.");
             } else {
-                console.error("showResultModal function is not defined!");
+                console.error("[handleReportResponse] updateGlobalUserData function is not defined!");
+            }
+
+            if (typeof showResultModal === 'function') {
+                console.log("[handleReportResponse] Attempting to call showResultModal.");
+                showResultModal(responseData.resultData.didWin, responseData.resultData, originalRate);
+                console.log("[handleReportResponse] showResultModal function was called.");
+            } else {
+                console.error("[handleReportResponse] showResultModal function is not defined!");
             }
             break;
         case 'disputed':
@@ -360,7 +371,7 @@ function handleReportResponse(responseData) {
             window.isPollingForResult = false;
             if (battleStatusEl) battleStatusEl.textContent = '報告が一致しませんでした。この対戦は無効になります。';
             setTimeout(() => {
-                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
             }, 3000);
             break;
         case 'cancelled':
@@ -368,7 +379,7 @@ function handleReportResponse(responseData) {
             window.isPollingForResult = false;
             if (battleStatusEl) battleStatusEl.textContent = '対戦がキャンセルされました。';
             setTimeout(() => {
-                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
             }, 3000);
             break;
         default:
@@ -376,15 +387,15 @@ function handleReportResponse(responseData) {
             window.isPollingForResult = false;
             if (battleStatusEl) battleStatusEl.textContent = `不明な応答 ('${responseData.status}') をサーバーから受信しました。`;
             setTimeout(() => {
-                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
             }, 3000);
             break;
     }
 
-    if (typeof updateMatchUI === 'function') updateMatchUI(); // match_ui.js で定義
-    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage(); // match_ui.js で定義
+    if (typeof updateMatchUI === 'function') updateMatchUI();
+    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
 }
-// window.handleReportResponse = handleReportResponse; // UIから直接呼ばない想定なら不要
+// window.handleReportResponse = handleReportResponse; // UIから直接呼ばない想定
 
 function updateGlobalUserData(newRate, newPoints) {
     if (window.MyApp?.currentUserData) {
@@ -394,7 +405,7 @@ function updateGlobalUserData(newRate, newPoints) {
         if (typeof window.updateUserPoints === 'function') window.updateUserPoints(newPoints);
     }
 }
-// window.updateGlobalUserData = updateGlobalUserData; // UIから直接呼ばない想定なら不要
+// window.updateGlobalUserData = updateGlobalUserData; // UIから直接呼ばない想定
 
 function startPollingMatchResult() {
     stopPollingMatchResult();
@@ -424,12 +435,12 @@ function startPollingMatchResult() {
             const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
             if (battleStatusEl) battleStatusEl.textContent = `結果確認エラー: ${error.message}`;
             setTimeout(() => {
-                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義
+                if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
             }, 2000);
         }
     }, 5000);
 }
-// window.startPollingMatchResult = startPollingMatchResult; // UIから直接呼ばない想定なら不要
+window.startPollingMatchResult = startPollingMatchResult;
 
 function stopPollingMatchResult() {
     if (matchResultPollingInterval) {
@@ -437,7 +448,7 @@ function stopPollingMatchResult() {
         matchResultPollingInterval = null;
     }
 }
-window.stopPollingMatchResult = stopPollingMatchResult; // clearMatchStateAndUI から呼ばれるのでグローバルに
+window.stopPollingMatchResult = stopPollingMatchResult;
 
 // --- WebSocket (チャット) 関連 ---
 
@@ -457,7 +468,7 @@ function sendChatMessage() {
         chatInputEl.value = '';
     }
 }
-window.sendChatMessage = sendChatMessage; // グローバル関数として公開
+window.sendChatMessage = sendChatMessage;
 
 function startHeartbeat() {
     stopHeartbeat();
@@ -468,12 +479,12 @@ function startHeartbeat() {
         } else { stopHeartbeat(); }
     }, 30000);
 }
-// window.startHeartbeat = startHeartbeat; // UIから直接呼ばない想定なら不要
+// window.startHeartbeat = startHeartbeat; // UIから直接呼ばない
 
 function stopHeartbeat() {
     if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
 }
-window.stopHeartbeat = stopHeartbeat; // clearMatchStateAndUI, disconnectWebSocket から呼ばれるのでグローバルに
+window.stopHeartbeat = stopHeartbeat;
 
 function connectWebSocket() {
     if (matchWebSocket && (matchWebSocket.readyState === WebSocket.OPEN || matchWebSocket.readyState === WebSocket.CONNECTING)) return;
@@ -491,9 +502,8 @@ function connectWebSocket() {
     let path = "";
     if (wsUrl && !wsUrl.endsWith('/')) wsUrl += '/'; 
     if (window.location.hostname === 'www.mariokartbestrivals.com' || window.location.hostname === 'mariokartbestrivals.com') {
-        path = "ws/"; // 本番環境用のパスプレフィックス
+        path = "ws/";
     }
-    // ローカル環境など、他のホスト名の場合はパスプレフィックスなし
 
     if (!wsUrl || (!wsUrl.startsWith('ws://') && !wsUrl.startsWith('wss://'))) {
         if (typeof window.appendChatMessage === 'function') window.appendChatMessage('無効なWebSocket URLです。 ws:// または wss:// で始まる必要があります。', false, "システム");
@@ -505,7 +515,7 @@ function connectWebSocket() {
     if (typeof window.appendChatMessage === 'function') window.appendChatMessage("チャットサーバーに接続中...", false, "システム");
 
     try {
-        matchWebSocket = new WebSocket(fullWsUrl); // このファイルスコープの matchWebSocket を使用
+        matchWebSocket = new WebSocket(fullWsUrl);
         matchWebSocket.onopen = () => { 
             if (typeof window.appendChatMessage === 'function') window.appendChatMessage("チャットに接続しました。", false, "システム"); 
             startHeartbeat(); 
@@ -513,7 +523,7 @@ function connectWebSocket() {
         matchWebSocket.onmessage = (event) => {
             try {
                 const messageData = JSON.parse(event.data);
-                if (messageData.type === 'PONG') return; // ハートビート応答は無視
+                if (messageData.type === 'PONG') return;
                 if (messageData.type === 'MATCH_CHAT_MESSAGE' && messageData.text && messageData.senderId !== window.MyApp?.currentUserData?.googleId) {
                     if (typeof window.appendChatMessage === 'function') window.appendChatMessage(messageData.text, false, messageData.senderName || '相手');
                 } else if (messageData.type === 'SYSTEM_MESSAGE') {
@@ -529,12 +539,12 @@ function connectWebSocket() {
         };
         matchWebSocket.onclose = (event) => {
             stopHeartbeat();
-            const currentMatchIdForCloseMsg = window.currentMatchId; // グローバルから再取得
+            const currentMatchIdForCloseMsg = window.currentMatchId;
             if (event.code !== 1000 && currentMatchIdForCloseMsg) { 
                 const codeMsg = event.code === 1006 ? ' (接続が異常終了しました)' : '';
                 if (typeof window.appendChatMessage === 'function') window.appendChatMessage(`チャット接続が切れました (Code: ${event.code}${codeMsg})`, false, "システム");
             }
-            matchWebSocket = null; // 再接続できるように null にする
+            matchWebSocket = null;
             console.log("WebSocket connection closed. Code:", event.code, "Reason:", event.reason);
         };
     } catch (error) { 
@@ -542,14 +552,14 @@ function connectWebSocket() {
         if (typeof window.appendChatMessage === 'function') window.appendChatMessage("チャット接続失敗。", false, "システム"); 
     }
 }
-// window.connectWebSocket = connectWebSocket; // UIから直接呼ばない想定なら不要 (updateMatchUIから呼ばれる)
+window.connectWebSocket = connectWebSocket; // updateMatchUI から呼ばれるためグローバルに
 
 function disconnectWebSocket() {
     stopHeartbeat();
-    if (matchWebSocket) { // このファイルスコープの matchWebSocket を使用
+    if (matchWebSocket) {
         matchWebSocket.close(1000, "Client requested disconnect");
         matchWebSocket = null;
     }
     console.log("WebSocket disconnected by client request.");
 }
-window.disconnectWebSocket = disconnectWebSocket; // clearMatchStateAndUI などから呼ばれるのでグローバルに
+window.disconnectWebSocket = disconnectWebSocket;
