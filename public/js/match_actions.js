@@ -29,7 +29,7 @@ async function authenticatedFetch(url, options = {}) {
         if (response.status === 401 || response.status === 403) {
             console.error(`Auth error (${response.status}) for ${url}. Clearing state.`);
             if (typeof window.handleLogout === 'function') window.handleLogout();
-            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true); // match_ui.js で定義・公開
+            if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
             throw new Error('認証エラーが発生しました。再ログインしてください。');
         }
         
@@ -110,7 +110,7 @@ async function startMatchmaking() {
         }
     } catch (error) {
         console.error("[match_actions.js] Error starting matchmaking:", error);
-        const statusEl = document.getElementById('match-status'); // match_ui.js で管理されるDOM
+        const statusEl = document.getElementById('match-status');
         if (statusEl) statusEl.textContent = `マッチング開始エラー: ${error.message}`;
         
         window.isMatching = false;
@@ -153,7 +153,7 @@ function startPollingMatchStatus() {
                 case 'not_found':
                     stopPollingMatchStatus();
                     if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
-                    const statusEl = document.getElementById('match-status'); // match_ui.js で管理
+                    const statusEl = document.getElementById('match-status');
                     if (statusEl) statusEl.textContent = result.status === 'timeout' ? '時間内に相手が見つかりませんでした。' : 'マッチングが終了しました。';
                     break;
                 default:
@@ -166,7 +166,7 @@ function startPollingMatchStatus() {
             console.error("Error polling matchmaking status:", error);
             stopPollingMatchStatus();
             if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
-            const statusEl = document.getElementById('match-status'); // match_ui.js で管理
+            const statusEl = document.getElementById('match-status');
             if (statusEl) statusEl.textContent = `状況確認エラー: ${error.message}`;
         }
     }, 3000);
@@ -182,10 +182,21 @@ function stopPollingMatchStatus() {
 window.stopPollingMatchStatus = stopPollingMatchStatus;
 
 async function handleMatchFound(opponentData, matchId) {
+    console.log("[match_actions.js handleMatchFound] Match found!");
+    console.log("[match_actions.js handleMatchFound] Received opponentData (raw):", opponentData);
+    try {
+        console.log("[match_actions.js handleMatchFound] Received opponentData (JSON):", JSON.parse(JSON.stringify(opponentData)));
+    } catch (e) {
+        console.warn("[match_actions.js handleMatchFound] Could not stringify opponentData", e);
+    }
+    console.log("[match_actions.js handleMatchFound] Received matchId:", matchId);
+
     window.currentOpponentData = opponentData;
     window.currentMatchId = matchId;
     window.isMatching = false;
     window.isPollingForResult = false;
+
+    console.log("[match_actions.js handleMatchFound] window.currentOpponentData set to:", JSON.parse(JSON.stringify(window.currentOpponentData)));
 
     if (typeof window.resetCurrentLobbyCreator === 'function') {
         window.resetCurrentLobbyCreator();
@@ -193,10 +204,19 @@ async function handleMatchFound(opponentData, matchId) {
         console.warn("[match_actions.js] resetCurrentLobbyCreator function not found. Lobby creator display might be stale.");
     }
 
-    if (typeof updateMatchUI === 'function') updateMatchUI();
-    if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
+    if (typeof updateMatchUI === 'function') {
+        console.log("[match_actions.js handleMatchFound] Calling updateMatchUI.");
+        updateMatchUI();
+    } else {
+        console.error("[match_actions.js handleMatchFound] updateMatchUI function is not defined!");
+    }
+    if (typeof saveStateToSessionStorage === 'function') {
+        saveStateToSessionStorage();
+    } else {
+        console.error("[match_actions.js handleMatchFound] saveStateToSessionStorage function is not defined!");
+    }
 
-    const chatArea = document.getElementById('match-chat-messages'); // match_ui.js で管理
+    const chatArea = document.getElementById('match-chat-messages');
     if (chatArea) {
         chatArea.innerHTML = '<p class="chat-system-message">対戦相手が見つかりました。チャットを開始できます。</p>';
     }
@@ -210,15 +230,15 @@ async function handleMatchFound(opponentData, matchId) {
         console.error("[match_actions.js] Error leaving matchmaking queue:", error);
     }
 }
-// window.handleMatchFound = handleMatchFound; // 通常UIからは直接呼ばない
+// window.handleMatchFound = handleMatchFound; 
 
 async function cancelMatchmakingRequest() {
     if (!window.isMatching) return;
     
     stopPollingMatchStatus();
-    const statusEl = document.getElementById('match-status'); // match_ui.js で管理
+    const statusEl = document.getElementById('match-status');
     if (statusEl) statusEl.textContent = 'キャンセル処理中...';
-    const cancelBtnEl = document.getElementById('cancel-match-button'); // match_ui.js で管理
+    const cancelBtnEl = document.getElementById('cancel-match-button');
     if (cancelBtnEl) cancelBtnEl.disabled = true;
 
     try {
@@ -257,15 +277,15 @@ async function submitReport(result) {
         console.error("[submitReport] Error submitting report (raw error object):", error);
         console.error("[submitReport] Error message:", error.message);
         
-        const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
+        const battleStatusEl = document.getElementById('battle-status-text');
         if (battleStatusEl) {
             battleStatusEl.textContent = `結果報告エラー: ${error.message} (サーバーで問題が発生した可能性があります。しばらくしてから再試行してください。)`;
         }
         window.isSubmittingResult = false;
         
-        const reportWinBtn = document.getElementById('report-win-button'); // match_ui.js で管理
-        const reportLoseBtn = document.getElementById('report-lose-button'); // match_ui.js で管理
-        const cancelBattleBtn = document.getElementById('cancel-battle-button'); // match_ui.js で管理
+        const reportWinBtn = document.getElementById('report-win-button');
+        const reportLoseBtn = document.getElementById('report-lose-button');
+        const cancelBattleBtn = document.getElementById('cancel-battle-button');
         if (reportWinBtn) reportWinBtn.disabled = false;
         if (reportLoseBtn) reportLoseBtn.disabled = false;
         if (cancelBattleBtn) cancelBattleBtn.disabled = false;
@@ -293,13 +313,13 @@ async function cancelBattle() {
         handleReportResponse(responseData);
     } catch (error) {
         console.error("Error cancelling battle:", error);
-        const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
+        const battleStatusEl = document.getElementById('battle-status-text');
         if (battleStatusEl) battleStatusEl.textContent = `対戦キャンセルエラー: ${error.message}`;
         window.isSubmittingResult = false;
         
-        const reportWinBtn = document.getElementById('report-win-button'); // match_ui.js で管理
-        const reportLoseBtn = document.getElementById('report-lose-button'); // match_ui.js で管理
-        const cancelBattleBtn = document.getElementById('cancel-battle-button'); // match_ui.js で管理
+        const reportWinBtn = document.getElementById('report-win-button');
+        const reportLoseBtn = document.getElementById('report-lose-button');
+        const cancelBattleBtn = document.getElementById('cancel-battle-button');
         if (reportWinBtn) reportWinBtn.disabled = true;
         if (reportLoseBtn) reportLoseBtn.disabled = true;
         if (cancelBattleBtn) cancelBattleBtn.disabled = true;
@@ -321,7 +341,7 @@ function handleReportResponse(responseData) {
         console.warn("[handleReportResponse] hideLobbyInstruction function is not defined.");
     }
 
-    const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
+    const battleStatusEl = document.getElementById('battle-status-text');
 
     if (!responseData || typeof responseData.status === 'undefined') {
         console.error("[handleReportResponse] Invalid responseData or responseData.status is undefined.", responseData);
@@ -395,7 +415,7 @@ function handleReportResponse(responseData) {
     if (typeof updateMatchUI === 'function') updateMatchUI();
     if (typeof saveStateToSessionStorage === 'function') saveStateToSessionStorage();
 }
-// window.handleReportResponse = handleReportResponse; // UIから直接呼ばない想定
+// window.handleReportResponse = handleReportResponse;
 
 function updateGlobalUserData(newRate, newPoints) {
     if (window.MyApp?.currentUserData) {
@@ -405,7 +425,7 @@ function updateGlobalUserData(newRate, newPoints) {
         if (typeof window.updateUserPoints === 'function') window.updateUserPoints(newPoints);
     }
 }
-// window.updateGlobalUserData = updateGlobalUserData; // UIから直接呼ばない想定
+// window.updateGlobalUserData = updateGlobalUserData;
 
 function startPollingMatchResult() {
     stopPollingMatchResult();
@@ -432,7 +452,7 @@ function startPollingMatchResult() {
         } catch (error) {
             console.error("Error polling match result:", error);
             stopPollingMatchResult();
-            const battleStatusEl = document.getElementById('battle-status-text'); // match_ui.js で管理
+            const battleStatusEl = document.getElementById('battle-status-text');
             if (battleStatusEl) battleStatusEl.textContent = `結果確認エラー: ${error.message}`;
             setTimeout(() => {
                 if (typeof clearMatchStateAndUI === 'function') clearMatchStateAndUI(true);
@@ -453,7 +473,7 @@ window.stopPollingMatchResult = stopPollingMatchResult;
 // --- WebSocket (チャット) 関連 ---
 
 function sendChatMessage() {
-    const chatInputEl = document.getElementById('match-chat-input'); // match_ui.js で管理
+    const chatInputEl = document.getElementById('match-chat-input');
     if (!chatInputEl || !matchWebSocket || matchWebSocket.readyState !== WebSocket.OPEN) {
         if (!matchWebSocket || matchWebSocket.readyState !== WebSocket.OPEN) alert("チャットサーバーに接続されていません。");
         return;
@@ -462,7 +482,7 @@ function sendChatMessage() {
     if (messageText && window.currentMatchId) {
         const messagePayload = { type: 'MATCH_CHAT_MESSAGE', matchId: window.currentMatchId, text: messageText };
         matchWebSocket.send(JSON.stringify(messagePayload));
-        if (typeof window.appendChatMessage === 'function') { // match_ui.js で定義・グローバル公開
+        if (typeof window.appendChatMessage === 'function') {
             window.appendChatMessage(messageText, true, window.MyApp?.currentUserData?.name || '自分');
         }
         chatInputEl.value = '';
@@ -479,7 +499,7 @@ function startHeartbeat() {
         } else { stopHeartbeat(); }
     }, 30000);
 }
-// window.startHeartbeat = startHeartbeat; // UIから直接呼ばない
+// window.startHeartbeat = startHeartbeat;
 
 function stopHeartbeat() {
     if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
@@ -552,7 +572,7 @@ function connectWebSocket() {
         if (typeof window.appendChatMessage === 'function') window.appendChatMessage("チャット接続失敗。", false, "システム"); 
     }
 }
-window.connectWebSocket = connectWebSocket; // updateMatchUI から呼ばれるためグローバルに
+window.connectWebSocket = connectWebSocket;
 
 function disconnectWebSocket() {
     stopHeartbeat();
