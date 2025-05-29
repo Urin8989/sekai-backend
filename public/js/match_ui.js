@@ -1,16 +1,15 @@
 // frontend/match_ui.js
 
 // --- グローバル変数 ---
-let isMatching = false;
-let matchmakingStatusInterval = null;
-let currentMatchId = null;
-let currentOpponentData = null;
-let matchResultPollingInterval = null;
-let isSubmittingResult = false;
-let isPollingForResult = false; // 結果ポーリング中フラグ
-let currentLobbyCreatorGoogleId = null; // ★ ロビー作成者のGoogle ID
+// UIの状態に直接関連する変数を window オブジェクトにアタッチしてグローバルにする
+window.isMatching = false;
+window.currentMatchId = null;
+window.currentOpponentData = null;
+window.isSubmittingResult = false;
+window.isPollingForResult = false;
+window.currentLobbyCreatorGoogleId = null;
 
-// DOM要素
+// DOM要素 (これらはこのファイルスコープのまま)
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
 let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
@@ -18,7 +17,7 @@ let resultReportingArea, startBattleButton, reportResultButtons, reportWinButton
 let resultModal, resultTitle, resultMyRateBefore, resultMyRateAfter, resultRateChange, resultPointsEarned, resultNewPoints, closeResultModalButton;
 let lobbyInstructionElement;
 
-const MATCH_STATE_KEY = 'mkbrMatchState_v4';
+const MATCH_STATE_KEY = 'mkbrMatchState_v4'; // セッションストレージのキー
 
 // --- ヘルパー関数 ---
 
@@ -109,8 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (typeof window.onLoginStatusChange === 'function') {
-        window.onLoginStatusChange((user) => {
-            if (!window.MyApp?.isUserLoggedIn) {
+        window.onLoginStatusChange((isUserLoggedIn) => { // 引数名を変更して、window.MyApp.isUserLoggedIn への依存を減らす
+            if (!isUserLoggedIn) {
                 console.log("[match_ui.js] User logged out. Clearing state.");
                 clearMatchStateAndUI(true);
             } else {
@@ -123,29 +122,50 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("[match_ui.js] onLoginStatusChange function not found.");
     }
 
-    matchButton?.addEventListener('click', startMatchmaking);
-    cancelButton?.addEventListener('click', cancelMatchmakingRequest);
+    // イベントリスナーは match_actions.js で定義されたグローバル関数を呼び出す
+    matchButton?.addEventListener('click', () => { 
+        if (typeof startMatchmaking === 'function') startMatchmaking();
+        else console.error("startMatchmaking is not defined");
+    });
+    cancelButton?.addEventListener('click', () => {
+        if (typeof cancelMatchmakingRequest === 'function') cancelMatchmakingRequest();
+        else console.error("cancelMatchmakingRequest is not defined");
+    });
     startBattleButton?.addEventListener('click', () => {
         if (reportResultButtons) reportResultButtons.style.display = 'flex';
         if (startBattleButton) startBattleButton.style.display = 'none';
         if (battleStatusText) battleStatusText.textContent = '';
     });
-    reportWinButton?.addEventListener('click', () => submitReport('win'));
-    reportLoseButton?.addEventListener('click', () => submitReport('lose'));
-    cancelBattleButton?.addEventListener('click', cancelBattle);
+    reportWinButton?.addEventListener('click', () => {
+        if (typeof submitReport === 'function') submitReport('win');
+        else console.error("submitReport is not defined");
+    });
+    reportLoseButton?.addEventListener('click', () => {
+        if (typeof submitReport === 'function') submitReport('lose');
+        else console.error("submitReport is not defined");
+    });
+    cancelBattleButton?.addEventListener('click', () => {
+        if (typeof cancelBattle === 'function') cancelBattle();
+        else console.error("cancelBattle is not defined");
+    });
     closeResultModalButton?.addEventListener('click', closeResultModal);
-    matchChatSendButton?.addEventListener('click', sendChatMessage);
+
+    matchChatSendButton?.addEventListener('click', () => {
+        if (typeof sendChatMessage === 'function') sendChatMessage();
+        else console.error("sendChatMessage is not defined");
+    });
     matchChatInput?.addEventListener('keypress', (event) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            sendChatMessage();
+            if (typeof sendChatMessage === 'function') sendChatMessage();
+            else console.error("sendChatMessage is not defined");
         }
     });
 
     window.addEventListener('beforeunload', () => {
         saveStateToSessionStorage();
-        stopHeartbeat();
-        disconnectWebSocket();
+        if (typeof stopHeartbeat === 'function') stopHeartbeat(); // match_actions.js で定義
+        if (typeof disconnectWebSocket === 'function') disconnectWebSocket(); // match_actions.js で定義
     });
 
     updateMatchUI();
@@ -155,13 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveStateToSessionStorage() {
     const state = {
-        isMatching,
-        currentMatchId,
-        currentOpponentData,
+        isMatching: window.isMatching, // window. から取得
+        currentMatchId: window.currentMatchId,
+        currentOpponentData: window.currentOpponentData,
         battleStatusTextContent: battleStatusText ? battleStatusText.textContent : '',
-        isPollingForResult,
-        isSubmittingResult,
-        currentLobbyCreatorGoogleId,
+        isPollingForResult: window.isPollingForResult,
+        isSubmittingResult: window.isSubmittingResult,
+        currentLobbyCreatorGoogleId: window.currentLobbyCreatorGoogleId,
     };
     try {
         sessionStorage.setItem(MATCH_STATE_KEY, JSON.stringify(state));
@@ -175,19 +195,19 @@ function loadStateFromSessionStorage() {
         const savedStateString = sessionStorage.getItem(MATCH_STATE_KEY);
         if (savedStateString) {
             const savedState = JSON.parse(savedStateString);
-            currentMatchId = savedState.currentMatchId || null;
-            currentOpponentData = savedState.currentOpponentData || null;
-            isMatching = savedState.isMatching || false;
-            isPollingForResult = savedState.isPollingForResult || false;
-            isSubmittingResult = false;
-            currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null;
+            window.currentMatchId = savedState.currentMatchId || null;
+            window.currentOpponentData = savedState.currentOpponentData || null;
+            window.isMatching = savedState.isMatching || false;
+            window.isPollingForResult = savedState.isPollingForResult || false;
+            window.isSubmittingResult = false; // リロード時は常にfalse
+            window.currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null;
 
-            if (currentMatchId && currentOpponentData) {
-                isMatching = false;
-            } else if (isMatching) {
-                currentMatchId = null; currentOpponentData = null; isPollingForResult = false; currentLobbyCreatorGoogleId = null;
+            if (window.currentMatchId && window.currentOpponentData) {
+                window.isMatching = false;
+            } else if (window.isMatching) {
+                window.currentMatchId = null; window.currentOpponentData = null; window.isPollingForResult = false; window.currentLobbyCreatorGoogleId = null;
             } else {
-                 isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; currentLobbyCreatorGoogleId = null;
+                 window.isMatching = false; window.currentMatchId = null; window.currentOpponentData = null; window.isPollingForResult = false; window.currentLobbyCreatorGoogleId = null;
             }
 
             if (battleStatusText && savedState.battleStatusTextContent) {
@@ -202,43 +222,46 @@ function loadStateFromSessionStorage() {
                 }
             }
         } else {
-            isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; isSubmittingResult = false;
-            currentLobbyCreatorGoogleId = null;
+            window.isMatching = false; window.currentMatchId = null; window.currentOpponentData = null; window.isPollingForResult = false; window.isSubmittingResult = false;
+            window.currentLobbyCreatorGoogleId = null;
         }
     } catch (e) {
-        console.error("Error loading state:", e);
+        console.error("Error loading state from sessionStorage:", e);
         sessionStorage.removeItem(MATCH_STATE_KEY);
-        isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; isSubmittingResult = false;
-        currentLobbyCreatorGoogleId = null;
+        window.isMatching = false; window.currentMatchId = null; window.currentOpponentData = null; window.isPollingForResult = false; window.isSubmittingResult = false;
+        window.currentLobbyCreatorGoogleId = null;
     }
 }
 
 function resumePollingBasedOnState() {
     if (window.MyApp?.isUserLoggedIn && typeof window.getAuthToken === 'function' && window.getAuthToken()) {
-        if (isMatching && !matchmakingStatusInterval) {
+        // startPollingMatchStatus と startPollingMatchResult は match_actions.js で定義されているグローバル関数を期待
+        if (window.isMatching && typeof window.matchmakingStatusInterval === 'undefined' && typeof startPollingMatchStatus === 'function') { // matchmakingStatusInterval は match_actions.js で管理
             startPollingMatchStatus();
-        } else if (currentMatchId && isPollingForResult && !matchResultPollingInterval) {
+        } else if (window.currentMatchId && window.isPollingForResult && typeof window.matchResultPollingInterval === 'undefined' && typeof startPollingMatchResult === 'function') { // matchResultPollingInterval は match_actions.js で管理
             startPollingMatchResult();
         }
         updateMatchUI();
-    } else if (!window.MyApp?.isUserLoggedIn && (isMatching || currentMatchId)) {
+    } else if (!window.MyApp?.isUserLoggedIn && (window.isMatching || window.currentMatchId)) {
         clearMatchStateAndUI(true);
     }
 }
 
 function clearMatchStateAndUI(updateUIFlag = true) {
     sessionStorage.removeItem(MATCH_STATE_KEY);
-    isMatching = false;
-    currentMatchId = null;
-    currentOpponentData = null;
-    isSubmittingResult = false;
-    isPollingForResult = false;
-    currentLobbyCreatorGoogleId = null;
+    window.isMatching = false;
+    window.currentMatchId = null;
+    window.currentOpponentData = null;
+    window.isSubmittingResult = false;
+    window.isPollingForResult = false;
+    window.currentLobbyCreatorGoogleId = null;
 
-    stopPollingMatchStatus();
-    stopPollingMatchResult();
-    stopHeartbeat();
-    disconnectWebSocket();
+    // stopPolling関数群は match_actions.js で定義されているグローバル関数を期待
+    if (typeof stopPollingMatchStatus === 'function') stopPollingMatchStatus();
+    if (typeof stopPollingMatchResult === 'function') stopPollingMatchResult();
+    if (typeof stopHeartbeat === 'function') stopHeartbeat();
+    if (typeof disconnectWebSocket === 'function') disconnectWebSocket();
+
     hideLobbyInstruction();
 
     if (battleStatusText) battleStatusText.textContent = '';
@@ -249,16 +272,17 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     }
 }
 
+// match_actions.js から呼び出されるためグローバルに公開
 function resetCurrentLobbyCreator() {
-    currentLobbyCreatorGoogleId = null;
+    window.currentLobbyCreatorGoogleId = null;
     console.log("[match_ui.js] Lobby creator ID has been reset.");
 }
-window.resetCurrentLobbyCreator = resetCurrentLobbyCreator;
+window.resetCurrentLobbyCreator = resetCurrentLobbyCreator; // グローバル関数として登録
 
 // --- UI表示関数 ---
 
 function displayMyProfileInfo(userData) {
-    if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) return;
+    if (!myProfilePic || !myProfileName || !myProfileRate) return; // myProfilePointsElement はオプションに
     const defaultAvatar = getDefaultAvatarPath();
 
     if (userData) {
@@ -266,7 +290,7 @@ function displayMyProfileInfo(userData) {
         myProfilePic.onerror = () => { myProfilePic.src = defaultAvatar; };
         myProfileName.textContent = escapeHTML(userData.name) || 'プレイヤー名';
         myProfileRate.textContent = userData.rate ?? '----';
-        myProfilePointsElement.textContent = `${userData.points ?? '----'} P`;
+        if (myProfilePointsElement) myProfilePointsElement.textContent = `${userData.points ?? '----'} P`;
         const profile = userData.profile || {};
         if (myProfileCourseElement) myProfileCourseElement.textContent = escapeHTML(profile.favCourse) || '未設定';
         if (myProfileCommentElement) myProfileCommentElement.textContent = escapeHTML(profile.comment) || '未設定';
@@ -282,7 +306,7 @@ function displayMyProfileInfo(userData) {
         myProfilePic.src = defaultAvatar;
         myProfileName.textContent = '---';
         myProfileRate.textContent = '----';
-        myProfilePointsElement.textContent = '---- P';
+        if (myProfilePointsElement) myProfilePointsElement.textContent = '---- P';
         if (myProfileCourseElement) myProfileCourseElement.textContent = '---';
         if (myProfileCommentElement) myProfileCommentElement.textContent = '---';
         if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
@@ -326,48 +350,47 @@ function displayOpponentInfo(opponentData) {
     opponentInfoArea.dataset.opponentId = opponentData.googleId;
 }
 
-function determineAndDisplayLobbyCreator(opponentData) {
+function determineAndDisplayLobbyCreator(opponentDataToDisplay) { // 引数名変更
     if (!lobbyInstructionElement) {
-        console.error("[determineAndDisplayLobbyCreator] ロビー指示の表示に必要なHTML要素(lobbyInstructionElement)が見つかりません。");
+        console.error("[match_ui.js determineAndDisplayLobbyCreator] lobbyInstructionElement not found.");
         return;
     }
 
-    if (!opponentData || !opponentData.googleId) {
-        // console.log("[determineAndDisplayLobbyCreator] opponentData または opponentData.googleId が未定義です。", opponentData);
+    // window.currentOpponentData を使うのではなく、引数で渡されたデータを使用
+    if (!opponentDataToDisplay || !opponentDataToDisplay.googleId) {
         lobbyInstructionElement.innerHTML = "対戦相手の情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
 
     if (!window.MyApp?.currentUserData || !window.MyApp.currentUserData.googleId) {
-        // console.log("[determineAndDisplayLobbyCreator] currentUserData または currentUserData.googleId が未定義です。", window.MyApp?.currentUserData);
         lobbyInstructionElement.innerHTML = "ユーザー情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
 
     const myGoogleId = window.MyApp.currentUserData.googleId;
-    const opponentGoogleId = opponentData.googleId;
+    const opponentGoogleId = opponentDataToDisplay.googleId; // 引数のデータを使用
     let lobbyCreatorName = "";
 
-    if (!currentLobbyCreatorGoogleId || (currentLobbyCreatorGoogleId !== myGoogleId && currentLobbyCreatorGoogleId !== opponentGoogleId)) {
-        // console.log("[determineAndDisplayLobbyCreator] ロビー作成者を決定します。 MyID:", myGoogleId, "OpponentID:", opponentGoogleId, "CurrentLobbyCreatorID:", currentLobbyCreatorGoogleId);
+    // window.currentLobbyCreatorGoogleId を使用
+    if (!window.currentLobbyCreatorGoogleId || (window.currentLobbyCreatorGoogleId !== myGoogleId && window.currentLobbyCreatorGoogleId !== opponentGoogleId)) {
         if (myGoogleId < opponentGoogleId) {
-            currentLobbyCreatorGoogleId = myGoogleId;
+            window.currentLobbyCreatorGoogleId = myGoogleId;
         } else if (opponentGoogleId < myGoogleId) {
-            currentLobbyCreatorGoogleId = opponentGoogleId;
+            window.currentLobbyCreatorGoogleId = opponentGoogleId;
         } else {
-            console.warn("[determineAndDisplayLobbyCreator] Google IDが一致しました。自分のIDを優先します。");
-            currentLobbyCreatorGoogleId = myGoogleId;
+            console.warn("[match_ui.js determineAndDisplayLobbyCreator] Google IDs are identical. Defaulting to current user.");
+            window.currentLobbyCreatorGoogleId = myGoogleId;
         }
     }
 
-    if (currentLobbyCreatorGoogleId === myGoogleId) {
+    if (window.currentLobbyCreatorGoogleId === myGoogleId) {
         lobbyCreatorName = escapeHTML(window.MyApp.currentUserData.name) || "あなた";
-    } else if (currentLobbyCreatorGoogleId === opponentGoogleId) {
-        lobbyCreatorName = escapeHTML(opponentData.name) || "相手";
+    } else if (window.currentLobbyCreatorGoogleId === opponentGoogleId) {
+        lobbyCreatorName = escapeHTML(opponentDataToDisplay.name) || "相手"; // 引数のデータを使用
     } else {
-        console.error("[determineAndDisplayLobbyCreator] ロビー作成者名を表示できませんでした。決定されたID:", currentLobbyCreatorGoogleId, "MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
+        console.error("[match_ui.js determineAndDisplayLobbyCreator] Could not determine lobby creator name. DeterminedID:", window.currentLobbyCreatorGoogleId, "MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
         lobbyInstructionElement.innerHTML = "ロビー作成者の情報を確認できませんでした。ページを再読み込みしてみてください。";
         lobbyInstructionElement.style.display = 'block';
         return;
@@ -383,9 +406,18 @@ function hideLobbyInstruction() {
 }
 
 function updateMatchUI() {
-    console.log("[match_ui.js] Updating UI. State:", { isMatching, currentMatchId, currentOpponentData, isPollingForResult, isSubmittingResult, currentLobbyCreatorGoogleId });
+    console.log("[match_ui.js] updateMatchUI called. Current window.isMatching:", window.isMatching);
+    console.log("[match_ui.js] Updating UI. State:", { 
+        isMatching: window.isMatching, 
+        currentMatchId: window.currentMatchId, 
+        currentOpponentData: window.currentOpponentData, 
+        isPollingForResult: window.isPollingForResult, 
+        isSubmittingResult: window.isSubmittingResult, 
+        currentLobbyCreatorGoogleId: window.currentLobbyCreatorGoogleId 
+    });
     const user = window.MyApp?.currentUserData;
     const loggedIn = !!window.MyApp?.isUserLoggedIn;
+    
     displayMyProfileInfo(user);
 
     const show = (el) => { if (el) el.style.display = (el.tagName === 'SECTION' || el.tagName === 'DIV' || el.id === 'report-result-buttons') ? 'flex' : 'inline-block'; };
@@ -404,47 +436,60 @@ function updateMatchUI() {
     enable(matchButton);
 
     if (loggedIn) {
-        if (isMatching) {
+        if (window.isMatching) {
             hide(matchButton); show(cancelButton); enable(cancelButton);
             show(opponentPlaceholder); show(opponentSpinner);
             setText(matchStatusText, '対戦相手を探しています...');
             hide(opponentInfoArea);
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        } else if (currentMatchId && currentOpponentData) {
+            hide(lobbyInstructionElement);
+        } else if (window.currentMatchId && window.currentOpponentData) {
             hide(matchButton); hide(cancelButton); hide(opponentSpinner); hide(opponentPlaceholder);
             if (opponentInfoArea) opponentInfoArea.style.display = 'contents';
             show(matchChatSection); show(resultReportingArea);
             if (opponentProfileSection) opponentProfileSection.classList.add('visible');
             setText(matchStatusText, '対戦相手が見つかりました！');
-            displayOpponentInfo(currentOpponentData);
-            determineAndDisplayLobbyCreator(currentOpponentData);
+            displayOpponentInfo(window.currentOpponentData); // window. から取得
+            determineAndDisplayLobbyCreator(window.currentOpponentData); // window. から取得したデータを渡す
 
-            if (isSubmittingResult || isPollingForResult) {
+            if (window.isSubmittingResult || window.isPollingForResult) {
                 hide(startBattleButton); show(reportResultButtons);
                 disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
-                if (isSubmittingResult) {
+                if (window.isSubmittingResult) {
                     setText(battleStatusText, '結果送信中...');
-                } else if (isPollingForResult) {
+                } else if (window.isPollingForResult) {
                     setText(battleStatusText, '相手の報告を待っています...');
                 } else {
-                    setText(battleStatusText, '');
+                    // このelseブロックは通常到達しないが、念のためbattleStatusTextをクリア
+                    if (battleStatusText && battleStatusText.textContent === '結果送信中...' || battleStatusText.textContent === '相手の報告を待っています...') {
+                        //setText(battleStatusText, ''); // 状態と矛盾するテキストならクリア
+                    }
                 }
             } else {
                 show(startBattleButton); hide(reportResultButtons);
-                setText(battleStatusText, '');
+                // battleStatusText は handleReportResponse でエラー等が表示される可能性があるので、ここではクリアしない方が良い場合もある。
+                // ただし、マッチ直後で報告前なら空でよい。
+                if (battleStatusText && !battleStatusText.textContent.includes("エラー") && !battleStatusText.textContent.includes("キャンセル") && !battleStatusText.textContent.includes("無効")) {
+                   setText(battleStatusText, '');
+                }
             }
-            if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) connectWebSocket();
-        } else {
+             // connectWebSocket は match_actions.js で定義されたグローバル関数を期待
+            if (typeof window.matchWebSocket === 'undefined' || (window.matchWebSocket && window.matchWebSocket.readyState === WebSocket.CLOSED)) { // matchWebSocket は match_actions.js で管理されるグローバル変数
+                if (typeof connectWebSocket === 'function') connectWebSocket();
+            }
+        } else { // ログイン済みだが、マッチング前
             show(matchButton); enable(matchButton); setText(matchButton, 'ライバルを探す');
             setText(matchStatusText, 'ライバルを探しましょう！');
             hide(opponentSpinner); show(opponentPlaceholder);
             hide(lobbyInstructionElement);
+            if(battleStatusText) battleStatusText.textContent = ''; // 以前のメッセージをクリア
         }
-    } else {
+    } else { // 未ログイン時
         show(matchButton); disable(matchButton); setText(matchButton, 'ログインが必要です');
         setText(matchStatusText, '対戦するにはログインしてください。');
         hide(opponentSpinner); show(opponentPlaceholder);
         hide(lobbyInstructionElement);
+        if(battleStatusText) battleStatusText.textContent = '';
     }
 }
 
@@ -468,7 +513,7 @@ function showResultModal(didWin, resultData, originalRate) {
         if (resultModal && resultModal.style.display === 'flex') {
             closeResultModal();
         }
-    }, 4000);
+    }, 6000);
 }
 
 function closeResultModal() {
@@ -478,6 +523,8 @@ function closeResultModal() {
     }
 }
 
+// appendChatMessage は match_actions.js からも呼ばれる想定であればグローバルにするか、
+// match_ui.js内でのみ使うならこのままで良い。現状は match_actions.js からも呼ばれる想定。
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
@@ -485,7 +532,7 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
 
     const isSystem = senderName === 'システム';
     const sender = window.MyApp?.currentUserData;
-    const opponent = currentOpponentData;
+    const opponent = window.currentOpponentData; // window. から取得
 
     if (isSystem) {
         messageDiv.classList.add('system-message');
@@ -509,7 +556,8 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
                 <p class="message-text">${escapeHTML(messageText)}</p>
             </div>`;
     }
-
     matchChatMessagesArea.appendChild(messageDiv);
     scrollToChatBottom(false);
 }
+// match_actions.js から使えるようにグローバルに公開
+window.appendChatMessage = appendChatMessage;
