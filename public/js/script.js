@@ -22,45 +22,37 @@ function mapUserDataToStandardFormat(rawUserData) {
     if (!rawUserData) {
         return null;
     }
-    // console.log("[script.js mapUserDataToStandardFormat] Mapping rawUserData:", JSON.stringify(rawUserData, null, 2));
 
     const mapped = {
         ...rawUserData, // 元のプロパティをすべてコピー
-        googleId: rawUserData.googleId || rawUserData.id || rawUserData.sub, // googleId, id, sub の優先順位で googleId にマッピング
-        name: rawUserData.name || rawUserData.displayName || rawUserData.given_name, // name, displayName, given_name の優先順位で name にマッピング
-        // email と picture は多くの場合そのまま使えるが、必要なら同様にマッピング
+        googleId: rawUserData.googleId || rawUserData.id || rawUserData.sub,
+        name: rawUserData.name || rawUserData.displayName || rawUserData.given_name,
         email: rawUserData.email,
         picture: rawUserData.picture,
     };
-
-    // マッピング後、期待するプロパティが存在しない場合は null や undefined のままになる
-    // 必要に応じて、必須プロパティがない場合はエラー処理やデフォルト値設定も検討できます。
-    // 例: if (!mapped.googleId) console.error("Critical: googleId could not be mapped!");
-
-    // console.log("[script.js mapUserDataToStandardFormat] Mapped userData:", JSON.stringify(mapped, null, 2));
     return mapped;
 }
 
 
 function initializeGoogleSignIn() {
     if (typeof google === 'undefined') {
-        console.error("[script.js] initializeGoogleSignIn: Google Identity Services library not loaded.");
+        // console.error("[script.js] initializeGoogleSignIn: Google Identity Services library not loaded.");
         const signInDiv = document.getElementById("g_id_signin");
         if (signInDiv) signInDiv.innerHTML = '<p class="error-text">Googleログインを利用できません。</p>';
-        handleUserDataFetched(null); // ログイン状態を未ログインとして確定
+        handleUserDataFetched(null);
         return;
     }
     try {
         google.accounts.id.initialize({
             client_id: "326810930641-r6f3qlievpi09n9krlld94762sjr28pd.apps.googleusercontent.com",
-            login_uri: `${window.MyApp.BACKEND_URL}/api/auth/google`, // サーバーサイドのエンドポイント
-            ux_mode: "redirect", // リダイレクトフローを使用
+            login_uri: `${window.MyApp.BACKEND_URL}/api/auth/google`,
+            ux_mode: "redirect",
             auto_select: true,
             cancel_on_tap_outside: false,
         });
         const signInButtonContainer = document.getElementById("g_id_signin");
         if (!signInButtonContainer) {
-            console.error("[script.js] initializeGoogleSignIn: Sign-in button container 'g_id_signin' not found.");
+            // console.error("[script.js] initializeGoogleSignIn: Sign-in button container 'g_id_signin' not found.");
             handleUserDataFetched(null);
             return;
         }
@@ -68,15 +60,14 @@ function initializeGoogleSignIn() {
             signInButtonContainer,
             { theme: "outline", size: "large", type: "standard", text: "signin_with" }
         );
-        // リダイレクト前のURLを保存 (ログイン後に戻るため)
         if (signInButtonContainer) {
             signInButtonContainer.addEventListener('click', () => {
                 sessionStorage.setItem('loginRedirectUrl', window.location.href);
-            }, true); // キャプチャフェーズでイベントを補足
+            }, true);
         }
 
     } catch (error) {
-        console.error("[script.js] initializeGoogleSignIn: Error during Google Sign-In initialization:", error);
+        // console.error("[script.js] initializeGoogleSignIn: Error during Google Sign-In initialization:", error);
         const signInDiv = document.getElementById("g_id_signin");
         if (signInDiv) {
             signInDiv.innerHTML = '<p class="error-text">Googleログインの初期化に失敗しました。</p>';
@@ -85,19 +76,14 @@ function initializeGoogleSignIn() {
     }
 }
 
-// この関数はUXモードが "popup" の場合や、Credential Management API を直接使う場合に idToken を受け取って処理する想定。
-// UXモードが "redirect" の場合、サーバーサイドで認証処理が行われ、結果がリダイレクト先のURLパラメータで渡されるため、
-// この関数がクライアントサイドで直接 Google からの credential response を受け取ることは通常ない。
-// ただし、サーバーからのコールバックをこの関数で処理するような設計も可能。
-// 今回は checkInitialLoginState でURLパラメータを処理する流れになっている。
-async function handleCredentialResponse(response) { // この関数が呼ばれるケースは現状のredirectフローでは限定的かもしれない
-    console.log("[script.js handleCredentialResponse] Received credential response (likely not from Google directly with redirect UX):", response);
-    const apiUrl = `${window.MyApp.BACKEND_URL}/api/auth/google`; // これはサーバー側で id_token を検証・処理するエンドポイント
+async function handleCredentialResponse(response) {
+    // console.log("[script.js handleCredentialResponse] Received credential response (likely not from Google directly with redirect UX):", response);
+    const apiUrl = `${window.MyApp.BACKEND_URL}/api/auth/google`;
     try {
         const apiResponse = await fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential: response.credential }), // Googleからの credential (id_token) をサーバーに送る
+            body: JSON.stringify({ credential: response.credential }),
         });
 
         if (!apiResponse.ok) {
@@ -106,14 +92,13 @@ async function handleCredentialResponse(response) { // この関数が呼ばれ�
             throw new Error(`URL: ${apiUrl} - ${errorData.message || `Server error (Status: ${apiResponse.status})`}`);
         }
 
-        const result = await apiResponse.json(); // サーバーからの応答 (ユーザー情報と独自トークンを含む)
+        const result = await apiResponse.json();
 
         if (result && result.userData && result.token) {
-            // ★★★ サーバーからの userData を標準形式にマッピング ★★★
             const mappedUserData = mapUserDataToStandardFormat(result.userData);
             const userDataWithToken = { ...mappedUserData, token: result.token };
             
-            console.log("[script.js handleCredentialResponse] Mapped userDataWithToken from server:", JSON.stringify(userDataWithToken, null, 2));
+            // console.log("[script.js handleCredentialResponse] Mapped userDataWithToken from server:", JSON.stringify(userDataWithToken, null, 2));
 
             saveUserData(userDataWithToken);
             handleUserDataFetched(userDataWithToken);
@@ -122,7 +107,7 @@ async function handleCredentialResponse(response) { // この関数が呼ばれ�
             throw new Error('Invalid response from server after credential validation.');
         }
     } catch (error) {
-        console.error("[script.js] handleCredentialResponse: Error during token validation or fetching user data:", error);
+        // console.error("[script.js] handleCredentialResponse: Error during token validation or fetching user data:", error);
         alert(`Login failed: ${error.message}`);
         clearUserData();
         handleUserDataFetched(null);
@@ -134,28 +119,23 @@ function handleLogout() {
     if (typeof google !== 'undefined' && window.MyApp.isUserLoggedIn) {
         try { 
             google.accounts.id.disableAutoSelect();
-            // google.accounts.id.revoke(localStorage.getItem('userGoogleId'), done => { // 必要ならリボークも
-            //   console.log('Google token revoked.');
-            // });
         } catch (e) {
-            console.warn("[script.js] handleLogout: Error disabling Google auto-select or revoking:", e);
+            // console.warn("[script.js] handleLogout: Error disabling Google auto-select or revoking:", e);
         }
     }
-    clearUserData(); // localStorageから削除
-    handleUserDataFetched(null); // MyAppの状態を更新
+    clearUserData();
+    handleUserDataFetched(null);
     document.dispatchEvent(new CustomEvent('logoutSuccess'));
-    // ログアウト後にホームページなどにリダイレクトすることも検討
-    // window.location.href = '/'; 
 }
 
 function saveUserData(userDataWithToken) {
     try {
         if (!userDataWithToken || !userDataWithToken.token) {
-            console.warn("[script.js] saveUserData: Attempting to save user data without a token. UserData:", JSON.stringify(userDataWithToken));
+            // console.warn("[script.js] saveUserData: Attempting to save user data without a token. UserData:", JSON.stringify(userDataWithToken));
         }
         localStorage.setItem('userData', JSON.stringify(userDataWithToken));
     } catch (e) {
-        console.error("[script.js] saveUserData: Error saving user data to localStorage:", e);
+        // console.error("[script.js] saveUserData: Error saving user data to localStorage:", e);
     }
 }
 
@@ -164,7 +144,7 @@ function loadUserData() {
         const storedData = localStorage.getItem('userData');
         return storedData ? JSON.parse(storedData) : null;
     } catch (e) {
-        console.error("[script.js] loadUserData: Error loading or parsing user data from localStorage:", e);
+        // console.error("[script.js] loadUserData: Error loading or parsing user data from localStorage:", e);
         return null;
     }
 }
@@ -173,7 +153,7 @@ function clearUserData() {
     try {
         localStorage.removeItem('userData');
     } catch (e) {
-        console.error("[script.js] clearUserData: Error removing user data from localStorage:", e);
+        // console.error("[script.js] clearUserData: Error removing user data from localStorage:", e);
     }
 }
 
@@ -181,16 +161,15 @@ function updateHeaderUI(userData) {
     const userInfoDiv = document.getElementById('user-info');
     const signInButtonDiv = document.getElementById('g_id_signin');
     const userNameSpan = document.getElementById('header-user-name');
-    const userPointsSpan = document.getElementById('header-user-points'); // ポイント表示用 (HTMLに存在する場合)
+    const userPointsSpan = document.getElementById('header-user-points');
     const logoutButton = document.getElementById('logout-button');
 
     if (!userInfoDiv || !signInButtonDiv || !userNameSpan || !logoutButton) {
-        console.error("[script.js] updateHeaderUI: One or more header elements not found. This may not be an error on pages without these elements.");
+        // console.error("[script.js] updateHeaderUI: One or more header elements not found. This may not be an error on pages without these elements.");
         return;
     }
 
-    if (userData && userData.token) { // トークンの存在もログイン判定の目安に
-        // ★★★ userData.name を使用 (mapUserDataToStandardFormat で 'name' に統一されている想定) ★★★
+    if (userData && userData.token) {
         userNameSpan.textContent = userData.name || 'ゲスト'; 
         if (userPointsSpan && typeof userData.points !== 'undefined') {
              userPointsSpan.textContent = `${userData.points} P`;
@@ -199,14 +178,14 @@ function updateHeaderUI(userData) {
         }
         userInfoDiv.style.display = 'flex';
         signInButtonDiv.style.display = 'none';
-        if (!logoutButton.onclick) { // イベントリスナーが重複しないように
+        if (!logoutButton.onclick) {
             logoutButton.onclick = handleLogout;
         }
     } else {
         userNameSpan.textContent = '';
         if (userPointsSpan) userPointsSpan.textContent = '';
         userInfoDiv.style.display = 'none';
-        signInButtonDiv.style.display = 'block'; // または 'inline-block' など、元のスタイルに合わせる
+        signInButtonDiv.style.display = 'block';
     }
 }
 
@@ -216,133 +195,114 @@ async function checkInitialLoginState() {
     const userDataStringFromUrl = urlParams.get('userData');
 
     if (tokenFromUrl && userDataStringFromUrl) {
-        console.log("[script.js checkInitialLoginState] Found token and user data in URL params.");
+        // console.log("[script.js checkInitialLoginState] Found token and user data in URL params.");
         try {
             const rawUserDataFromUrl = JSON.parse(decodeURIComponent(userDataStringFromUrl));
-            // ★★★ URLからの userData を標準形式にマッピング ★★★
             const mappedUserDataFromUrl = mapUserDataToStandardFormat(rawUserDataFromUrl);
             const userDataWithTokenFromUrl = { ...mappedUserDataFromUrl, token: decodeURIComponent(tokenFromUrl) };
             
-            console.log("[script.js checkInitialLoginState] Mapped userDataWithToken from URL:", JSON.stringify(userDataWithTokenFromUrl, null, 2));
+            // console.log("[script.js checkInitialLoginState] Mapped userDataWithToken from URL:", JSON.stringify(userDataWithTokenFromUrl, null, 2));
 
             saveUserData(userDataWithTokenFromUrl);
             
-            // リダイレクト処理
             const redirectUrl = sessionStorage.getItem('loginRedirectUrl');
-            sessionStorage.removeItem('loginRedirectUrl'); // 使用後は削除
-            // URLから認証情報を削除して表示をクリーンにする
+            sessionStorage.removeItem('loginRedirectUrl');
             const cleanUrl = window.location.pathname + window.location.hash;
             window.history.replaceState({}, document.title, cleanUrl);
 
-            handleUserDataFetched(userDataWithTokenFromUrl); // MyApp と UI を更新
+            handleUserDataFetched(userDataWithTokenFromUrl);
 
-            // 元のページにリダイレクト (クエリパラメータなしのURLで比較)
-            // ただし、既にクリーンなURLになっているので、リダイレクトの必要性はケースによる
             if (redirectUrl && new URL(redirectUrl).pathname !== new URL(window.location.href).pathname) {
-                 console.log(`[script.js checkInitialLoginState] Redirecting to original URL: ${redirectUrl}`);
+                 // console.log(`[script.js checkInitialLoginState] Redirecting to original URL: ${redirectUrl}`);
                  window.location.href = redirectUrl;
-                 return; // リダイレクトするので以降の処理は不要
+                 return;
             }
-            return; // URLパラメータからの処理が完了
+            return;
         } catch (error) {
-            console.error("[script.js] checkInitialLoginState: Error parsing or processing user data from URL:", error);
-            clearUserData(); // 不正なデータならクリア
-            // エラーがあっても、次のlocalStorageのチェックに進むために return しない
+            // console.error("[script.js] checkInitialLoginState: Error parsing or processing user data from URL:", error);
+            clearUserData();
         }
     }
 
-    // URLに情報がなければ、localStorageの情報を確認
     const storedUserDataWithToken = loadUserData();
     if (storedUserDataWithToken && storedUserDataWithToken.token) {
-        console.log("[script.js checkInitialLoginState] Found user data in localStorage. Verifying token...");
+        // console.log("[script.js checkInitialLoginState] Found user data in localStorage. Verifying token...");
         const verifyUrl = `${window.MyApp.BACKEND_URL}/api/auth/verify`;
         try {
             const verifyResponse = await fetch(verifyUrl, {
-                method: 'POST', // POSTでトークンをボディやヘッダーで送るのが一般的
+                method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${storedUserDataWithToken.token}`,
-                    'Content-Type': 'application/json' // ボディが空でも指定推奨
+                    'Content-Type': 'application/json'
                 }
-                // body: JSON.stringify({}) // ボディが不要な場合でも空のJSONを送るか、サーバー仕様に合わせる
             });
             if (verifyResponse.ok) {
-                const verifiedResult = await verifyResponse.json(); // サーバーは検証済みユーザーデータと新しいトークン(オプション)を返す想定
-                console.log("[script.js checkInitialLoginState] Token verification successful. Server response:", JSON.stringify(verifiedResult, null, 2));
+                const verifiedResult = await verifyResponse.json();
+                // console.log("[script.js checkInitialLoginState] Token verification successful. Server response:", JSON.stringify(verifiedResult, null, 2));
                 
-                // ★★★ 検証済み userData を標準形式にマッピング ★★★
-                // verifiedResult.userData が存在し、その中にユーザー情報がある想定
-                // もし storedUserDataWithToken の方が新旧混在の情報源として正しい場合もあるので、サーバーの応答に合わせる
-                const rawUserDataToMap = verifiedResult.userData || storedUserDataWithToken; // サーバーからのデータ優先
+                const rawUserDataToMap = verifiedResult.userData || storedUserDataWithToken;
                 const mappedUserData = mapUserDataToStandardFormat(rawUserDataToMap);
                 
-                const currentToken = verifiedResult.token || storedUserDataWithToken.token; // 新しいトークンがあれば使用
+                const currentToken = verifiedResult.token || storedUserDataWithToken.token;
                 const dataToUse = { ...mappedUserData, token: currentToken };
                 
-                saveUserData(dataToUse); // 更新された情報でlocalStorageも更新
+                saveUserData(dataToUse);
                 handleUserDataFetched(dataToUse);
             } else {
-                console.warn("[script.js] checkInitialLoginState: Token verification failed or token expired. Status:", verifyResponse.status);
+                // console.warn("[script.js] checkInitialLoginState: Token verification failed or token expired. Status:", verifyResponse.status);
                 clearUserData();
                 handleUserDataFetched(null);
             }
         } catch (error) {
-            console.error("[script.js] checkInitialLoginState: Error during token verification:", error);
-            clearUserData(); // エラー時はクリア
+            // console.error("[script.js] checkInitialLoginState: Error during token verification:", error);
+            clearUserData();
             handleUserDataFetched(null);
         }
     } else {
-        console.log("[script.js checkInitialLoginState] No user data in localStorage or no token found.");
-        if (storedUserDataWithToken && !storedUserDataWithToken.token) { // データはあるがトークンがない場合
-            clearUserData(); // 不完全なデータはクリア
+        // console.log("[script.js checkInitialLoginState] No user data in localStorage or no token found.");
+        if (storedUserDataWithToken && !storedUserDataWithToken.token) {
+            clearUserData();
         }
-        handleUserDataFetched(null); // 未ログインとして処理
+        handleUserDataFetched(null);
     }
 }
 
 function handleUserDataFetched(userDataWithToken) {
-    // ★★★ このログで userDataWithToken の中身を詳細に確認 ★★★
-    console.log("[script.js handleUserDataFetched] Called with userDataWithToken (raw):", userDataWithToken);
-    try {
-        console.log("[script.js handleUserDataFetched] Called with userDataWithToken (JSON):", JSON.stringify(userDataWithToken, null, 2));
-    } catch(e) {
-        console.warn("[script.js handleUserDataFetched] Could not stringify userDataWithToken for logging.", e);
-    }
+    // console.log("[script.js handleUserDataFetched] Called with userDataWithToken (raw):", userDataWithToken);
+    // try {
+    //     console.log("[script.js handleUserDataFetched] Called with userDataWithToken (JSON):", JSON.stringify(userDataWithToken, null, 2));
+    // } catch(e) {
+    //     // console.warn("[script.js handleUserDataFetched] Could not stringify userDataWithToken for logging.", e);
+    // }
 
-    const isLoggedInNow = !!(userDataWithToken && userDataWithToken.token && userDataWithToken.googleId && userDataWithToken.name); // ★ googleIdとnameの存在もチェック
+    const isLoggedInNow = !!(userDataWithToken && userDataWithToken.token && userDataWithToken.googleId && userDataWithToken.name);
     const loginStateChanged = window.MyApp.isUserLoggedIn === undefined || window.MyApp.isUserLoggedIn !== isLoggedInNow;
 
     window.MyApp.isUserLoggedIn = isLoggedInNow;
-    // ★★★ マッピング済みのデータ、またはマッピング不要でも期待するプロパティを持つデータを格納 ★★★
     window.MyApp.currentUserData = userDataWithToken; 
     
-    console.log("[script.js handleUserDataFetched] MyApp.isUserLoggedIn set to:", window.MyApp.isUserLoggedIn);
-    console.log("[script.js handleUserDataFetched] MyApp.currentUserData set to (JSON):", JSON.stringify(window.MyApp.currentUserData, null, 2));
+    // console.log("[script.js handleUserDataFetched] MyApp.isUserLoggedIn set to:", window.MyApp.isUserLoggedIn);
+    // console.log("[script.js handleUserDataFetched] MyApp.currentUserData set to (JSON):", JSON.stringify(window.MyApp.currentUserData, null, 2));
 
-    updateHeaderUI(window.MyApp.currentUserData); // currentUserData を渡す (マッピング済み想定)
+    updateHeaderUI(window.MyApp.currentUserData);
 
-    // ユーザーデータの準備ができたことを通知するコールバックを実行
-    // ログイン状態が実際に変更されたか、または初めてisUserLoggedInが設定された場合にコールバックを実行
-    if (loginStateChanged || (isLoggedInNow && window.MyApp._onUserDataReadyCallbacks.length > 0 && window.MyApp.isUserLoggedIn !== undefined /*初回実行を制御*/)) {
-        console.log("[script.js handleUserDataFetched] Executing onUserDataReadyCallbacks.");
+    if (loginStateChanged || (isLoggedInNow && window.MyApp._onUserDataReadyCallbacks.length > 0 && window.MyApp.isUserLoggedIn !== undefined)) {
+        // console.log("[script.js handleUserDataFetched] Executing onUserDataReadyCallbacks.");
         executeCallbacks(window.MyApp._onUserDataReadyCallbacks, window.MyApp.currentUserData);
-        // 最初のデータ準備完了時のみコールバックを実行し、リストをクリアする場合
-        // if (isLoggedInNow) window.MyApp._onUserDataReadyCallbacks.length = 0; 
     }
-    // ログイン状態の変更を通知するコールバックを実行
     if (loginStateChanged) {
-        console.log("[script.js handleUserDataFetched] Executing onLoginStatusChangeCallbacks.");
-        executeCallbacks(window.MyApp._onLoginStatusChangeCallbacks, window.MyApp.currentUserData); // 引数を currentUserData に変更
+        // console.log("[script.js handleUserDataFetched] Executing onLoginStatusChangeCallbacks.");
+        executeCallbacks(window.MyApp._onLoginStatusChangeCallbacks, window.MyApp.currentUserData);
     }
 }
 
 window.registerUserDataReadyCallback = (callback) => {
     if (typeof callback !== 'function') return;
-    // isUserLoggedIn が undefined でない（つまり初期チェックが完了している）場合にコールバックを処理
     if (typeof window.MyApp.isUserLoggedIn !== 'undefined') {
-        console.log("[script.js registerUserDataReadyCallback] Executing callback immediately as user data state is known.");
-        try { callback(window.MyApp.currentUserData); } catch (error) { console.error("[script.js] Error executing ready callback immediately:", error); }
+        // console.log("[script.js registerUserDataReadyCallback] Executing callback immediately as user data state is known.");
+        try { callback(window.MyApp.currentUserData); } catch (error) { /* console.error("[script.js] Error executing ready callback immediately:", error); */ }
     } else {
-        console.log("[script.js registerUserDataReadyCallback] Pushing callback as user data state is not yet known.");
+        // console.log("[script.js registerUserDataReadyCallback] Pushing callback as user data state is not yet known.");
         window.MyApp._onUserDataReadyCallbacks.push(callback);
     }
 };
@@ -350,29 +310,23 @@ window.registerUserDataReadyCallback = (callback) => {
 window.onLoginStatusChange = (callback) => {
     if (typeof callback === 'function') {
         window.MyApp._onLoginStatusChangeCallbacks.push(callback);
-        // isUserLoggedIn が undefined でない（初期チェック完了後）場合に、現在の状態で一度コールバックを実行
         if (typeof window.MyApp.isUserLoggedIn !== 'undefined') {
-             console.log("[script.js onLoginStatusChange] Executing callback immediately with current login status.");
-            try { callback(window.MyApp.isUserLoggedIn); } // 引数をisUserLoggedInに変更 (またはcurrentUserData)
-            catch(e) { console.error("[script.js] Error executing status change callback immediately:", e); }
+            //  console.log("[script.js onLoginStatusChange] Executing callback immediately with current login status.");
+            try { callback(window.MyApp.isUserLoggedIn); }
+            catch(e) { /* console.error("[script.js] Error executing status change callback immediately:", e); */ }
         }
     }
 };
 
 function executeCallbacks(callbacks, arg) {
-    // callbacks 配列が変更される可能性に備えてコピーを作成して反復処理
     const callbacksToExecute = [...callbacks];
     callbacksToExecute.forEach((callback, index) => {
         try { 
             callback(arg); 
         } catch (error) { 
-            console.error(`[script.js] Error executing callback ${index + 1}:`, error); 
+            // console.error(`[script.js] Error executing callback ${index + 1}:`, error); 
         }
     });
-    // 一度実行したコールバックをクリアする場合（特に onUserDataReadyCallbacks）
-    // if (callbacks === window.MyApp._onUserDataReadyCallbacks && window.MyApp.isUserLoggedIn) {
-    //     window.MyApp._onUserDataReadyCallbacks.length = 0;
-    // }
 }
 
 function setupNavigationMenu() {
@@ -397,17 +351,16 @@ function setupNavigationMenu() {
 }
 
 window.onload = async () => {
-    console.log("[script.js window.onload] Initializing...");
+    // console.log("[script.js window.onload] Initializing...");
     initializeGoogleSignIn();
     try {
         await checkInitialLoginState();
-        console.log("[script.js window.onload] checkInitialLoginState finished. Current MyApp.currentUserData:", JSON.stringify(window.MyApp.currentUserData, null, 2));
+        // console.log("[script.js window.onload] checkInitialLoginState finished. Current MyApp.currentUserData:", JSON.stringify(window.MyApp.currentUserData, null, 2));
     } catch (error) {
-        console.error("[script.js] window.onload: Error during checkInitialLoginState:", error);
-        // エラーが発生しても、UIの他の部分の初期化は試みる
+        // console.error("[script.js] window.onload: Error during checkInitialLoginState:", error);
     }
     setupNavigationMenu();
-    console.log("[script.js window.onload] Initialization complete.");
+    // console.log("[script.js window.onload] Initialization complete.");
 };
 
 window.saveCurrentUserData = () => {
@@ -503,8 +456,8 @@ window.displayBadges = (badgeSlots, badgeIds) => {
 window.updateUserPoints = (newPoints) => {
     if (window.MyApp.currentUserData) {
         window.MyApp.currentUserData.points = newPoints;
-        saveUserData(window.MyApp.currentUserData); // 更新されたポイントを含むユーザーデータを保存
-        updateHeaderUI(window.MyApp.currentUserData); // ヘッダーのポイント表示も更新
+        saveUserData(window.MyApp.currentUserData);
+        updateHeaderUI(window.MyApp.currentUserData);
         document.dispatchEvent(new CustomEvent('pointsUpdated', { detail: { newPoints } }));
     }
 };
