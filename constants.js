@@ -4,9 +4,6 @@ const WebSocketMessageTypes = {
   COMMUNITY_CHAT_MESSAGE: 'community_chat_message',
   MATCH_CHAT_MESSAGE: 'MATCH_CHAT_MESSAGE', // ★★★ 'chat_message' から変更 ★★★
   OPPONENT_DISCONNECTED: 'opponent_disconnected',
-  PARTICIPANT_KICKED: 'participant_kicked', // 追加
-  PARTICIPANT_UPDATE: 'participant_update', // 追加
-  COMMUNITY_DELETED: 'community_deleted', // 追加
   // 他のメッセージタイプやイベント名もここに追加可能
 };
 

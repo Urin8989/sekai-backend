@@ -14,12 +14,12 @@
     <style>
         .community-list-section h2 {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 2rem; /* 中央揃えに伴い、下のマージンを調整 */
         }
         #no-communities-msg {
             text-align: center;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
+            margin-top: 2rem; /* メッセージの上のマージンを追加 */
+            margin-bottom: 2rem; /* メッセージの下のマージンを追加 */
         }
     </style>
     </head>
@@ -95,7 +95,8 @@
                         <img id="detail-organizer-avatar" src="images/placeholder-avatar.png" alt="作成者のアバター" class="organizer-avatar">
                         <p><strong>作成者:</strong> <span id="detail-organizer"></span></p>
                     </div>
-                    <p><strong>最大人数:</strong> <span id="detail-participants-limit-display"></span> 人</p> <p><strong>説明:</strong></p>
+                    <p><strong>最大人数:</strong> <span id="detail-participants-limit-display"></span> 人</p>
+                    <p><strong>説明:</strong></p>
                     <pre id="detail-description"></pre>
                     <h4><i class="fas fa-coins"></i> 参加特典</h4>
                     <p>参加すると <strong id="detail-join-points" class="point-value">---</strong> ポイント獲得！</p>
@@ -105,7 +106,8 @@
                 </div>
 
                 <div class="detail-participants-card">
-                    <h3>参加者 (<span id="detail-participants-count">0</span> / <span id="detail-participants-limit-header">0</span>)</h3> <div class="participants-actions">
+                    <h3>参加者 (<span id="detail-participants-count">0</span> / <span id="detail-participants-limit-display">0</span>)</h3>
+                    <div class="participants-actions">
                          <span id="join-status-message"></span>
                          <button id="join-community-button" class="button button-primary button-stylish" style="display: none;">参加する</button>
                          <button id="leave-community-button" class="button button-danger" style="display: none;">脱退する</button>
@@ -137,11 +139,11 @@
             <form id="create-community-form">
                 <div class="form-group">
                     <label for="communityName">コミュニティ名:</label>
-                    <input type="text" id="communityName" name="communityName" required maxlength="50">
+                    <input type="text" id="communityName" name="communityName" required>
                 </div>
                 <div class="form-group">
                     <label for="communityDescription">説明:</label>
-                    <textarea id="communityDescription" name="communityDescription" rows="4" placeholder="コミュニティの目的や活動内容などを入力" maxlength="200"></textarea>
+                    <textarea id="communityDescription" name="communityDescription" rows="4" placeholder="コミュニティの目的や活動内容などを入力"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="communityParticipants">最大参加人数:</label>
@@ -163,7 +165,6 @@
     </footer>
 
     <script src="js/script.js"></script>
-    <script src="js/community-logic.js" defer></script>
-    <script src="js/community-ui.js" defer></script>
+    <script src="js/community.js"></script>
 </body>
 </html>
