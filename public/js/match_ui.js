@@ -59,38 +59,38 @@ function scrollToChatBottom(instant = false, areaElement = matchChatMessagesArea
 document.addEventListener('DOMContentLoaded', () => {
     matchButton = document.getElementById('match-button');
     cancelButton = document.getElementById('cancel-match-button');
-    opponentInfoArea = document.getElementById('opponent-info');
-    matchStatusText = document.getElementById('match-status');
-    opponentProfileSection = document.getElementById('opponent-profile');
-    opponentPlaceholder = document.getElementById('opponent-placeholder');
-    opponentSpinner = document.getElementById('opponent-spinner');
-    myProfilePic = document.getElementById('my-profile-pic');
-    myProfileName = document.getElementById('my-profile-name');
-    myProfileRate = document.getElementById('my-profile-rate');
-    myProfilePointsElement = document.getElementById('my-profile-points');
+    opponentInfoArea = document.getElementById('opponent-info'); //
+    matchStatusText = document.getElementById('match-status'); //
+    opponentProfileSection = document.getElementById('opponent-profile'); //
+    opponentPlaceholder = document.getElementById('opponent-placeholder'); //
+    opponentSpinner = document.getElementById('opponent-spinner'); //
+    myProfilePic = document.getElementById('my-profile-pic'); //
+    myProfileName = document.getElementById('my-profile-name'); //
+    myProfileRate = document.getElementById('my-profile-rate'); //
+    myProfilePointsElement = document.getElementById('my-profile-points'); //
     myProfileCourseElement = document.querySelector('#my-profile .profile-home-course-display .detail-value');
     myProfileCommentElement = document.querySelector('#my-profile .profile-comment-display .detail-comment');
-    myProfileBadgesContainer = document.querySelector('#my-profile .profile-badges');
-    matchChatSection = document.getElementById('match-chat-section');
-    matchChatMessagesArea = document.getElementById('match-chat-messages');
-    matchChatInput = document.getElementById('match-chat-input');
-    matchChatSendButton = document.getElementById('match-chat-send-button');
-    resultReportingArea = document.querySelector('.result-reporting');
-    startBattleButton = document.getElementById('start-battle-button');
-    reportResultButtons = document.getElementById('report-result-buttons');
-    reportWinButton = document.getElementById('report-win-button');
-    reportLoseButton = document.getElementById('report-lose-button');
-    cancelBattleButton = document.getElementById('cancel-battle-button');
-    battleStatusText = document.getElementById('battle-status-text');
-    resultModal = document.getElementById('result-modal');
-    resultTitle = document.getElementById('result-title');
-    resultMyRateBefore = document.getElementById('result-my-rate-before');
-    resultMyRateAfter = document.getElementById('result-my-rate-after');
-    resultRateChange = document.getElementById('result-rate-change');
-    resultPointsEarned = document.getElementById('result-points-earned');
-    resultNewPoints = document.getElementById('result-new-points');
-    closeResultModalButton = document.getElementById('close-result-modal');
-    lobbyInstructionElement = document.getElementById('lobby-creation-instruction');
+    myProfileBadgesContainer = document.querySelector('#my-profile .profile-badges'); //
+    matchChatSection = document.getElementById('match-chat-section'); //
+    matchChatMessagesArea = document.getElementById('match-chat-messages'); //
+    matchChatInput = document.getElementById('match-chat-input'); //
+    matchChatSendButton = document.getElementById('match-chat-send-button'); //
+    resultReportingArea = document.querySelector('.result-reporting'); //
+    startBattleButton = document.getElementById('start-battle-button'); //
+    reportResultButtons = document.getElementById('report-result-buttons'); //
+    reportWinButton = document.getElementById('report-win-button'); //
+    reportLoseButton = document.getElementById('report-lose-button'); //
+    cancelBattleButton = document.getElementById('cancel-battle-button'); //
+    battleStatusText = document.getElementById('battle-status-text'); //
+    resultModal = document.getElementById('result-modal'); //
+    resultTitle = document.getElementById('result-title'); //
+    resultMyRateBefore = document.getElementById('result-my-rate-before'); //
+    resultMyRateAfter = document.getElementById('result-my-rate-after'); //
+    resultRateChange = document.getElementById('result-rate-change'); //
+    resultPointsEarned = document.getElementById('result-points-earned'); //
+    resultNewPoints = document.getElementById('result-new-points'); //
+    closeResultModalButton = document.getElementById('close-result-modal'); //
+    lobbyInstructionElement = document.getElementById('lobby-creation-instruction'); //
 
     loadStateFromSessionStorage();
 
@@ -263,12 +263,6 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     if (battleStatusText) battleStatusText.textContent = '';
     if (matchChatMessagesArea) matchChatMessagesArea.innerHTML = '';
 
-    // ヘッダータイトルの制御は今回の問題と直接関係ないので、コメントアウトまたは削除
-    // const siteTitleHeader = document.querySelector('.site-title-header');
-    // if (siteTitleHeader) {
-    //     siteTitleHeader.style.display = 'flex'; 
-    // }
-
     if (updateUIFlag) {
         updateMatchUI();
     }
@@ -288,17 +282,17 @@ function displayMyProfileInfo(userData) {
     const defaultAvatar = getDefaultAvatarPath();
 
     if (userData) {
-        myProfilePic.src = userData.picture || defaultAvatar;
+        myProfilePic.src = userData.picture || defaultAvatar; //
         myProfilePic.onerror = () => { myProfilePic.src = defaultAvatar; };
-        myProfileName.textContent = escapeHTML(userData.name) || 'プレイヤー名';
-        myProfileRate.textContent = userData.rate ?? '----';
-        if (myProfilePointsElement) myProfilePointsElement.textContent = `${userData.points ?? '----'} P`;
+        myProfileName.textContent = escapeHTML(userData.name) || 'プレイヤー名'; //
+        myProfileRate.textContent = userData.rate ?? '----'; //
+        if (myProfilePointsElement) myProfilePointsElement.textContent = `${userData.points ?? '----'} P`; //
         const profile = userData.profile || {};
-        if (myProfileCourseElement) myProfileCourseElement.textContent = escapeHTML(profile.favCourse) || '未設定';
-        if (myProfileCommentElement) myProfileCommentElement.textContent = escapeHTML(profile.comment) || '未設定';
+        if (myProfileCourseElement) myProfileCourseElement.textContent = escapeHTML(profile.favCourse) || '未設定'; //
+        if (myProfileCommentElement) myProfileCommentElement.textContent = escapeHTML(profile.comment) || '未設定'; //
 
         if (myProfileBadgesContainer && typeof window.displayBadges === 'function') {
-            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot');
+            const badgeSlots = myProfileBadgesContainer.querySelectorAll('.badge-slot'); //
             const badgesToDisplay = userData.displayBadges?.length > 0
                 ? userData.displayBadges
                 : (userData.badges ? [...new Set(userData.badges)].slice(0, 3) : []);
@@ -350,6 +344,13 @@ function displayOpponentInfo(opponentData) {
             <span class="detail-value">${escapeHTML(opponentProfile.favCourse) || '---'}</span>
         </div>`;
     opponentInfoArea.dataset.opponentId = opponentData.googleId;
+
+    requestAnimationFrame(() => {
+        if (opponentProfileSection && opponentProfileSection.parentElement) {
+            const opponentWidth = opponentProfileSection.offsetWidth;
+            // console.log('Opponent profile width re-checked:', opponentWidth); 
+        }
+    });
 }
 
 function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
@@ -448,14 +449,14 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
     }
 
     console.log(`[DDC Success] Lobby creator determined: ${lobbyCreatorName} (ID: ${window.currentLobbyCreatorGoogleId})`);
-    lobbyInstructionElement.innerHTML = `マッチングしました！<br><b>${lobbyCreatorName}</b> さん、ロビーを作成してください。`;
+    lobbyInstructionElement.innerHTML = `マッチングしました！<br><b>${lobbyCreatorName}</b> さん、ロビーを作成してください。`; //
     lobbyInstructionElement.style.display = 'block';
 }
 window.determineAndDisplayLobbyCreator = determineAndDisplayLobbyCreator;
 
 
 function hideLobbyInstruction() {
-    if (lobbyInstructionElement) lobbyInstructionElement.style.display = 'none';
+    if (lobbyInstructionElement) lobbyInstructionElement.style.display = 'none'; //
 }
 window.hideLobbyInstruction = hideLobbyInstruction;
 
@@ -473,23 +474,20 @@ function updateMatchUI() {
     const setText = (el, text) => { if (el) el.textContent = text; };
 
     // --- UI要素の表示状態初期化 ---
-    hide(cancelButton);
-    hide(opponentInfoArea); 
-    hide(opponentSpinner);  
-    hide(matchChatSection);
-    hide(resultReportingArea);
-    hide(startBattleButton);
-    hide(reportResultButtons);
-    hide(lobbyInstructionElement);
+    hide(cancelButton); //
+    // opponentInfoArea と opponentPlaceholder は状態に応じて設定
+    hide(opponentSpinner); //
+    hide(matchChatSection); //
+    hide(resultReportingArea); //
+    hide(startBattleButton); //
+    hide(reportResultButtons); //
+    hide(lobbyInstructionElement); //
 
-    if (opponentProfileSection) {
-        opponentProfileSection.classList.remove('visible'); 
-    }
+    if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
     
     // --- ボタンの有効/無効状態初期化 ---
-    enable(reportWinButton); enable(reportLoseButton); enable(cancelBattleButton);
-    enable(matchButton);
-
+    enable(reportWinButton); enable(reportLoseButton); enable(cancelBattleButton); //
+    enable(matchButton); //
 
     if (loggedIn) {
         if (window.isMatching) { // マッチング検索中
@@ -497,9 +495,9 @@ function updateMatchUI() {
             show(cancelButton); enable(cancelButton);
             
             setText(matchStatusText, '対戦相手を探しています...');
-            hide(opponentInfoArea);      // 相手情報欄は隠す
-            show(opponentPlaceholder);   // ★ プレースホルダーを表示 (この中に「Best Rivals」やスピナーの親があると想定)
-            show(opponentSpinner);       // スピナー表示
+            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; //
+            if (opponentSpinner) show(opponentSpinner);
+            if (opponentInfoArea) opponentInfoArea.style.display = 'none'; //
             
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             hide(lobbyInstructionElement);
@@ -509,15 +507,16 @@ function updateMatchUI() {
             hide(cancelButton);
             
             setText(matchStatusText, '対戦相手が見つかりました！');
-            hide(opponentPlaceholder);   // ★★★ プレースホルダーを明示的に隠す ★★★
-            hide(opponentSpinner);       // スピナーも確実に隠す
-            show(opponentInfoArea);      // 相手情報欄を表示
-            displayOpponentInfo(window.currentOpponentData); // 相手情報を描画
+            if (opponentPlaceholder) hide(opponentPlaceholder);
+            if (opponentSpinner) hide(opponentSpinner);
+            if (opponentInfoArea) opponentInfoArea.style.display = 'contents'; // CSSの display: contents; に従う
             
-            if (opponentProfileSection) opponentProfileSection.classList.add('visible'); // visibleクラス追加
-            show(matchChatSection);
-            show(resultReportingArea);
+            displayOpponentInfo(window.currentOpponentData);
             
+            if (opponentProfileSection) opponentProfileSection.classList.add('visible');
+            show(matchChatSection); //
+            if (resultReportingArea) resultReportingArea.style.display = 'block'; // もしくは 'flex'、CSSに合わせて調整
+
             console.log("[match_ui.js updateMatchUI] About to call determineAndDisplayLobbyCreator with opponentData:", JSON.parse(JSON.stringify(window.currentOpponentData)));
             determineAndDisplayLobbyCreator(window.currentOpponentData);
 
@@ -531,7 +530,8 @@ function updateMatchUI() {
                 disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
                 setText(battleStatusText, '相手の報告を待っています...');
             } else {
-                show(startBattleButton); hide(reportResultButtons);
+                if (startBattleButton) startBattleButton.style.display = 'inline-block'; // もしくは 'block'
+                hide(reportResultButtons);
                 if (battleStatusText && !battleStatusText.textContent.includes("エラー") && 
                     !battleStatusText.textContent.includes("キャンセル") && 
                     !battleStatusText.textContent.includes("無効") &&
@@ -545,13 +545,13 @@ function updateMatchUI() {
                 if (typeof connectWebSocket === 'function') connectWebSocket();
             }
 
-        } else { // マッチング前 (ログイン済み、マッチング中でもマッチ成功でもない)
+        } else { // マッチング前 (ログイン済み)
             show(matchButton); enable(matchButton); setText(matchButton, 'ライバルを探す');
-            setText(matchStatusText, 'ライバルを探しましょう！'); 
+            setText(matchStatusText, 'ライバルを探しましょう！');
             
-            hide(opponentInfoArea);     // 相手情報欄は隠す
-            hide(opponentSpinner);      // スピナーも隠す
-            show(opponentPlaceholder);  // ★ プレースホルダーを表示 (この中に「Best Rivals」があると想定)
+            if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; //
+            if (opponentSpinner) hide(opponentSpinner);
+            if (opponentInfoArea) opponentInfoArea.style.display = 'none'; //
             
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             hide(lobbyInstructionElement);
@@ -561,23 +561,17 @@ function updateMatchUI() {
         show(matchButton); disable(matchButton); setText(matchButton, 'ログインが必要です');
         setText(matchStatusText, '対戦するにはログインしてください。');
 
-        hide(opponentInfoArea);    // 相手情報欄は隠す
-        hide(opponentSpinner);     // スピナーも隠す
-        show(opponentPlaceholder); // ★ プレースホルダーを表示 (この中に「Best Rivals」があると想定)
+        if (opponentPlaceholder) opponentPlaceholder.style.display = 'flex'; //
+        if (opponentSpinner) hide(opponentSpinner);
+        if (opponentInfoArea) opponentInfoArea.style.display = 'none'; //
         
         if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
         hide(lobbyInstructionElement);
         if(battleStatusText) battleStatusText.textContent = '';
     }
     
-    // resultModal表示時はopponentPlaceholderを隠す（CSSでも制御されているが念のため）
-    if (resultModal && resultModal.style.display === 'flex') {
-        hide(opponentPlaceholder);
-    } else if (!window.isMatching && !window.currentMatchId) {
-        // マッチング前、かつ結果モーダルも表示されていなければプレースホルダーを表示
-        // (ただし、上記の各条件で既に show(opponentPlaceholder) が呼ばれているので、重複を避けるか、
-        //  ここでの制御を主とするか設計による。現状は各条件分岐内で制御している。)
-        // show(opponentPlaceholder); // この行は上記の分岐でカバーされているため、通常は不要
+    if (resultModal && resultModal.style.display === 'flex') { //
+        if (opponentPlaceholder) hide(opponentPlaceholder);
     }
 }
 window.updateMatchUI = updateMatchUI;
@@ -594,19 +588,19 @@ function showResultModal(didWin, resultData, originalRate) {
         hideLobbyInstruction();
     }
 
-    if (resultTitle) resultTitle.textContent = didWin ? '勝利！' : '敗北...';
-    if (resultMyRateBefore) resultMyRateBefore.textContent = originalRate ?? '----';
-    if (resultMyRateAfter) resultMyRateAfter.textContent = resultData.newRate ?? '----';
-    if (resultRateChange) {
+    if (resultTitle) resultTitle.textContent = didWin ? '勝利！' : '敗北...'; //
+    if (resultMyRateBefore) resultMyRateBefore.textContent = originalRate ?? '----'; //
+    if (resultMyRateAfter) resultMyRateAfter.textContent = resultData.newRate ?? '----'; //
+    if (resultRateChange) { //
         const change = resultData.rateChange ?? 0;
         resultRateChange.textContent = `${change >= 0 ? '+' : ''}${change}`;
         resultRateChange.style.color = change >= 0 ? (didWin ? 'var(--color-success, green)' : 'var(--color-warning, orange)') : 'var(--color-danger, red)';
     }
-    if (resultPointsEarned) resultPointsEarned.textContent = resultData.pointsEarned ?? '--';
-    if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
+    if (resultPointsEarned) resultPointsEarned.textContent = resultData.pointsEarned ?? '--'; //
+    if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----'; //
     
-    resultModal.style.display = 'flex';
-    hide(opponentPlaceholder); // モーダル表示時もプレースホルダーは隠す
+    resultModal.style.display = 'flex'; //
+    if (opponentPlaceholder) hide(opponentPlaceholder);
     
     if (typeof saveStateToSessionStorage === 'function') {
         saveStateToSessionStorage();
@@ -623,7 +617,7 @@ window.showResultModal = showResultModal;
 function closeResultModal() {
     console.log("[match_ui.js closeResultModal] Function called.");
     
-    if (resultModal && resultModal.style.display !== 'none') {
+    if (resultModal && resultModal.style.display !== 'none') { //
         resultModal.style.display = 'none';
         
         if (typeof clearMatchStateAndUI === 'function') {
@@ -666,7 +660,7 @@ function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
                 <p class="message-text">${escapeHTML(messageText)}</p>
             </div>`;
     }
-    matchChatMessagesArea.appendChild(messageDiv);
+    matchChatMessagesArea.appendChild(messageDiv); //
     scrollToChatBottom(false);
 }
 window.appendChatMessage = appendChatMessage;
