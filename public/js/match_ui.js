@@ -12,7 +12,7 @@ let isSubmittingResult = false;
 let isPollingForResult = false; // 結果ポーリング中フラグ
 let currentLobbyCreatorGoogleId = null; // ★ ロビー作成者のGoogle ID
 
-// DOM要素 (変更なし)
+// DOM要素
 let matchButton, cancelButton, opponentInfoArea, matchStatusText, opponentProfileSection, opponentPlaceholder, opponentSpinner;
 let myProfilePic, myProfileName, myProfileRate, myProfilePointsElement, myProfileCourseElement, myProfileCommentElement, myProfileBadgesContainer;
 let matchChatSection, matchChatMessagesArea, matchChatInput, matchChatSendButton;
@@ -22,7 +22,7 @@ let lobbyInstructionElement;
 
 const MATCH_STATE_KEY = 'mkbrMatchState_v4';
 
-// --- ヘルパー関数 --- (変更なし)
+// --- ヘルパー関数 ---
 
 const getDefaultAvatarPath = () => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -58,7 +58,7 @@ function scrollToChatBottom(instant = false, areaElement = matchChatMessagesArea
     }, 50);
 }
 
-// --- DOM読み込み完了時の処理 --- (変更なし)
+// --- DOM読み込み完了時の処理 ---
 
 document.addEventListener('DOMContentLoaded', () => {
     // DOM要素の取得
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     startBattleButton?.addEventListener('click', () => {
         if (reportResultButtons) reportResultButtons.style.display = 'flex';
         if (startBattleButton) startBattleButton.style.display = 'none';
-        if (battleStatusText) battleStatusText.textContent = ''; 
+        if (battleStatusText) battleStatusText.textContent = '';
     });
     reportWinButton?.addEventListener('click', () => submitReport('win'));
     reportLoseButton?.addEventListener('click', () => submitReport('lose'));
@@ -163,7 +163,7 @@ function saveStateToSessionStorage() {
         battleStatusTextContent: battleStatusText ? battleStatusText.textContent : '',
         isPollingForResult,
         isSubmittingResult,
-        currentLobbyCreatorGoogleId, // ★ 追加
+        currentLobbyCreatorGoogleId,
     };
     try {
         sessionStorage.setItem(MATCH_STATE_KEY, JSON.stringify(state));
@@ -181,15 +181,14 @@ function loadStateFromSessionStorage() {
             currentOpponentData = savedState.currentOpponentData || null;
             isMatching = savedState.isMatching || false;
             isPollingForResult = savedState.isPollingForResult || false;
-            isSubmittingResult = false; // リロード時は常にfalse
-            currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null; // ★ 追加
+            isSubmittingResult = false;
+            currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null;
 
-            if (currentMatchId && currentOpponentData) { // マッチ継続中
+            if (currentMatchId && currentOpponentData) {
                 isMatching = false;
-                // currentLobbyCreatorGoogleId は復元されたものを使用
-            } else if (isMatching) { // マッチング待機中にリロード
+            } else if (isMatching) {
                 currentMatchId = null; currentOpponentData = null; isPollingForResult = false; currentLobbyCreatorGoogleId = null;
-            } else { // それ以外の状態 (初期状態など)
+            } else {
                  isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; currentLobbyCreatorGoogleId = null;
             }
 
@@ -206,13 +205,13 @@ function loadStateFromSessionStorage() {
             }
         } else {
             isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; isSubmittingResult = false;
-            currentLobbyCreatorGoogleId = null; // ★ 追加
+            currentLobbyCreatorGoogleId = null;
         }
     } catch (e) {
         console.error("Error loading state:", e);
         sessionStorage.removeItem(MATCH_STATE_KEY);
         isMatching = false; currentMatchId = null; currentOpponentData = null; isPollingForResult = false; isSubmittingResult = false;
-        currentLobbyCreatorGoogleId = null; // ★ 追加
+        currentLobbyCreatorGoogleId = null;
     }
 }
 
@@ -223,7 +222,6 @@ function resumePollingBasedOnState() {
         } else if (currentMatchId && isPollingForResult && !matchResultPollingInterval) {
             startPollingMatchResult();
         }
-        // どのような状態であっても、ログイン状態が確定したらUIを更新する
         updateMatchUI();
     } else if (!window.MyApp?.isUserLoggedIn && (isMatching || currentMatchId)) {
         clearMatchStateAndUI(true);
@@ -237,7 +235,7 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     currentOpponentData = null;
     isSubmittingResult = false;
     isPollingForResult = false;
-    currentLobbyCreatorGoogleId = null; // ★ 追加
+    currentLobbyCreatorGoogleId = null;
 
     stopPollingMatchStatus();
     stopPollingMatchResult();
@@ -253,22 +251,15 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     }
 }
 
-
-/**
- * 現在のロビー作成者IDをリセットします。
- * 新しいマッチが成立した際に match_actions.js から呼ばれることを想定しています。
- */
 function resetCurrentLobbyCreator() {
     currentLobbyCreatorGoogleId = null;
     console.log("[match_ui.js] Lobby creator ID has been reset.");
 }
-// グローバルスコープに公開 (match_actions.jsから呼び出すため)
 window.resetCurrentLobbyCreator = resetCurrentLobbyCreator;
-
 
 // --- UI表示関数 ---
 
-function displayMyProfileInfo(userData) { // (変更なし)
+function displayMyProfileInfo(userData) {
     if (!myProfilePic || !myProfileName || !myProfileRate || !myProfilePointsElement) return;
     const defaultAvatar = getDefaultAvatarPath();
 
@@ -303,7 +294,7 @@ function displayMyProfileInfo(userData) { // (変更なし)
     }
 }
 
-function displayOpponentInfo(opponentData) { // (変更なし)
+function displayOpponentInfo(opponentData) {
     if (!opponentInfoArea || !opponentData) return;
     const defaultAvatar = getDefaultAvatarPath();
     const defaultBadgeImg = getDefaultBadgePath();
@@ -337,23 +328,22 @@ function displayOpponentInfo(opponentData) { // (変更なし)
     opponentInfoArea.dataset.opponentId = opponentData.googleId;
 }
 
-// ★ 旧関数名: displayLobbyInstructionWithRandomPlayer から変更
 function determineAndDisplayLobbyCreator(opponentData) {
     if (!lobbyInstructionElement) {
-        console.error("ロビー指示の表示に必要なHTML要素(lobbyInstructionElement)が見つかりません。");
+        console.error("[determineAndDisplayLobbyCreator] ロビー指示の表示に必要なHTML要素(lobbyInstructionElement)が見つかりません。");
         return;
     }
-    // 相手データや自分のユーザーデータがまだロードされていない場合は、フォールバックメッセージを表示
-    if (!opponentData || !window.MyApp?.currentUserData) {
-        // この状態は updateMatchUI の呼び出しタイミングによっては発生しうる（特に初回ロード時）
-        // console.warn("[determineAndDisplayLobbyCreator] 相手または自分のユーザーデータが未取得です。");
-        lobbyInstructionElement.innerHTML = "対戦情報を読み込み中です...";
+
+    if (!opponentData || !opponentData.googleId) {
+        // console.log("[determineAndDisplayLobbyCreator] opponentData または opponentData.googleId が未定義です。", opponentData);
+        lobbyInstructionElement.innerHTML = "対戦相手の情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
-    if (!window.MyApp.currentUserData.googleId || !opponentData.googleId) {
-        console.warn("[determineAndDisplayLobbyCreator] ユーザーIDまたは相手のIDが取得できませんでした。");
-        lobbyInstructionElement.innerHTML = "マッチング情報取得中です。<br>少々お待ちください。";
+
+    if (!window.MyApp?.currentUserData || !window.MyApp.currentUserData.googleId) {
+        // console.log("[determineAndDisplayLobbyCreator] currentUserData または currentUserData.googleId が未定義です。", window.MyApp?.currentUserData);
+        lobbyInstructionElement.innerHTML = "ユーザー情報を読み込み中です...";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
@@ -362,35 +352,25 @@ function determineAndDisplayLobbyCreator(opponentData) {
     const opponentGoogleId = opponentData.googleId;
     let lobbyCreatorName = "";
 
-    // currentLobbyCreatorGoogleId がまだ設定されていない場合 (新しいマッチ or リロード後の未復元など)
-    // または、復元されたIDが現在のプレイヤーのどちらとも一致しない場合（稀なケースだが念のため）
     if (!currentLobbyCreatorGoogleId || (currentLobbyCreatorGoogleId !== myGoogleId && currentLobbyCreatorGoogleId !== opponentGoogleId)) {
-        console.log("[determineAndDisplayLobbyCreator] ロビー作成者を決定します。 MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
-        // Google ID を辞書順で比較
+        // console.log("[determineAndDisplayLobbyCreator] ロビー作成者を決定します。 MyID:", myGoogleId, "OpponentID:", opponentGoogleId, "CurrentLobbyCreatorID:", currentLobbyCreatorGoogleId);
         if (myGoogleId < opponentGoogleId) {
             currentLobbyCreatorGoogleId = myGoogleId;
         } else if (opponentGoogleId < myGoogleId) {
             currentLobbyCreatorGoogleId = opponentGoogleId;
         } else {
-            // 万が一 Google ID が同じ場合 (通常ありえない) は、自分のIDを優先するなどのフォールバック
             console.warn("[determineAndDisplayLobbyCreator] Google IDが一致しました。自分のIDを優先します。");
             currentLobbyCreatorGoogleId = myGoogleId;
         }
-        // 決定後、状態を保存する (updateMatchUI の最後に呼ばれる saveStateToSessionStorage でまとめて保存されることを期待)
-        // saveStateToSessionStorage(); // ここで呼ぶと頻度が高い可能性。呼び出し元で制御。
     }
 
-    // 表示する名前を決定
     if (currentLobbyCreatorGoogleId === myGoogleId) {
         lobbyCreatorName = escapeHTML(window.MyApp.currentUserData.name) || "あなた";
     } else if (currentLobbyCreatorGoogleId === opponentGoogleId) {
         lobbyCreatorName = escapeHTML(opponentData.name) || "相手";
     } else {
-        // この状況は通常発生しないはず (上記のifブロックでcurrentLobbyCreatorGoogleIdが設定されるため)
-        console.error("[determineAndDisplayLobbyCreator] ロビー作成者名を表示できませんでした。保存されたID:", currentLobbyCreatorGoogleId, "MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
-        // フォールバックとして再度決定を試みるか、エラーメッセージを表示
-        // ここではエラーメッセージを表示
-        lobbyInstructionElement.innerHTML = "ロビー作成者の情報を確認できませんでした。";
+        console.error("[determineAndDisplayLobbyCreator] ロビー作成者名を表示できませんでした。決定されたID:", currentLobbyCreatorGoogleId, "MyID:", myGoogleId, "OpponentID:", opponentGoogleId);
+        lobbyInstructionElement.innerHTML = "ロビー作成者の情報を確認できませんでした。ページを再読み込みしてみてください。";
         lobbyInstructionElement.style.display = 'block';
         return;
     }
@@ -400,7 +380,7 @@ function determineAndDisplayLobbyCreator(opponentData) {
 }
 
 
-function hideLobbyInstruction() { // (変更なし)
+function hideLobbyInstruction() {
     if (lobbyInstructionElement) lobbyInstructionElement.style.display = 'none';
 }
 
@@ -418,7 +398,7 @@ function updateMatchUI() {
 
     hide(cancelButton); hide(opponentInfoArea); hide(opponentSpinner);
     hide(matchChatSection); hide(resultReportingArea); hide(startBattleButton);
-    hide(reportResultButtons); hide(resultModal); hide(lobbyInstructionElement); // 先に隠す
+    hide(reportResultButtons); hide(resultModal); hide(lobbyInstructionElement);
     if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
     show(opponentPlaceholder);
 
@@ -432,16 +412,14 @@ function updateMatchUI() {
             setText(matchStatusText, '対戦相手を探しています...');
             hide(opponentInfoArea);
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-        } else if (currentMatchId && currentOpponentData) { // マッチ成立時
+        } else if (currentMatchId && currentOpponentData) {
             hide(matchButton); hide(cancelButton); hide(opponentSpinner); hide(opponentPlaceholder);
             if (opponentInfoArea) opponentInfoArea.style.display = 'contents';
             show(matchChatSection); show(resultReportingArea);
             if (opponentProfileSection) opponentProfileSection.classList.add('visible');
             setText(matchStatusText, '対戦相手が見つかりました！');
             displayOpponentInfo(currentOpponentData);
-            
-            // ★ ロビー作成者の指示を表示
-            determineAndDisplayLobbyCreator(currentOpponentData); 
+            determineAndDisplayLobbyCreator(currentOpponentData);
 
             if (isSubmittingResult || isPollingForResult) {
                 hide(startBattleButton); show(reportResultButtons);
@@ -455,24 +433,24 @@ function updateMatchUI() {
                 }
             } else {
                 show(startBattleButton); hide(reportResultButtons);
-                setText(battleStatusText, ''); 
+                setText(battleStatusText, '');
             }
             if (!matchWebSocket || matchWebSocket.readyState === WebSocket.CLOSED) connectWebSocket();
-        } else { // ログイン済みだが、マッチング前
+        } else {
             show(matchButton); enable(matchButton); setText(matchButton, 'ライバルを探す');
             setText(matchStatusText, 'ライバルを探しましょう！');
             hide(opponentSpinner); show(opponentPlaceholder);
-            hide(lobbyInstructionElement); // マッチング前は指示を隠す
+            hide(lobbyInstructionElement);
         }
-    } else { // 未ログイン時
+    } else {
         show(matchButton); disable(matchButton); setText(matchButton, 'ログインが必要です');
         setText(matchStatusText, '対戦するにはログインしてください。');
         hide(opponentSpinner); show(opponentPlaceholder);
-        hide(lobbyInstructionElement); // 未ログイン時も指示を隠す
+        hide(lobbyInstructionElement);
     }
 }
 
-function showResultModal(didWin, resultData, originalRate) { // (変更なし)
+function showResultModal(didWin, resultData, originalRate) {
     if (!resultModal) return;
     hideLobbyInstruction();
     if (resultTitle) resultTitle.textContent = didWin ? '勝利！' : '敗北...';
@@ -486,23 +464,23 @@ function showResultModal(didWin, resultData, originalRate) { // (変更なし)
     if (resultPointsEarned) resultPointsEarned.textContent = resultData.pointsEarned ?? '--';
     if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
     resultModal.style.display = 'flex';
-    saveStateToSessionStorage(); // 結果表示時にも状態保存
+    saveStateToSessionStorage();
 
     setTimeout(() => {
         if (resultModal && resultModal.style.display === 'flex') {
             closeResultModal();
         }
-    }, 4000); // 4秒後に自動で閉じる
+    }, 4000);
 }
 
-function closeResultModal() { // (変更なし)
+function closeResultModal() {
     if (resultModal && resultModal.style.display !== 'none') {
         resultModal.style.display = 'none';
-        clearMatchStateAndUI(true); // 結果モーダルを閉じたら状態をクリア
+        clearMatchStateAndUI(true);
     }
 }
 
-function appendChatMessage(messageText, isMyMessage, senderName = '相手') { // (変更なし)
+function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('match-chat-message');
