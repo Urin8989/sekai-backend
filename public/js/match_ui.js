@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof window.registerUserDataReadyCallback === 'function') {
         window.registerUserDataReadyCallback((loggedInUserData) => {
-            console.log("[match_ui.js] User data ready. Updating UI."); // 初期化フローの確認用
+            console.log("[match_ui.js] User data ready. Updating UI.");
             updateMatchUI();
             resumePollingBasedOnState();
         });
@@ -108,10 +108,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.onLoginStatusChange === 'function') {
         window.onLoginStatusChange((isUserLoggedIn) => {
             if (!isUserLoggedIn) {
-                console.log("[match_ui.js] User logged out. Clearing state."); // ログイン状態変更の確認用
+                console.log("[match_ui.js] User logged out. Clearing state.");
                 clearMatchStateAndUI(true);
             } else {
-                console.log("[match_ui.js] User logged in. Updating UI and maybe resuming poll."); // ログイン状態変更の確認用
+                console.log("[match_ui.js] User logged in. Updating UI and maybe resuming poll.");
                 updateMatchUI();
                 resumePollingBasedOnState();
             }
@@ -183,7 +183,7 @@ function saveStateToSessionStorage() {
     try {
         sessionStorage.setItem(MATCH_STATE_KEY, JSON.stringify(state));
     } catch (e) {
-        // console.error("Error saving state to sessionStorage:", e); // 頻出する可能性があるのでコメントアウトも検討
+        // console.error("Error saving state to sessionStorage:", e);
     }
 }
 
@@ -196,11 +196,11 @@ function loadStateFromSessionStorage() {
             window.currentOpponentData = savedState.currentOpponentData || null;
             window.isMatching = savedState.isMatching || false;
             window.isPollingForResult = savedState.isPollingForResult || false;
-            window.isSubmittingResult = false;
+            window.isSubmittingResult = false; 
             window.currentLobbyCreatorGoogleId = savedState.currentLobbyCreatorGoogleId || null;
 
             if (window.currentMatchId && window.currentOpponentData) {
-                window.isMatching = false;
+                window.isMatching = false; 
             } else if (window.isMatching) {
                 window.currentMatchId = null; window.currentOpponentData = null; window.isPollingForResult = false; window.currentLobbyCreatorGoogleId = null;
             } else {
@@ -244,7 +244,7 @@ function resumePollingBasedOnState() {
 }
 
 function clearMatchStateAndUI(updateUIFlag = true) {
-    // console.log("[match_ui.js clearMatchStateAndUI] Clearing match state and UI."); // 必要なら有効化
+    console.log("[match_ui.js clearMatchStateAndUI] Clearing match state and UI.");
     sessionStorage.removeItem(MATCH_STATE_KEY);
     window.isMatching = false;
     window.currentMatchId = null;
@@ -263,6 +263,12 @@ function clearMatchStateAndUI(updateUIFlag = true) {
     if (battleStatusText) battleStatusText.textContent = '';
     if (matchChatMessagesArea) matchChatMessagesArea.innerHTML = '';
 
+    // ヘッダータイトルの制御は今回の問題と直接関係ないので、コメントアウトまたは削除
+    // const siteTitleHeader = document.querySelector('.site-title-header');
+    // if (siteTitleHeader) {
+    //     siteTitleHeader.style.display = 'flex'; 
+    // }
+
     if (updateUIFlag) {
         updateMatchUI();
     }
@@ -271,15 +277,13 @@ window.clearMatchStateAndUI = clearMatchStateAndUI;
 
 function resetCurrentLobbyCreator() {
     window.currentLobbyCreatorGoogleId = null;
-    console.log("[match_ui.js] Lobby creator ID has been reset."); // 重要なログなので残す
+    console.log("[match_ui.js] Lobby creator ID has been reset.");
 }
 window.resetCurrentLobbyCreator = resetCurrentLobbyCreator;
 
 // --- UI表示関数 ---
 
 function displayMyProfileInfo(userData) {
-    // この関数内のログは、My Pageなど他の場所でも使われる可能性があるため、
-    // 今回の問題とは直接関係が薄いので、ログは追加しないでおきます。
     if (!myProfilePic || !myProfileName || !myProfileRate) return;
     const defaultAvatar = getDefaultAvatarPath();
 
@@ -315,7 +319,6 @@ function displayMyProfileInfo(userData) {
 }
 
 function displayOpponentInfo(opponentData) {
-    // この関数内のログも、今回は不要と判断します。
     if (!opponentInfoArea || !opponentData) return;
     const defaultAvatar = getDefaultAvatarPath();
     const defaultBadgeImg = getDefaultBadgePath();
@@ -350,7 +353,6 @@ function displayOpponentInfo(opponentData) {
 }
 
 function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
-    // ★★★ この関数内のログは問題解決に非常に重要なので、詳細なまま残します ★★★
     console.log("[DDC Start] determineAndDisplayLobbyCreator CALLED");
     try {
         console.log("[DDC Data] opponentDataToDisplay:", JSON.stringify(opponentDataToDisplay, null, 2));
@@ -366,7 +368,6 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
         return;
     }
 
-    // 対戦相手データのチェック
     if (!opponentDataToDisplay || !opponentDataToDisplay.googleId || !opponentDataToDisplay.name) {
         console.warn("[DDC Warn] opponentDataToDisplay is missing or incomplete (googleId or name). Displaying 'loading opponent'. Opponent Data:", JSON.stringify(opponentDataToDisplay));
         lobbyInstructionElement.innerHTML = "対戦相手の情報を読み込み中です...";
@@ -374,7 +375,6 @@ function determineAndDisplayLobbyCreator(opponentDataToDisplay) {
         return;
     }
 
-    // 自分自身のユーザーデータの詳細チェック
     const currentUser = window.MyApp?.currentUserData;
     let logMessage = "[DDC Check CurrentUser] ";
     let isCurrentUserValid = true;
@@ -460,16 +460,7 @@ function hideLobbyInstruction() {
 window.hideLobbyInstruction = hideLobbyInstruction;
 
 function updateMatchUI() {
-    // ★ UI更新のトリガーと状態を確認するためのログは残す
     console.log("[match_ui.js] updateMatchUI called. Current window.isMatching:", window.isMatching);
-    // console.log("[match_ui.js] Updating UI. State:", JSON.stringify({ // 詳細なStateオブジェクトは頻出するので一旦コメントアウト
-    //     isMatching: window.isMatching, 
-    //     currentMatchId: window.currentMatchId, 
-    //     currentOpponentData: window.currentOpponentData, 
-    //     isPollingForResult: window.isPollingForResult, 
-    //     isSubmittingResult: window.isSubmittingResult, 
-    //     currentLobbyCreatorGoogleId: window.currentLobbyCreatorGoogleId 
-    // }, null, 2));
     const user = window.MyApp?.currentUserData;
     const loggedIn = !!window.MyApp?.isUserLoggedIn;
     
@@ -481,40 +472,56 @@ function updateMatchUI() {
     const enable = (el) => { if (el) el.disabled = false; };
     const setText = (el, text) => { if (el) el.textContent = text; };
 
-    hide(cancelButton); hide(opponentInfoArea); hide(opponentSpinner);
-    hide(matchChatSection); hide(resultReportingArea); hide(startBattleButton);
-    hide(reportResultButtons); 
+    // --- UI要素の表示状態初期化 ---
+    hide(cancelButton);
+    hide(opponentInfoArea); 
+    hide(opponentSpinner);  
+    hide(matchChatSection);
+    hide(resultReportingArea);
+    hide(startBattleButton);
+    hide(reportResultButtons);
     hide(lobbyInstructionElement);
-    if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
-    
-    if (!(resultModal && resultModal.style.display === 'flex')) {
-        show(opponentPlaceholder);
-    } else {
-        hide(opponentPlaceholder);
-    }
 
+    if (opponentProfileSection) {
+        opponentProfileSection.classList.remove('visible'); 
+    }
+    
+    // --- ボタンの有効/無効状態初期化 ---
     enable(reportWinButton); enable(reportLoseButton); enable(cancelBattleButton);
     enable(matchButton);
 
+
     if (loggedIn) {
-        if (window.isMatching) {
-            hide(matchButton); show(cancelButton); enable(cancelButton);
-            show(opponentPlaceholder); show(opponentSpinner);
+        if (window.isMatching) { // マッチング検索中
+            hide(matchButton);
+            show(cancelButton); enable(cancelButton);
+            
             setText(matchStatusText, '対戦相手を探しています...');
-            hide(opponentInfoArea);
+            hide(opponentInfoArea);      // 相手情報欄は隠す
+            show(opponentPlaceholder);   // ★ プレースホルダーを表示 (この中に「Best Rivals」やスピナーの親があると想定)
+            show(opponentSpinner);       // スピナー表示
+            
             if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             hide(lobbyInstructionElement);
-        } else if (window.currentMatchId && window.currentOpponentData) {
-            hide(matchButton); hide(cancelButton); hide(opponentSpinner); 
-            if (opponentInfoArea) opponentInfoArea.style.display = 'contents';
-            show(matchChatSection); show(resultReportingArea);
-            if (opponentProfileSection) opponentProfileSection.classList.add('visible');
+
+        } else if (window.currentMatchId && window.currentOpponentData) { // マッチング成功
+            hide(matchButton);
+            hide(cancelButton);
+            
             setText(matchStatusText, '対戦相手が見つかりました！');
-            displayOpponentInfo(window.currentOpponentData);
-            // ★ DDC呼び出し直前のログ
+            hide(opponentPlaceholder);   // ★★★ プレースホルダーを明示的に隠す ★★★
+            hide(opponentSpinner);       // スピナーも確実に隠す
+            show(opponentInfoArea);      // 相手情報欄を表示
+            displayOpponentInfo(window.currentOpponentData); // 相手情報を描画
+            
+            if (opponentProfileSection) opponentProfileSection.classList.add('visible'); // visibleクラス追加
+            show(matchChatSection);
+            show(resultReportingArea);
+            
             console.log("[match_ui.js updateMatchUI] About to call determineAndDisplayLobbyCreator with opponentData:", JSON.parse(JSON.stringify(window.currentOpponentData)));
             determineAndDisplayLobbyCreator(window.currentOpponentData);
 
+            // 結果報告ボタンの表示制御
             if (window.isSubmittingResult) {
                 hide(startBattleButton); show(reportResultButtons);
                 disable(reportWinButton); disable(reportLoseButton); disable(cancelBattleButton);
@@ -537,25 +544,46 @@ function updateMatchUI() {
             if (typeof window.matchWebSocket === 'undefined' || (window.matchWebSocket && window.matchWebSocket.readyState === WebSocket.CLOSED)) {
                 if (typeof connectWebSocket === 'function') connectWebSocket();
             }
-        } else { 
+
+        } else { // マッチング前 (ログイン済み、マッチング中でもマッチ成功でもない)
             show(matchButton); enable(matchButton); setText(matchButton, 'ライバルを探す');
-            setText(matchStatusText, 'ライバルを探しましょう！');
-            hide(opponentSpinner); 
+            setText(matchStatusText, 'ライバルを探しましょう！'); 
+            
+            hide(opponentInfoArea);     // 相手情報欄は隠す
+            hide(opponentSpinner);      // スピナーも隠す
+            show(opponentPlaceholder);  // ★ プレースホルダーを表示 (この中に「Best Rivals」があると想定)
+            
+            if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
             hide(lobbyInstructionElement);
             if(battleStatusText) battleStatusText.textContent = '';
         }
-    } else { 
+    } else { // 未ログイン時
         show(matchButton); disable(matchButton); setText(matchButton, 'ログインが必要です');
         setText(matchStatusText, '対戦するにはログインしてください。');
-        hide(opponentSpinner); 
+
+        hide(opponentInfoArea);    // 相手情報欄は隠す
+        hide(opponentSpinner);     // スピナーも隠す
+        show(opponentPlaceholder); // ★ プレースホルダーを表示 (この中に「Best Rivals」があると想定)
+        
+        if (opponentProfileSection) opponentProfileSection.classList.remove('visible');
         hide(lobbyInstructionElement);
         if(battleStatusText) battleStatusText.textContent = '';
+    }
+    
+    // resultModal表示時はopponentPlaceholderを隠す（CSSでも制御されているが念のため）
+    if (resultModal && resultModal.style.display === 'flex') {
+        hide(opponentPlaceholder);
+    } else if (!window.isMatching && !window.currentMatchId) {
+        // マッチング前、かつ結果モーダルも表示されていなければプレースホルダーを表示
+        // (ただし、上記の各条件で既に show(opponentPlaceholder) が呼ばれているので、重複を避けるか、
+        //  ここでの制御を主とするか設計による。現状は各条件分岐内で制御している。)
+        // show(opponentPlaceholder); // この行は上記の分岐でカバーされているため、通常は不要
     }
 }
 window.updateMatchUI = updateMatchUI;
 
 function showResultModal(didWin, resultData, originalRate) {
-    console.log("[match_ui.js showResultModal] Function called."); // 処理開始ログ
+    console.log("[match_ui.js showResultModal] Function called.");
     
     if (!resultModal) {
         console.error("[match_ui.js showResultModal] resultModal element not found! Cannot display modal.");
@@ -578,15 +606,14 @@ function showResultModal(didWin, resultData, originalRate) {
     if (resultNewPoints) resultNewPoints.textContent = resultData.newPoints ?? '----';
     
     resultModal.style.display = 'flex';
+    hide(opponentPlaceholder); // モーダル表示時もプレースホルダーは隠す
     
     if (typeof saveStateToSessionStorage === 'function') {
         saveStateToSessionStorage();
     }
 
     setTimeout(() => {
-        // console.log("[match_ui.js showResultModal] Timeout for auto-closing modal reached."); // 詳細ログは一旦コメントアウト
         if (resultModal && resultModal.style.display === 'flex') {
-            // console.log("[match_ui.js showResultModal] Modal is still open, calling closeResultModal via timeout.");
             closeResultModal();
         }
     }, 6000);
@@ -600,8 +627,8 @@ function closeResultModal() {
         resultModal.style.display = 'none';
         
         if (typeof clearMatchStateAndUI === 'function') {
-            clearMatchStateAndUI(true);
-            console.log("[match_ui.js closeResultModal] clearMatchStateAndUI was called."); // 実行確認ログ
+            clearMatchStateAndUI(true); 
+            console.log("[match_ui.js closeResultModal] clearMatchStateAndUI was called.");
         } else {
             console.error("[match_ui.js closeResultModal] clearMatchStateAndUI function is not defined!");
         }
@@ -609,7 +636,6 @@ function closeResultModal() {
 }
 
 function appendChatMessage(messageText, isMyMessage, senderName = '相手') {
-    // この関数内のログは、チャット機能のデバッグ用なので、今回は不要と判断
     if (!matchChatMessagesArea) return;
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('match-chat-message');
