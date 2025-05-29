@@ -13,8 +13,10 @@ window.CommunityLogic = (() => {
     let communityWebSocket = null;
     let currentCommunityChatId = null;
     let isLoadingData = false;
+    let heartbeatInterval = null; // ★★★ ハートビート用の Interval ID を追加 ★★★
 
     // --- UI Interface (Placeholders) ---
+    // ... (変更なし) ...
     let ui = {
         renderCommunityList: () => {},
         showLoading: () => {},
@@ -53,7 +55,9 @@ window.CommunityLogic = (() => {
         ui = { ...ui, ...uiModule };
     }
 
+
     // --- API Service ---
+    // ... (変更なし) ...
     async function authenticatedFetch(url, options = {}, requiresAuth = true) {
         const headers = { ...options.headers };
         if (requiresAuth) {
@@ -105,13 +109,40 @@ window.CommunityLogic = (() => {
         kickParticipant: (communityId, participantId) => authenticatedFetch(`${ui.getBackendUrl()}/api/communities/${communityId}/kick`, { method: 'POST', body: { participantId } }),
     };
 
+
     // --- WebSocket Management ---
+
+    // ★★★ ハートビート開始関数を追加 ★★★
+    function startHeartbeat() {
+        stopHeartbeat(); // 既存のタイマーをクリア
+        heartbeatInterval = setInterval(() => {
+            if (communityWebSocket && communityWebSocket.readyState === WebSocket.OPEN) {
+                try {
+                    communityWebSocket.send(JSON.stringify({ type: 'PING' }));
+                } catch (e) {
+                    console.error("Failed to send PING:", e);
+                    stopHeartbeat(); // 送信に失敗したら停止
+                }
+            } else {
+                stopHeartbeat(); // WebSocketが開いていなければ停止
+            }
+        }, 30000); // 30秒ごと
+    }
+
+    // ★★★ ハートビート停止関数を追加 ★★★
+    function stopHeartbeat() {
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
+    }
+
     function connectCommunityWebSocket(communityId) {
         if (communityWebSocket && (communityWebSocket.readyState === WebSocket.OPEN || communityWebSocket.readyState === WebSocket.CONNECTING) && currentCommunityChatId === communityId) {
              ui.enableChat();
              return;
         }
-        disconnectCommunityWebSocket();
+        disconnectCommunityWebSocket(); // 既存の接続とハートビートを停止
 
         const token = ui.getAuthToken();
         if (!communityId || !token) { ui.appendSystemMessage("チャット接続に必要な情報がありません。", 'error'); return; }
@@ -119,16 +150,29 @@ window.CommunityLogic = (() => {
 
         let baseUrl = ui.getWebSocketUrl();
         if (!baseUrl) { ui.appendSystemMessage("WebSocket URLが設定されていません。", 'error'); return; }
+
+        // ★★★ URL末尾のスラッシュ処理を追加 ★★★
+        if (!baseUrl.endsWith('/')) {
+            baseUrl += '/';
+        }
+
         let path = (window.location.hostname.includes('mariokartbestrivals.com')) ? "ws/" : "";
         const wsUrl = `${baseUrl}${path}?token=${token}&communityId=${communityId}`;
 
         ui.appendSystemMessage("チャットサーバーに接続中...", 'info');
         try {
             communityWebSocket = new WebSocket(wsUrl);
-            communityWebSocket.onopen = () => { ui.appendSystemMessage("接続しました。", 'info'); ui.enableChat(); };
+            communityWebSocket.onopen = () => {
+                ui.appendSystemMessage("接続しました。", 'info');
+                ui.enableChat();
+                startHeartbeat(); // ★★★ 接続時にハートビートを開始 ★★★
+            };
             communityWebSocket.onmessage = (event) => {
                 try {
                     const msg = JSON.parse(event.data);
+                     // ★★★ PONG メッセージは無視 ★★★
+                     if (msg.type === 'PONG') return;
+
                      if (msg.type === 'participant_kicked' && msg.kickedUserId === currentUser?.sub) {
                          ui.alert("コミュニティから追放されました。");
                          ui.reloadPage();
@@ -146,15 +190,20 @@ window.CommunityLogic = (() => {
             communityWebSocket.onerror = (errorEvent) => {
                 console.error("WebSocket Error:", errorEvent);
                 ui.appendSystemMessage('チャット接続エラーが発生しました。', 'error');
-                disconnectCommunityWebSocket();
+                disconnectCommunityWebSocket(); // エラー時も切断処理
             };
             communityWebSocket.onclose = (event) => {
-                 if (currentCommunityChatId === communityId) { // 自分が意図しない切断のみメッセージを出す
-                     const message = event.code === 1000 ? 'チャットから切断されました。' : `チャット接続が切れました (Code: ${event.code})。`;
-                     const messageType = event.code === 1000 ? 'info' : 'error';
-                     ui.appendSystemMessage(message, messageType);
-                     disconnectCommunityWebSocket();
+                 // ★★★ 切断時にハートビートを停止 ★★★
+                 stopHeartbeat();
+                 // 自分が意図しない切断のみメッセージを出す (1000 は正常終了)
+                 if (currentCommunityChatId === communityId && event.code !== 1000) {
+                     const message = `チャット接続が切れました (Code: ${event.code})。`;
+                     ui.appendSystemMessage(message, 'error');
                  }
+                 // ★★★ 切断時は常に WebSocket を null にする ★★★
+                 communityWebSocket = null;
+                 currentCommunityChatId = null;
+                 ui.disableChat("チャットは利用できません");
             };
         } catch (error) {
             console.error("Error initializing WebSocket:", error);
@@ -164,6 +213,7 @@ window.CommunityLogic = (() => {
     }
 
     function disconnectCommunityWebSocket() {
+        stopHeartbeat(); // ★★★ 切断時にハートビートを停止 ★★★
         if (communityWebSocket) {
             communityWebSocket.onopen = null;
             communityWebSocket.onmessage = null;
@@ -179,6 +229,7 @@ window.CommunityLogic = (() => {
     }
 
     // --- Core Logic ---
+    // ... (変更なし) ...
     async function checkUserStatus(communityData, prefetchedParticipants = null) {
         const communityId = communityData?.id || communityData?._id;
         let isMember = false, isOrganizer = false, canJoin = false;
@@ -238,6 +289,7 @@ window.CommunityLogic = (() => {
 
 
     // --- Handlers ---
+    // ... (変更なし) ...
     async function handleInitialLoad() {
         ui.showLoading(true);
         try {
